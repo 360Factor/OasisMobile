@@ -7,8 +7,8 @@ using MonoTouch.Foundation;
 
 namespace OasisMobile.iOS
 {
-	[Register ("Home")]
-	partial class Home
+	[Register ("LoginView")]
+	partial class LoginView
 	{
 		void ReleaseDesignerOutlets ()
 		{

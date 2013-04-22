@@ -80,6 +80,10 @@
     <Reference Include="System.Xml" />
     <Reference Include="System.Core" />
     <Reference Include="monotouch" />
+    <Reference Include="FlyoutNavigation">
+      <HintPath>..\Components\flyoutnavigation-1.1\lib\ios\FlyoutNavigation.dll</HintPath>
+    </Reference>
+    <Reference Include="MonoTouch.Dialog-1" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Resources\" />
@@ -88,6 +92,7 @@
     <Folder Include="BusinessModel\Model\" />
     <Folder Include="BusinessModel\ORM\" />
     <Folder Include="Screens\" />
+    <Folder Include="Navigation\" />
   </ItemGroup>
   <ItemGroup>
     <None Include="Info.plist" />
@@ -95,10 +100,6 @@
   <ItemGroup>
     <Compile Include="Main.cs" />
     <Compile Include="AppDelegate.cs" />
-    <Compile Include="OasisMobile_iOSViewController.cs" />
-    <Compile Include="OasisMobile_iOSViewController.designer.cs">
-      <DependentUpon>OasisMobile_iOSViewController.cs</DependentUpon>
-    </Compile>
     <Compile Include="BusinessModel\Business\Exam.cs" />
     <Compile Include="BusinessModel\Model\AnswerOption.cs" />
     <Compile Include="BusinessModel\Model\Category.cs" />
@@ -114,16 +115,28 @@
     <Compile Include="BusinessModel\ORM\ConnectionString.cs" />
     <Compile Include="BusinessModel\ORM\Repository.cs" />
     <Compile Include="BusinessModel\ORM\SQLite.cs" />
-    <Compile Include="Screens\Home.cs" />
-    <Compile Include="Screens\Home.designer.cs">
-      <DependentUpon>Home.cs</DependentUpon>
+    <Compile Include="Screens\LoginView.cs" />
+    <Compile Include="Screens\LoginView.designer.cs">
+      <DependentUpon>LoginView.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Navigation\OasisFlyoutController.cs" />
+    <Compile Include="Screens\ExamListView.cs" />
+    <Compile Include="Screens\ExamListView.designer.cs">
+      <DependentUpon>ExamListView.cs</DependentUpon>
     </Compile>
   </ItemGroup>
-  <ItemGroup>
-    <InterfaceDefinition Include="OasisMobile_iOSViewController_iPhone.xib" />
-    <InterfaceDefinition Include="OasisMobile_iOSViewController_iPad.xib" />
-    <InterfaceDefinition Include="Screens\Home_iPhone.xib" />
-    <InterfaceDefinition Include="Screens\Home_iPad.xib" />
-  </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
+  <ItemGroup>
+    <InterfaceDefinition Include="Screens\LoginView_iPhone.xib" />
+    <InterfaceDefinition Include="Screens\LoginView_iPad.xib" />
+    <InterfaceDefinition Include="Screens\ExamListView_iPhone.xib" />
+    <InterfaceDefinition Include="Screens\ExamListView_iPad.xib" />
+  </ItemGroup>
+  <ItemGroup>
+    <XamarinComponentReference Include="flyoutnavigation">
+      <InstallationInProgress>False</InstallationInProgress>
+      <Version>1.1</Version>
+      <Visible>False</Visible>
+    </XamarinComponentReference>
+  </ItemGroup>
 </Project>

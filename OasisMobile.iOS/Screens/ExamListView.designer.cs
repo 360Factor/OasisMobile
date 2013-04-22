@@ -7,11 +7,12 @@ using MonoTouch.Foundation;
 
 namespace OasisMobile.iOS
 {
-	[Register ("OasisMobile_iOSViewController")]
-	partial class OasisMobile_iOSViewController
+	[Register ("ExamListView")]
+	partial class ExamListView
 	{
 		void ReleaseDesignerOutlets ()
 		{
 		}
 	}
 }
+

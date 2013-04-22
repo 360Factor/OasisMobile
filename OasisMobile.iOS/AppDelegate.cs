@@ -15,7 +15,7 @@ namespace OasisMobile.iOS
 	{
 		// class-level declarations
 		UIWindow window;
-		OasisMobile_iOSViewController viewController;
+		UINavigationController m_navController;
 
 		//
 		// This method is invoked when the application has loaded and is ready to run. In this 
@@ -28,22 +28,12 @@ namespace OasisMobile.iOS
 		{
 			window = new UIWindow (UIScreen.MainScreen.Bounds);
 
-			//ConnectionString.SetDBPath("");
+			ConnectionString.SetDBPath("");
 
-
-			Exam _newExam = new Exam(){
-				ExamName = "Test exam",
-				Description = "Hello world",
-				IsExpired = 1
-			};
-
-			_newExam.Save();
-
-			List<Exam> _myExams = Exam.GetExamsBySQL("");
-
-
-			viewController = new OasisMobile_iOSViewController ();
-			window.RootViewController = viewController;
+			m_navController = new UINavigationController();
+			HomeView _homeView = new HomeView ();
+			m_navController.PushViewController (_homeView);
+			window.RootViewController = m_navController;
 			window.MakeKeyAndVisible ();
 			
 			return true;

@@ -1,3 +1,4 @@
+
 using System;
 using System.Drawing;
 
@@ -6,14 +7,14 @@ using MonoTouch.UIKit;
 
 namespace OasisMobile.iOS
 {
-	public partial class OasisMobile_iOSViewController : UIViewController
+	public partial class ExamListView : UIViewController
 	{
 		static bool UserInterfaceIdiomIsPhone {
 			get { return UIDevice.CurrentDevice.UserInterfaceIdiom == UIUserInterfaceIdiom.Phone; }
 		}
 
-		public OasisMobile_iOSViewController ()
-			: base (UserInterfaceIdiomIsPhone ? "OasisMobile_iOSViewController_iPhone" : "OasisMobile_iOSViewController_iPad", null)
+		public ExamListView ()
+			: base (UserInterfaceIdiomIsPhone ? "ExamListView_iPhone" : "ExamListView_iPad", null)
 		{
 		}
 		
@@ -30,16 +31,6 @@ namespace OasisMobile.iOS
 			base.ViewDidLoad ();
 			
 			// Perform any additional setup after loading the view, typically from a nib.
-		}
-		
-		public override bool ShouldAutorotateToInterfaceOrientation (UIInterfaceOrientation toInterfaceOrientation)
-		{
-			// Return true for supported orientations
-			if (UserInterfaceIdiomIsPhone) {
-				return (toInterfaceOrientation != UIInterfaceOrientation.PortraitUpsideDown);
-			} else {
-				return true;
-			}
 		}
 	}
 }
