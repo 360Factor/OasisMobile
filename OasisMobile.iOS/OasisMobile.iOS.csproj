@@ -114,15 +114,16 @@
     <Compile Include="BusinessModel\ORM\ConnectionString.cs" />
     <Compile Include="BusinessModel\ORM\Repository.cs" />
     <Compile Include="BusinessModel\ORM\SQLite.cs" />
-    <Compile Include="Screens\Home_iPhone.cs" />
-    <Compile Include="Screens\Home_iPhone.designer.cs">
-      <DependentUpon>Home_iPhone.cs</DependentUpon>
+    <Compile Include="Screens\Home.cs" />
+    <Compile Include="Screens\Home.designer.cs">
+      <DependentUpon>Home.cs</DependentUpon>
     </Compile>
   </ItemGroup>
   <ItemGroup>
     <InterfaceDefinition Include="OasisMobile_iOSViewController_iPhone.xib" />
     <InterfaceDefinition Include="OasisMobile_iOSViewController_iPad.xib" />
     <InterfaceDefinition Include="Screens\Home_iPhone.xib" />
+    <InterfaceDefinition Include="Screens\Home_iPad.xib" />
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
 </Project>

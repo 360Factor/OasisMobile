@@ -7,9 +7,14 @@ using MonoTouch.UIKit;
 
 namespace OasisMobile.iOS
 {
-	public partial class Home_iPhone : UIViewController
+	public partial class Home : UIViewController
 	{
-		public Home_iPhone () : base ("Home_iPhone", null)
+		static bool UserInterfaceIdiomIsPhone {
+			get { return UIDevice.CurrentDevice.UserInterfaceIdiom == UIUserInterfaceIdiom.Phone; }
+		}
+
+		public Home ()
+			: base (UserInterfaceIdiomIsPhone ? "Home_iPhone" : "Home_iPad", null)
 		{
 		}
 		
