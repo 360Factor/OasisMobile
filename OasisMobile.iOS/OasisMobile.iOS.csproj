@@ -93,6 +93,7 @@
     <Folder Include="BusinessModel\ORM\" />
     <Folder Include="Screens\" />
     <Folder Include="Navigation\" />
+    <Folder Include="Images\" />
   </ItemGroup>
   <ItemGroup>
     <None Include="Info.plist" />
@@ -124,6 +125,15 @@
     <Compile Include="Screens\ExamListView.designer.cs">
       <DependentUpon>ExamListView.cs</DependentUpon>
     </Compile>
+    <Compile Include="Screens\LoginTableSource.cs" />
+    <Compile Include="Screens\AboutView.cs" />
+    <Compile Include="Screens\AboutView.designer.cs">
+      <DependentUpon>AboutView.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Screens\AccountView.cs" />
+    <Compile Include="Screens\AccountView.designer.cs">
+      <DependentUpon>AccountView.cs</DependentUpon>
+    </Compile>
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
   <ItemGroup>
@@ -131,6 +141,10 @@
     <InterfaceDefinition Include="Screens\LoginView_iPad.xib" />
     <InterfaceDefinition Include="Screens\ExamListView_iPhone.xib" />
     <InterfaceDefinition Include="Screens\ExamListView_iPad.xib" />
+    <InterfaceDefinition Include="Screens\AboutView_iPhone.xib" />
+    <InterfaceDefinition Include="Screens\AboutView_iPad.xib" />
+    <InterfaceDefinition Include="Screens\AccountView_iPhone.xib" />
+    <InterfaceDefinition Include="Screens\AccountView_iPad.xib" />
   </ItemGroup>
   <ItemGroup>
     <XamarinComponentReference Include="flyoutnavigation">
@@ -138,5 +152,8 @@
       <Version>1.1</Version>
       <Visible>False</Visible>
     </XamarinComponentReference>
+  </ItemGroup>
+  <ItemGroup>
+    <BundleResource Include="Images\Background-Party.png" />
   </ItemGroup>
 </Project>

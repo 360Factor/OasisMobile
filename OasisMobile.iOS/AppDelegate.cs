@@ -16,7 +16,6 @@ namespace OasisMobile.iOS
 		// class-level declarations
 		UIWindow window;
 		UINavigationController m_navController;
-
 		//
 		// This method is invoked when the application has loaded and is ready to run. In this 
 		// method you should instantiate the window, load the UI into it and then make the window
@@ -31,11 +30,10 @@ namespace OasisMobile.iOS
 			ConnectionString.SetDBPath("");
 
 			m_navController = new UINavigationController();
-			HomeView _homeView = new HomeView ();
-			m_navController.PushViewController (_homeView);
+			LoginView _loginView = new LoginView ();
+			m_navController.PushViewController (_loginView,false);
 			window.RootViewController = m_navController;
 			window.MakeKeyAndVisible ();
-			
 			return true;
 		}
 	}
