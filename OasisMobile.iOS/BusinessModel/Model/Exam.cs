@@ -12,6 +12,8 @@ namespace OasisMobile
     {
         [PrimaryKey, AutoIncrement, Column("pkExamID")]
         public int ExamID {get; set;}
+        [Ignore]
+        public bool IsNew {get {return ExamID == 0;}}
         public string ExamName {get; set;}
         public Boolean IsExpired {get; set;}
         public int Credit {get; set;}
@@ -55,6 +57,16 @@ namespace OasisMobile
         }
     }
 
+    public static List<Exam> GetExamsByExamIDs(List<int> ExamIDs)
+    {
+        if (ExamIDs == null || ExamIDs.Count == 0)
+            return null;
+
+        string _sql = string.Format("select * from Exam where pkExamID in ({0})", string.Join(",", ExamIDs.ToArray()));
+
+        return GetExamsBySQL(_sql);;
+    }
+
     public static List<Exam> GetExamsBySQL(string sql)
     {
         lock(Repository.Locker) {
@@ -62,6 +74,48 @@ namespace OasisMobile
         }
     }
 
+
+        public static void SaveAll(List<Exam> Exams)
+        {
+            lock (Repository.Locker)
+            {
+                List<Exam> _newExams = new List<Exam>();
+                List<Exam> _existingExams = new List<Exam>();
+
+                foreach (Exam _Exam in Exams)
+                {
+                    if (_Exam.IsNew)
+                        _newExams.Add(_Exam);
+                    else
+                        _existingExams.Add(_Exam);
+                }
+
+                Repository.Instance.InsertAll(_newExams);
+                Repository.Instance.UpdateAll(_existingExams);
+            }
+        }
+
+        public static Exam GetExamByExamName(int TargetExamName)
+        {
+            string _sql = "select * from Exam where ExamName = " + TargetExamName;
+            List<Exam> _Exams = GetExamsBySQL(_sql);
+
+            if (_Exams == null || _Exams.Count == 0)
+                return null;
+            else
+                return _Exams[0];
+        }
+
+        public static Exam GetExamByMainSystemID(int TargetMainSystemID)
+        {
+            string _sql = "select * from Exam where MainSystemID = " + TargetMainSystemID;
+            List<Exam> _Exams = GetExamsBySQL(_sql);
+
+            if (_Exams == null || _Exams.Count == 0)
+                return null;
+            else
+                return _Exams[0];
+        }
     }
 
 }

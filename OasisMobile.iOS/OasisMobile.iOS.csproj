@@ -88,34 +88,17 @@
   <ItemGroup>
     <Folder Include="Resources\" />
     <Folder Include="BusinessModel\" />
-    <Folder Include="BusinessModel\Business\" />
-    <Folder Include="BusinessModel\Model\" />
-    <Folder Include="BusinessModel\ORM\" />
     <Folder Include="Screens\" />
     <Folder Include="Navigation\" />
     <Folder Include="Images\" />
   </ItemGroup>
   <ItemGroup>
     <None Include="Info.plist" />
+    <None Include="BusinessModel\Model\.DS_Store" />
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Main.cs" />
     <Compile Include="AppDelegate.cs" />
-    <Compile Include="BusinessModel\Business\Exam.cs" />
-    <Compile Include="BusinessModel\Model\AnswerOption.cs" />
-    <Compile Include="BusinessModel\Model\Category.cs" />
-    <Compile Include="BusinessModel\Model\Exam.cs" />
-    <Compile Include="BusinessModel\Model\ExamAccess.cs" />
-    <Compile Include="BusinessModel\Model\Image.cs" />
-    <Compile Include="BusinessModel\Model\Logger.cs" />
-    <Compile Include="BusinessModel\Model\Question.cs" />
-    <Compile Include="BusinessModel\Model\User.cs" />
-    <Compile Include="BusinessModel\Model\UserAnswerOption.cs" />
-    <Compile Include="BusinessModel\Model\UserExam.cs" />
-    <Compile Include="BusinessModel\Model\UserQuestion.cs" />
-    <Compile Include="BusinessModel\ORM\ConnectionString.cs" />
-    <Compile Include="BusinessModel\ORM\Repository.cs" />
-    <Compile Include="BusinessModel\ORM\SQLite.cs" />
     <Compile Include="Screens\LoginView.cs" />
     <Compile Include="Screens\LoginView.designer.cs">
       <DependentUpon>LoginView.cs</DependentUpon>
@@ -134,6 +117,54 @@
     <Compile Include="Screens\AccountView.designer.cs">
       <DependentUpon>AccountView.cs</DependentUpon>
     </Compile>
+    <Compile Include="BusinessModel\Business\ActivityType.cs" />
+    <Compile Include="BusinessModel\Business\Contributor.cs" />
+    <Compile Include="BusinessModel\Business\FamilyStatus.cs" />
+    <Compile Include="BusinessModel\Business\FocusArea.cs" />
+    <Compile Include="BusinessModel\Business\FocusAreaAssessment.cs" />
+    <Compile Include="BusinessModel\Business\FocusAreaAssessmentSnap.cs" />
+    <Compile Include="BusinessModel\Business\FocusAreaTimeAssessment.cs" />
+    <Compile Include="BusinessModel\Business\FocusAreaTimeAssessmentSnap.cs" />
+    <Compile Include="BusinessModel\Business\FocusAreaTypeMapping.cs" />
+    <Compile Include="BusinessModel\Business\GoalFrequencyType.cs" />
+    <Compile Include="BusinessModel\Business\GoalPeriod.cs" />
+    <Compile Include="BusinessModel\Business\GoalProgress.cs" />
+    <Compile Include="BusinessModel\Business\GoalType.cs" />
+    <Compile Include="BusinessModel\Business\Journal.cs" />
+    <Compile Include="BusinessModel\Business\MaritalStatus.cs" />
+    <Compile Include="BusinessModel\Business\MobileCarrier.cs" />
+    <Compile Include="BusinessModel\Business\Notification.cs" />
+    <Compile Include="BusinessModel\Business\PredefinedActivity.cs" />
+    <Compile Include="BusinessModel\Business\PredefinedGoal.cs" />
+    <Compile Include="BusinessModel\Business\Reminder.cs" />
+    <Compile Include="BusinessModel\Business\ReminderMessageType.cs" />
+    <Compile Include="BusinessModel\Business\Reward.cs" />
+    <Compile Include="BusinessModel\Business\RewardHistory.cs" />
+    <Compile Include="BusinessModel\Business\RewardPeriod.cs" />
+    <Compile Include="BusinessModel\Business\ToDo.cs" />
+    <Compile Include="BusinessModel\Business\User.cs" />
+    <Compile Include="BusinessModel\Business\UserActivity.cs" />
+    <Compile Include="BusinessModel\Business\UserActivityRecommendation.cs" />
+    <Compile Include="BusinessModel\Business\UserAudit.cs" />
+    <Compile Include="BusinessModel\Business\UserGoal.cs" />
+    <Compile Include="BusinessModel\Business\UserGoalSuspension.cs" />
+    <Compile Include="BusinessModel\Business\UserType.cs" />
+    <Compile Include="BusinessModel\Business\WeekDay.cs" />
+    <Compile Include="BusinessModel\Business\WorkStatus.cs" />
+    <Compile Include="BusinessModel\Model\AnswerOption.cs" />
+    <Compile Include="BusinessModel\Model\Category.cs" />
+    <Compile Include="BusinessModel\Model\Exam.cs" />
+    <Compile Include="BusinessModel\Model\ExamAccess.cs" />
+    <Compile Include="BusinessModel\Model\Image.cs" />
+    <Compile Include="BusinessModel\Model\Question.cs" />
+    <Compile Include="BusinessModel\Model\User.cs" />
+    <Compile Include="BusinessModel\Model\UserAnswerOption.cs" />
+    <Compile Include="BusinessModel\Model\UserExam.cs" />
+    <Compile Include="BusinessModel\Model\UserQuestion.cs" />
+    <Compile Include="BusinessModel\ORM\ConnectionString.cs" />
+    <Compile Include="BusinessModel\ORM\Repository.cs" />
+    <Compile Include="BusinessModel\ORM\SQL.cs" />
+    <Compile Include="BusinessModel\ORM\SQLite.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
   <ItemGroup>

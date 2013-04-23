@@ -8,10 +8,12 @@ using System.Linq;
 namespace OasisMobile
 {
 
-    public class AnswerOption
+    public partial class AnswerOption
     {
         [PrimaryKey, AutoIncrement, Column("pkAnswerOptionID")]
         public int AnswerOptionID {get; set;}
+        [Ignore]
+        public bool IsNew {get {return AnswerOptionID == 0;}}
         [Column("fkQuestionID")]
         public int QuestionID {get; set;}
         public string AnswerText {get; set;}
@@ -51,6 +53,16 @@ namespace OasisMobile
         }
     }
 
+    public static List<AnswerOption> GetAnswerOptionsByAnswerOptionIDs(List<int> AnswerOptionIDs)
+    {
+        if (AnswerOptionIDs == null || AnswerOptionIDs.Count == 0)
+            return null;
+
+        string _sql = string.Format("select * from AnswerOption where pkAnswerOptionID in ({0})", string.Join(",", AnswerOptionIDs.ToArray()));
+
+        return GetAnswerOptionsBySQL(_sql);;
+    }
+
     public static List<AnswerOption> GetAnswerOptionsBySQL(string sql)
     {
         lock(Repository.Locker) {
@@ -58,6 +70,32 @@ namespace OasisMobile
         }
     }
 
+
+        public static void SaveAll(List<AnswerOption> AnswerOptions)
+        {
+            lock (Repository.Locker)
+            {
+                List<AnswerOption> _newAnswerOptions = new List<AnswerOption>();
+                List<AnswerOption> _existingAnswerOptions = new List<AnswerOption>();
+
+                foreach (AnswerOption _AnswerOption in AnswerOptions)
+                {
+                    if (_AnswerOption.IsNew)
+                        _newAnswerOptions.Add(_AnswerOption);
+                    else
+                        _existingAnswerOptions.Add(_AnswerOption);
+                }
+
+                Repository.Instance.InsertAll(_newAnswerOptions);
+                Repository.Instance.UpdateAll(_existingAnswerOptions);
+            }
+        }
+
+    public static List<AnswerOption> GetAnswerOptionsByQuestionID(int QuestionID)
+    {
+        string _sql = "select * from AnswerOption where fkQuestionID = " + QuestionID;
+        return GetAnswerOptionsBySQL(_sql);
+    }
     }
 
 }

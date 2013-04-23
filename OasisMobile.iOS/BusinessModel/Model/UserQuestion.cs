@@ -8,10 +8,12 @@ using System.Linq;
 namespace OasisMobile
 {
 
-    public class UserQuestion
+    public partial class UserQuestion
     {
         [PrimaryKey, AutoIncrement, Column("pkUserQuestionID")]
         public int UserQuestionID {get; set;}
+        [Ignore]
+        public bool IsNew {get {return UserQuestionID == 0;}}
         [Column("fkQuestionID")]
         public int QuestionID {get; set;}
         [Column("fkUserExamID")]
@@ -57,6 +59,16 @@ namespace OasisMobile
         }
     }
 
+    public static List<UserQuestion> GetUserQuestionsByUserQuestionIDs(List<int> UserQuestionIDs)
+    {
+        if (UserQuestionIDs == null || UserQuestionIDs.Count == 0)
+            return null;
+
+        string _sql = string.Format("select * from UserQuestion where pkUserQuestionID in ({0})", string.Join(",", UserQuestionIDs.ToArray()));
+
+        return GetUserQuestionsBySQL(_sql);;
+    }
+
     public static List<UserQuestion> GetUserQuestionsBySQL(string sql)
     {
         lock(Repository.Locker) {
@@ -64,6 +76,37 @@ namespace OasisMobile
         }
     }
 
+
+        public static void SaveAll(List<UserQuestion> UserQuestions)
+        {
+            lock (Repository.Locker)
+            {
+                List<UserQuestion> _newUserQuestions = new List<UserQuestion>();
+                List<UserQuestion> _existingUserQuestions = new List<UserQuestion>();
+
+                foreach (UserQuestion _UserQuestion in UserQuestions)
+                {
+                    if (_UserQuestion.IsNew)
+                        _newUserQuestions.Add(_UserQuestion);
+                    else
+                        _existingUserQuestions.Add(_UserQuestion);
+                }
+
+                Repository.Instance.InsertAll(_newUserQuestions);
+                Repository.Instance.UpdateAll(_existingUserQuestions);
+            }
+        }
+
+        public static UserQuestion GetUserQuestionByMainSystemID(int TargetMainSystemID)
+        {
+            string _sql = "select * from UserQuestion where MainSystemID = " + TargetMainSystemID;
+            List<UserQuestion> _UserQuestions = GetUserQuestionsBySQL(_sql);
+
+            if (_UserQuestions == null || _UserQuestions.Count == 0)
+                return null;
+            else
+                return _UserQuestions[0];
+        }
     }
 
 }

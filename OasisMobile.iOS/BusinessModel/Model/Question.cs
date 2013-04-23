@@ -8,10 +8,12 @@ using System.Linq;
 namespace OasisMobile
 {
 
-    public class Question
+    public partial class Question
     {
         [PrimaryKey, AutoIncrement, Column("pkQuestionID")]
         public int QuestionID {get; set;}
+        [Ignore]
+        public bool IsNew {get {return QuestionID == 0;}}
         public string Stem {get; set;}
         public string LeadIn {get; set;}
         public string Commentary {get; set;}
@@ -56,6 +58,16 @@ namespace OasisMobile
         }
     }
 
+    public static List<Question> GetQuestionsByQuestionIDs(List<int> QuestionIDs)
+    {
+        if (QuestionIDs == null || QuestionIDs.Count == 0)
+            return null;
+
+        string _sql = string.Format("select * from Question where pkQuestionID in ({0})", string.Join(",", QuestionIDs.ToArray()));
+
+        return GetQuestionsBySQL(_sql);;
+    }
+
     public static List<Question> GetQuestionsBySQL(string sql)
     {
         lock(Repository.Locker) {
@@ -63,6 +75,49 @@ namespace OasisMobile
         }
     }
 
+
+        public static void SaveAll(List<Question> Questions)
+        {
+            lock (Repository.Locker)
+            {
+                List<Question> _newQuestions = new List<Question>();
+                List<Question> _existingQuestions = new List<Question>();
+
+                foreach (Question _Question in Questions)
+                {
+                    if (_Question.IsNew)
+                        _newQuestions.Add(_Question);
+                    else
+                        _existingQuestions.Add(_Question);
+                }
+
+                Repository.Instance.InsertAll(_newQuestions);
+                Repository.Instance.UpdateAll(_existingQuestions);
+            }
+        }
+
+    public static List<Question> GetQuestionsByExamID(int ExamID)
+    {
+        string _sql = "select * from Question where fkExamID = " + ExamID;
+        return GetQuestionsBySQL(_sql);
+    }
+
+    public static List<Question> GetQuestionsByCategoryID(int CategoryID)
+    {
+        string _sql = "select * from Question where fkCategoryID = " + CategoryID;
+        return GetQuestionsBySQL(_sql);
+    }
+
+        public static Question GetQuestionByMainSystemID(int TargetMainSystemID)
+        {
+            string _sql = "select * from Question where MainSystemID = " + TargetMainSystemID;
+            List<Question> _Questions = GetQuestionsBySQL(_sql);
+
+            if (_Questions == null || _Questions.Count == 0)
+                return null;
+            else
+                return _Questions[0];
+        }
     }
 
 }

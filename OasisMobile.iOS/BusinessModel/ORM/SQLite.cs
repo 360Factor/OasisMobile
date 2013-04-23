@@ -1,4 +1,5 @@
-﻿//
+
+//
 // Copyright (c) 2009-2012 Krueger Systems, Inc.
 // 
 // Permission is hereby granted, free of charge, to any person obtaining a copy
@@ -3382,4 +3383,3 @@ namespace SQLite
         }
     }
 }
-
