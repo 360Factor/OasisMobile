@@ -1,7 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-
+using System.IO;
 using MonoTouch.Foundation;
 using MonoTouch.UIKit;
 
@@ -14,8 +14,11 @@ namespace OasisMobile.iOS
 	public partial class AppDelegate : UIApplicationDelegate
 	{
 		// class-level declarations
-		UIWindow window;
-		UINavigationController m_navController;
+		public static UIWindow window;
+		//public static UINavigationController m_navController;
+		public static UIViewController m_loginViewController;
+		public static OasisFlyoutController m_flyoutMenuController;
+
 		//
 		// This method is invoked when the application has loaded and is ready to run. In this 
 		// method you should instantiate the window, load the UI into it and then make the window
@@ -27,14 +30,25 @@ namespace OasisMobile.iOS
 		{
 			window = new UIWindow (UIScreen.MainScreen.Bounds);
 
-			ConnectionString.SetDBPath("");
+			ConnectionString.SetDBPath (GetDatabaseFilePath());
 
-			m_navController = new UINavigationController();
-			LoginView _loginView = new LoginView ();
-			m_navController.PushViewController (_loginView,false);
-			window.RootViewController = m_navController;
+			m_flyoutMenuController = new OasisFlyoutController();
+			window.RootViewController = m_flyoutMenuController;
 			window.MakeKeyAndVisible ();
+			m_loginViewController = new LoginView();
+			m_loginViewController.ModalInPopover=false;
+			m_loginViewController.ModalTransitionStyle=UIModalTransitionStyle.FlipHorizontal;
+
+			m_flyoutMenuController.PresentViewController (m_loginViewController,false,null);
 			return true;
+		}
+
+		private string GetDatabaseFilePath ()
+		{
+			string documentsPath = Environment.GetFolderPath (Environment.SpecialFolder.Personal); // Documents folder
+			string libraryPath = Path.Combine (documentsPath, "..", "Library"); // Library folder instead
+
+			return Path.Combine (libraryPath,"OasisMobile.db3");
 		}
 	}
 }

@@ -165,6 +165,7 @@
     <Compile Include="BusinessModel\ORM\Repository.cs" />
     <Compile Include="BusinessModel\ORM\SQL.cs" />
     <Compile Include="BusinessModel\ORM\SQLite.cs" />
+    <Compile Include="Navigation\FlyoutNavigationBaseViewController.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
   <ItemGroup>
@@ -186,5 +187,8 @@
   </ItemGroup>
   <ItemGroup>
     <BundleResource Include="Images\Background-Party.png" />
+    <BundleResource Include="Images\OasisLogo560px.png" />
+    <BundleResource Include="Images\OasisBG.png" />
+    <BundleResource Include="Images\slideout.png" />
   </ItemGroup>
 </Project>

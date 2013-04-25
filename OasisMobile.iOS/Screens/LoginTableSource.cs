@@ -27,10 +27,11 @@ namespace OasisMobile.iOS
 		
 		LoginData Credential { get; set; }
 
-		private int m_rowCount = 2;
 		private UITextField txtUserName;
 		private UITextField txtPassword;
-		
+		private UIImageView imgLogo;
+		private UIButton btnLogin;
+	
 		#region implemented abstract members of UITableViewSource
 		
 		public override int RowsInSection (UITableView tableview, int section)
@@ -38,32 +39,40 @@ namespace OasisMobile.iOS
 
 			switch (section) {
 			case 0:
-				break;
-			case 1:
 				return 1;
-			case 2:
+			case 1:
 				return 2;
+			case 2:
+				return 1;
 			default:
 				return 0;
 
 			}
 
-			return  m_rowCount;
 		}
 		
 		public override UITableViewCell GetCell (UITableView tableView, NSIndexPath indexPath)
 		{
 
-			var cell = tableView.DequeueReusableCell ("cell");
-			if (cell == null) {
-				cell = new UITableViewCell (UITableViewCellStyle.Default, "cell");
-			}
+			UITableViewCell cell;
 			
 			switch (indexPath.Section) {
 			case 0:
-		
-
+				cell = tableView.DequeueReusableCell ("logoCell");
+				if (cell == null) {
+					cell = new UITableViewCell (UITableViewCellStyle.Default, "logoCell");
+				}
+				UIImage loginLogoImage = new UIImage ("Images/OasisLogo560px.png");
+				UIImageView imgLogo = new UIImageView (loginLogoImage);
+				imgLogo.Frame = new System.Drawing.RectangleF (AppDelegate.window.Frame.Width / 2 - 140, 10, 280, 90); 
+				cell.ContentView.AddSubview (imgLogo);
+				return cell;
 			case 1:
+				cell = tableView.DequeueReusableCell ("cell");
+				if (cell == null) {
+					cell = new UITableViewCell (UITableViewCellStyle.Default, "cell");
+					cell.SelectionStyle = UITableViewCellSelectionStyle.None;
+				}
 				if (indexPath.Row == 0) {
 					cell.TextLabel.Text = "Username";
 					txtUserName = new UITextField (new System.Drawing.RectangleF (110, 10, 185, 30));
@@ -87,17 +96,39 @@ namespace OasisMobile.iOS
 					};
 					cell.ContentView.AddSubview (txtPassword);
 				}
+				return cell;
 			case 2:
+				cell = new UITableViewCell ();
+		
+				btnLogin = new UIButton (UIButtonType.RoundedRect);
+				btnLogin.AutoresizingMask = UIViewAutoresizing.FlexibleWidth;
+				btnLogin.Frame = new System.Drawing.RectangleF (0, 0, cell.Frame.Width, 36);
+				btnLogin.SetTitle ("Login", UIControlState.Normal);
+				btnLogin.TouchUpInside += (object sender, EventArgs e) => {
+					if (txtUserName.Text == "john.doe" && txtPassword.Text == "password") {
 
+						//AppDelegate.m_navController.SetViewControllers (new UIViewController[]{new ExamListView()},true);
+						//AppDelegate.m_navController.PushViewController (new ExamListView (), true);
+						AppDelegate.m_loginViewController.DismissViewController (true,null);
+					} else {
+						UIAlertView _invalidCredentialAlert = new UIAlertView ("Invalid Credential", "You have entered an invalid credential", null, "Ok", null);
+						_invalidCredentialAlert.Show ();
+					}
+
+				};
+				cell.ContentView.AddSubview (btnLogin);
+				return cell;
 			default:
-				break;
+				cell = tableView.DequeueReusableCell ("cell");
+				if (cell == null) {
+					cell = new UITableViewCell (UITableViewCellStyle.Default, "cell");
+
+				}
+				return cell;
 			}
 
 
-			
 
-
-			return cell;
 		}
 		
 		#endregion
@@ -108,6 +139,36 @@ namespace OasisMobile.iOS
 			// TODO: Implement - see: http://go-mono.com/docs/index.aspx?link=T%3aMonoTouch.Foundation.ModelAttribute
 		}
 
+		public override void WillDisplay (UITableView tableView, UITableViewCell cell, NSIndexPath indexPath)
+		{
+			// NOTE: Don't call the base implementation on a Model class
+			// see http://docs.xamarin.com/ios/tutorials/Events%2c_Protocols_and_Delegates 
+			if ((indexPath.Section == 0 || indexPath.Section == 2) && indexPath.Row == 0) {
+				cell.BackgroundView = null;
+			}
+		}
+
+		public override void RowSelected (UITableView tableView, NSIndexPath indexPath)
+		{
+			// NOTE: Don't call the base implementation on a Model class
+			// see http://docs.xamarin.com/ios/tutorials/Events%2c_Protocols_and_Delegates 
+			if (indexPath.Section == 1) {
+				tableView.DeselectRow (indexPath, false);
+			}
+
+		}
+
+		public override float GetHeightForRow (UITableView tableView, NSIndexPath indexPath)
+		{
+			// NOTE: Don't call the base implementation on a Model class
+			// see http://docs.xamarin.com/ios/tutorials/Events%2c_Protocols_and_Delegates 
+			if (indexPath.Section == 0) {
+				return 100; 
+			} else {
+				return 44;
+			}
+
+		}
 	}
 }
 

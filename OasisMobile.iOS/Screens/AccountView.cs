@@ -7,7 +7,7 @@ using MonoTouch.UIKit;
 
 namespace OasisMobile.iOS
 {
-	public partial class AccountView : UIViewController
+	public partial class AccountView : FlyoutNavigationBaseViewController
 	{
 		static bool UserInterfaceIdiomIsPhone {
 			get { return UIDevice.CurrentDevice.UserInterfaceIdiom == UIUserInterfaceIdiom.Phone; }
@@ -16,6 +16,7 @@ namespace OasisMobile.iOS
 		public AccountView ()
 			: base (UserInterfaceIdiomIsPhone ? "AccountView_iPhone" : "AccountView_iPad", null)
 		{
+
 		}
 		
 		public override void DidReceiveMemoryWarning ()

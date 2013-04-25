@@ -21,16 +21,19 @@ namespace OasisMobile.iOS
 			vc2.PushViewController (new AccountView(), false);
 			var vc3 = new UINavigationController();
 			vc3.PushViewController (new AboutView(), false);
-			
+
+			UIImage testLogo = UIImage.FromBundle ("Images/Slideout.png");
 			
 			// Create the navigation menu
 			NavigationRoot = new RootElement ("Navigation") {
 				new Section () {
-					new StyledStringElement ("Exams")      { BackgroundColor = UIColor.Clear, TextColor = UIColor.LightGray },
-					new StyledStringElement ("Account")    { BackgroundColor = UIColor.Clear, TextColor = UIColor.LightGray },
+					new StyledStringElement ("Exams")      { BackgroundColor = UIColor.Clear, TextColor = UIColor.LightGray, Image=testLogo },
+					new StyledStringElement ("Account")    { BackgroundColor = UIColor.Clear, TextColor = UIColor.LightGray, Image=testLogo },
 					new StyledStringElement ("About Oasis"){ BackgroundColor = UIColor.Clear, TextColor = UIColor.LightGray },
 				}
 			};
+
+
 
 			// Supply view controllers corresponding to menu items:
 			ViewControllers = new UIViewController[] {

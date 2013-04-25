@@ -29,9 +29,15 @@ namespace OasisMobile.iOS
 		public override void ViewDidLoad ()
 		{
 			base.ViewDidLoad ();
-			
-			// Perform any additional setup after loading the view, typically from a nib.
+
+			UIImage loginImage = new UIImage("Images/OasisBG.png");
+			UIImageView loginBgView = new UIImageView(loginImage);
+			loginBgView.ContentMode=UIViewContentMode.ScaleAspectFill;
+			tblvLogin.BackgroundView = loginBgView;
+			tblvLogin.Source = new LoginTableSource();
 		}
+
+
 	}
 }
 
