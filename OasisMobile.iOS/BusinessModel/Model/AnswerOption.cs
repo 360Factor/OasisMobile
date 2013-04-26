@@ -5,7 +5,7 @@ using SQLite;
 using System.Collections.Generic;
 using System.Linq;
 
-namespace OasisMobile
+namespace OasisMobile.BussinessLogicLayer
 {
 
     public partial class AnswerOption
@@ -22,6 +22,7 @@ namespace OasisMobile
 
     public void Delete()
     {
+
         lock(Repository.Locker) {
             Repository.Instance.Delete(this);
         }

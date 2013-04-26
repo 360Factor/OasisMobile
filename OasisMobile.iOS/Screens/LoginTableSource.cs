@@ -3,6 +3,9 @@ using System.Collections.Generic;
 
 using MonoTouch.UIKit;
 using MonoTouch.Foundation;
+using BigTed;
+using System.Threading.Tasks;
+using System.Net;
 
 namespace OasisMobile.iOS
 {
@@ -11,21 +14,6 @@ namespace OasisMobile.iOS
 		public LoginTableSource ()
 		{
 		}
-
-		public class LoginData
-		{
-			string UserName { get; set; }
-
-			string password { get; set; }
-			
-			public LoginData ()
-			{
-				
-			}
-			
-		}
-		
-		LoginData Credential { get; set; }
 
 		private UITextField txtUserName;
 		private UITextField txtPassword;
@@ -63,7 +51,7 @@ namespace OasisMobile.iOS
 					cell = new UITableViewCell (UITableViewCellStyle.Default, "logoCell");
 				}
 				UIImage loginLogoImage = new UIImage ("Images/OasisLogo560px.png");
-				UIImageView imgLogo = new UIImageView (loginLogoImage);
+				imgLogo = new UIImageView (loginLogoImage);
 				imgLogo.Frame = new System.Drawing.RectangleF (AppDelegate.window.Frame.Width / 2 - 140, 10, 280, 90); 
 				cell.ContentView.AddSubview (imgLogo);
 				return cell;
@@ -104,18 +92,7 @@ namespace OasisMobile.iOS
 				btnLogin.AutoresizingMask = UIViewAutoresizing.FlexibleWidth;
 				btnLogin.Frame = new System.Drawing.RectangleF (0, 0, cell.Frame.Width, 36);
 				btnLogin.SetTitle ("Login", UIControlState.Normal);
-				btnLogin.TouchUpInside += (object sender, EventArgs e) => {
-					if (txtUserName.Text == "john.doe" && txtPassword.Text == "password") {
-
-						//AppDelegate.m_navController.SetViewControllers (new UIViewController[]{new ExamListView()},true);
-						//AppDelegate.m_navController.PushViewController (new ExamListView (), true);
-						AppDelegate.m_loginViewController.DismissViewController (true,null);
-					} else {
-						UIAlertView _invalidCredentialAlert = new UIAlertView ("Invalid Credential", "You have entered an invalid credential", null, "Ok", null);
-						_invalidCredentialAlert.Show ();
-					}
-
-				};
+				btnLogin.TouchUpInside += btnLogin_Clicked;
 				cell.ContentView.AddSubview (btnLogin);
 				return cell;
 			default:
@@ -168,6 +145,93 @@ namespace OasisMobile.iOS
 				return 44;
 			}
 
+		}
+
+		private void btnLogin_Clicked (object sender, EventArgs e)
+		{
+//			bool loginSuccessful = false;
+//			WebClient service = new WebClient ();
+//			service.Headers.Add (HttpRequestHeader.Accept, "application/json");
+//			string serviceURL = AppConfig.BaseWebserviceURL +
+//				"UserByLoginNameAndPassword/" + 
+//					System.Web.HttpUtility.UrlEncode (txtUserName.Text) + "/" + 
+//					System.Web.HttpUtility.UrlEncode (txtPassword.Text);
+//			string responseString = service.DownloadString (serviceURL);
+//			
+//			if (responseString != null && responseString != "") {
+//				var _jsonUser = System.Json.JsonValue.Parse (responseString);
+//				BussinessLogicLayer.User _loggedInUser;
+//				_loggedInUser = BussinessLogicLayer.User.GetUserByMainSystemID (_jsonUser ["UserID"]);
+//				if (_loggedInUser == null) {
+//					_loggedInUser = new BussinessLogicLayer.User ();
+//					_loggedInUser.MainSystemID = _jsonUser ["UserID"];
+//				}
+//				_loggedInUser.LoginName = _jsonUser ["LoginName"];
+//				_loggedInUser.UserName = _jsonUser ["UserName"];
+//				_loggedInUser.Password = _jsonUser ["Password"];
+//				_loggedInUser.EmailAddress = _jsonUser ["UserEmail"];
+//				_loggedInUser.LastLoginDate = DateTime.Now;
+//				_loggedInUser.Save ();
+//				loginSuccessful = true;
+//				AppSession.LoggedInUser = _loggedInUser;
+//			} else {
+//				loginSuccessful = false;
+//			}
+
+		
+
+			if (txtUserName.Text != "" && txtPassword.Text != "") {
+				BTProgressHUD.Show ("Please wait");
+				bool loginSuccessful = false;
+				string userName = txtUserName.Text;
+				string password = txtPassword.Text;
+				Task.Factory.StartNew (() => {
+					WebClient service = new WebClient ();
+					service.Headers.Add (HttpRequestHeader.Accept, "application/json");
+					string serviceURL = AppConfig.BaseWebserviceURL +
+										"UserByLoginNameAndPassword/" + 
+										System.Web.HttpUtility.UrlEncode (userName) + "/" + 
+										System.Web.HttpUtility.UrlEncode (password);
+					string responseString = service.DownloadString (serviceURL);
+					if (responseString != null && responseString != "") {
+						var _jsonUser = System.Json.JsonValue.Parse (responseString);
+						BussinessLogicLayer.User _loggedInUser;
+						_loggedInUser = BussinessLogicLayer.User.GetUserByMainSystemID (_jsonUser ["UserID"]);
+						if (_loggedInUser == null) {
+							_loggedInUser = new BussinessLogicLayer.User ();
+							_loggedInUser.MainSystemID = _jsonUser ["UserID"];
+						}
+						_loggedInUser.LoginName = _jsonUser ["LoginName"];
+						_loggedInUser.UserName = _jsonUser ["UserName"];
+						_loggedInUser.Password = _jsonUser ["Password"];
+						_loggedInUser.EmailAddress = _jsonUser ["UserEmail"];
+						_loggedInUser.LastLoginDate = DateTime.Now;
+						_loggedInUser.Save ();
+						loginSuccessful = true;
+						AppSession.LoggedInUser = _loggedInUser;
+						SyncManager.SyncExamDataFromServer();
+						SyncManager.SyncUserExamDataFromServer (AppSession.LoggedInUser);
+
+					} else {
+						loginSuccessful = false;
+					}
+					
+				}).ContinueWith (task1 => {
+					if (loginSuccessful) {
+						//After login, we download the exam list and the user's exam before displaying the exam
+						BTProgressHUD.Dismiss ();
+						AppDelegate.m_loginViewController.DismissViewController (true, null);
+					} else {
+						BTProgressHUD.Dismiss ();
+						UIAlertView _invalidCredentialAlert = new UIAlertView ("Invalid Credential", "The credential you entered is invalid, please try again", null, "Ok", null);
+						_invalidCredentialAlert.Show ();
+					}
+				}, TaskScheduler.FromCurrentSynchronizationContext ());
+				
+			} else {
+				UIAlertView _requiredFieldAlert = new UIAlertView ("Credential Required", "Please enter your credential in the provided field", null, "Ok", null);
+				_requiredFieldAlert.Show ();
+			}
 		}
 	}
 }

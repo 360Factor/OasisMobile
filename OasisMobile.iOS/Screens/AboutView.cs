@@ -29,7 +29,7 @@ namespace OasisMobile.iOS
 		public override void ViewDidLoad ()
 		{
 			base.ViewDidLoad ();
-			
+			this.Title="About";
 			// Perform any additional setup after loading the view, typically from a nib.
 		}
 	}

@@ -18,7 +18,7 @@ namespace OasisMobile
 
     	private Repository (string DBPath) : base(DBPath)
     	{
-    	    if (!System.IO.File.Exists(ConnectionString.DBPath))
+    	    //if (!System.IO.File.Exists(ConnectionString.DBPath))
                 CreateDatabase();
     	}
 

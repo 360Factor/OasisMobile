@@ -32,6 +32,7 @@ namespace OasisMobile.iOS
 
 			ConnectionString.SetDBPath (GetDatabaseFilePath());
 
+
 			m_flyoutMenuController = new OasisFlyoutController();
 			window.RootViewController = m_flyoutMenuController;
 			window.MakeKeyAndVisible ();

@@ -5,7 +5,7 @@ using SQLite;
 using System.Collections.Generic;
 using System.Linq;
 
-namespace OasisMobile
+namespace OasisMobile.BussinessLogicLayer
 {
 
     public partial class UserAnswerOption
