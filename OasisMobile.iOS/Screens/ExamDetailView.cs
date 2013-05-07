@@ -9,6 +9,9 @@ using System.Net;
 using System.Json;
 using System.Collections.Generic;
 using System.Linq;
+using System.IO;
+using System.Text.RegularExpressions;
+using System.Threading.Tasks;
 
 namespace OasisMobile.iOS
 {
@@ -286,12 +289,39 @@ namespace OasisMobile.iOS
 				if (AppSession.SelectedUserExam != null && AppSession.SelectedUserExam.IsDownloaded) {
 
 				} else {
-					DownloadBaseExam (AppSession.SelectedExam);
+					bool _isDownloadSuccessful = false;
+					BTProgressHUD.Show ("Downloading Exam");
+					Task.Factory.StartNew (() => {
+						if (AppSession.SelectedUserExam == null) {
+							//TODO: generate and download user exam 
+						}
+						
+						if (DownloadExamBaseData (AppSession.SelectedExam) && 
+							DownloadExamImageFiles (AppSession.SelectedExam) && 
+							DownloadUserExamCompleteData (AppSession.LoggedInUser, AppSession.SelectedExam)) {
+							//Update the user exam to session just in case the user exam gets updated in download
+							AppSession.SelectedUserExam = BusinessModel.UserExam.GetFirstUserExamByUserIDAndExamID (
+															AppSession.LoggedInUser.UserID,
+															AppSession.SelectedExam.ExamID);
+							_isDownloadSuccessful = true;
+						} else {
+							_isDownloadSuccessful = false;
+						}
+					}).ContinueWith (task1 => {
+						BTProgressHUD.Dismiss ();
+						if (_isDownloadSuccessful) {
+							m_currentViewController.NavigationController.PushViewController (new ExamQuestionList_iPhone (), true);
+						} else {
+							UIAlertView _alert = new UIAlertView ("Download Failed", "We could not download your exam right now. Please try again later", null, "Ok", null);
+							_alert.Show ();
+						}
+					}, TaskScheduler.FromCurrentSynchronizationContext ());
+
+				
 				}
-				m_currentViewController.NavigationController.PushViewController (new ExamQuestionList_iPhone (), true);
 			}
 
-			private bool DownloadBaseExam (BusinessModel.Exam aExam)
+			private bool DownloadExamBaseData (BusinessModel.Exam aExam)
 			{
 				string _serviceTargetURL = "";
 				string _responseString = "";
@@ -319,6 +349,7 @@ namespace OasisMobile.iOS
 					_service.Headers.Add (HttpRequestHeader.Accept, "application/json");
 					_responseString = _service.DownloadString (_serviceTargetURL);
 				} catch (Exception ex) {
+					Console.WriteLine (ex.ToString ());
 					return false;
 				}
 
@@ -329,38 +360,37 @@ namespace OasisMobile.iOS
 					//---------------------------
 					List<BusinessModel.Question> _localQuestionList = BusinessModel.Question.GetQuestionsByExamID (aExam.ExamID);
 					
-					if(_localQuestionList == null){
-						_localQuestionList = new List<BusinessModel.Question>();
+					if (_localQuestionList == null) {
+						_localQuestionList = new List<BusinessModel.Question> ();
 					}
 
-					JsonArray _remoteQuestionList = (JsonArray) _jsonObj ["QuestionList"];
+					JsonArray _remoteQuestionList = (JsonArray)_jsonObj ["QuestionList"];
 					foreach (JsonValue _remoteQuestion in _remoteQuestionList) {
 						BusinessModel.Question _matchinglocalQuestion = 
 							(from x in _localQuestionList 
-							 where x.MainSystemID == _remoteQuestion["QuestionID"] select x).FirstOrDefault ();
-						if(_matchinglocalQuestion == null){
-							_matchinglocalQuestion = new BusinessModel.Question();
-							_matchinglocalQuestion.MainSystemID = _remoteQuestion["QuestionID"];
+							 where x.MainSystemID == _remoteQuestion ["QuestionID"] select x).FirstOrDefault ();
+						if (_matchinglocalQuestion == null) {
+							_matchinglocalQuestion = new BusinessModel.Question ();
+							_matchinglocalQuestion.MainSystemID = _remoteQuestion ["QuestionID"];
 							_localQuestionList.Add (_matchinglocalQuestion);
 						}
-						_matchinglocalQuestion.Stem = _remoteQuestion["Stem"];
-						_matchinglocalQuestion.LeadIn = _remoteQuestion["LeadIn"];
-						_matchinglocalQuestion.Commentary = _remoteQuestion["Commentary"];
-						_matchinglocalQuestion.Reference = _remoteQuestion["Reference"];
+						_matchinglocalQuestion.Stem = _remoteQuestion ["Stem"];
+						_matchinglocalQuestion.LeadIn = _remoteQuestion ["LeadIn"];
+						_matchinglocalQuestion.Commentary = _remoteQuestion ["Commentary"];
+						_matchinglocalQuestion.Reference = _remoteQuestion ["Reference"];
 						_matchinglocalQuestion.ExamID = aExam.ExamID;
-						if(_mainSystemIDToCategoryIDMap.ContainsKey (_remoteQuestion["CategoryID"])){
-							_matchinglocalQuestion.CategoryID = _mainSystemIDToCategoryIDMap[_remoteQuestion["CategoryID"]];
-						}
-						else{
+						if (_mainSystemIDToCategoryIDMap.ContainsKey (_remoteQuestion ["CategoryID"])) {
+							_matchinglocalQuestion.CategoryID = _mainSystemIDToCategoryIDMap [_remoteQuestion ["CategoryID"]];
+						} else {
 							//If there are categories used by question that does not exist yet, we resync the category
-							_mainSystemIDToCategoryIDMap = DownloadCategories();
-							if(_mainSystemIDToCategoryIDMap == null){
+							_mainSystemIDToCategoryIDMap = DownloadCategories ();
+							if (_mainSystemIDToCategoryIDMap == null) {
 								//If for some reason, the download of categories fail, we cannot continue and so return false for failing to download exam
 								return false;
 							}
-							_matchinglocalQuestion.CategoryID = _mainSystemIDToCategoryIDMap[_remoteQuestion["CategoryID"]];
+							_matchinglocalQuestion.CategoryID = _mainSystemIDToCategoryIDMap [_remoteQuestion ["CategoryID"]];
 						}
-						_matchinglocalQuestion.PopulationCorrectPct = _remoteQuestion["OverallCorrectResponsePct"];
+						_matchinglocalQuestion.PopulationCorrectPct = _remoteQuestion ["OverallCorrectResponsePct"];
 					}
 					BusinessModel.Question.SaveAll (_localQuestionList);
 
@@ -369,7 +399,7 @@ namespace OasisMobile.iOS
 					Dictionary<int,int> _mainSystemIDToQuestionIDMap = 
 						(from x in _localQuestionList 
 						 select new{MainSystemID = x.MainSystemID, 
-									QuestionID = x.QuestionID}).ToDictionary(y=>y.MainSystemID, y=>y.QuestionID);
+									QuestionID = x.QuestionID}).ToDictionary (y => y.MainSystemID, y => y.QuestionID);
 
 
 					// SYNC EXAM BASE ANSWER OPTION
@@ -377,26 +407,26 @@ namespace OasisMobile.iOS
 					List<BusinessModel.AnswerOption> _localAnswerOptionList = 
 						BusinessModel.AnswerOption.GetAnswerOptionsBySQL (string.Format (
 							"SELECT * FROM AnswerOption INNER JOIN Question " +
-							"ON AnswerOption.fkQuestionID = Question.pkQuestionID " +
-							"WHERE Question.fkExamID={0}",aExam.ExamID));
+						"ON AnswerOption.fkQuestionID = Question.pkQuestionID " +
+						"WHERE Question.fkExamID={0}", aExam.ExamID));
 					
-					if(_localAnswerOptionList == null){
-						_localAnswerOptionList = new List<BusinessModel.AnswerOption>();
+					if (_localAnswerOptionList == null) {
+						_localAnswerOptionList = new List<BusinessModel.AnswerOption> ();
 					}
 
-					JsonArray _remoteAnswerOptionList = (JsonArray)_jsonObj["AnswerOptionList"];
-					foreach(JsonValue _remoteAnswerOption in _remoteQuestionList){
+					JsonArray _remoteAnswerOptionList = (JsonArray)_jsonObj ["AnswerOptionList"];
+					foreach (JsonValue _remoteAnswerOption in _remoteAnswerOptionList) {
 						BusinessModel.AnswerOption _matchingLocalAnswerOption = 
-							(from x in _localAnswerOptionList where x.MainSystemID == _remoteAnswerOption["AnswerOptionID"] 
+							(from x in _localAnswerOptionList where x.MainSystemID == _remoteAnswerOption ["AnswerOptionID"] 
 							 select x).FirstOrDefault ();
-						if(_matchingLocalAnswerOption == null){
-							_matchingLocalAnswerOption = new BusinessModel.AnswerOption();
-							_matchingLocalAnswerOption.MainSystemID = _remoteAnswerOption["AnswerOptionID"];
+						if (_matchingLocalAnswerOption == null) {
+							_matchingLocalAnswerOption = new BusinessModel.AnswerOption ();
+							_matchingLocalAnswerOption.MainSystemID = _remoteAnswerOption ["AnswerOptionID"];
 							_localAnswerOptionList.Add (_matchingLocalAnswerOption);
 						}
-						_matchingLocalAnswerOption.QuestionID = _mainSystemIDToQuestionIDMap[_remoteAnswerOption["QuestionID"]];
-						_matchingLocalAnswerOption.AnswerText = _remoteAnswerOption["Text"];
-						_matchingLocalAnswerOption.IsCorrect = _remoteAnswerOption["IsCorrect"];
+						_matchingLocalAnswerOption.QuestionID = _mainSystemIDToQuestionIDMap [_remoteAnswerOption ["QuestionID"]];
+						_matchingLocalAnswerOption.AnswerText = _remoteAnswerOption ["Text"];
+						_matchingLocalAnswerOption.IsCorrect = _remoteAnswerOption ["IsCorrect"];
 					}
 					BusinessModel.AnswerOption.SaveAll (_localAnswerOptionList);
 
@@ -404,29 +434,28 @@ namespace OasisMobile.iOS
 					//-----------------------------------------
 					List<BusinessModel.Image> _localImageList = 
 						BusinessModel.Image.GetImagesBySQL (string.Format (
-							"SELECT Image.* FROM Image INNER JOIN Question " +
-							"ON Image.fkQuestionID = Question.pkQuestionID " +
-							"WHERE Question.fkExamID={0}",aExam.ExamID));
+						"SELECT Image.* FROM Image INNER JOIN Question " +
+						"ON Image.fkQuestionID = Question.pkQuestionID " +
+						"WHERE Question.fkExamID={0}", aExam.ExamID));
 					
-					if(_localImageList == null){
-						_localImageList = new List<BusinessModel.Image>();
+					if (_localImageList == null) {
+						_localImageList = new List<BusinessModel.Image> ();
 					}
 					
-					JsonArray _remoteImageList = (JsonArray) _jsonObj["QuestionImageMap"];
-					foreach(JsonValue _remoteImage in _remoteImageList){
+					JsonArray _remoteImageList = (JsonArray)_jsonObj ["QuestionImageMap"];
+					foreach (JsonValue _remoteImage in _remoteImageList) {
 						BusinessModel.Image _matchingLocalImage = 
-							(from x in _localImageList where x.MainSystemID == _remoteImage["ImageID"] 
+							(from x in _localImageList where x.MainSystemID == _remoteImage ["ImageID"] 
 							 select x).FirstOrDefault ();
-						if(_matchingLocalImage == null){
-							_matchingLocalImage = new BusinessModel.Image();
-							_matchingLocalImage.MainSystemID = _remoteImage["ImageID"];
+						if (_matchingLocalImage == null) {
+							_matchingLocalImage = new BusinessModel.Image ();
+							_matchingLocalImage.MainSystemID = _remoteImage ["ImageID"];
 							_localImageList.Add (_matchingLocalImage);
 						}
-						_matchingLocalImage.QuestionID = _mainSystemIDToQuestionIDMap[_remoteImage["QuestionID"]];
-						_matchingLocalImage.Title = _remoteImage["FigureTitle"];
-						_matchingLocalImage.ShowInQuestion = _remoteImage["ShowInQuestion"];
-						_matchingLocalImage.ShowInCommentary = _remoteImage["ShowInCommentary"];
-						_matchingLocalImage.DownloadURL = "";
+						_matchingLocalImage.QuestionID = _mainSystemIDToQuestionIDMap [_remoteImage ["QuestionID"]];
+						_matchingLocalImage.Title = _remoteImage ["FigureTitle"];
+						_matchingLocalImage.ShowInQuestion = _remoteImage ["ShowInQuestion"];
+						_matchingLocalImage.ShowInCommentary = _remoteImage ["ShowInCommentary"];
 
 					}
 					BusinessModel.Image.SaveAll (_localImageList);
@@ -435,10 +464,212 @@ namespace OasisMobile.iOS
 					return false;
 				}
 
-		
-
-
 				return true;
+			}
+
+			private bool DownloadExamImageFiles (BusinessModel.Exam aExam)
+			{
+				string _serviceTargetURL = "";
+				string _responseString = "";
+				WebClient _service = new WebClient ();
+
+
+				//Get the local image records on db
+				List<BusinessModel.Image> _localImageList = 
+					BusinessModel.Image.GetImagesBySQL (string.Format (
+					"SELECT Image.* FROM Image INNER JOIN Question " +
+					"ON Image.fkQuestionID = Question.pkQuestionID " +
+					"WHERE Question.fkExamID={0}", aExam.ExamID));
+				
+				if (_localImageList == null) {
+					_localImageList = new List<BusinessModel.Image> ();
+				}
+
+				_serviceTargetURL = AppConfig.BaseWebserviceURL + string.Format (
+					"ImagesByExamID/{0}", aExam.MainSystemID);
+				
+				try {
+					_service.Headers.Add (HttpRequestHeader.Accept, "application/json");
+					_responseString = _service.DownloadString (_serviceTargetURL);
+				} catch (Exception ex) {
+					Console.WriteLine (ex.ToString ());
+					return false;
+				}
+				
+				if (_responseString != null && _responseString != "") {
+					JsonArray _remoteImageList = (JsonArray)JsonValue.Parse (_responseString);
+					//Create dictionary of main system id to remote image obj so we dont have to loop multiple times
+					Dictionary<int,JsonValue> _mainSystemIDToRemoteImageObjMap = new Dictionary<int, JsonValue> ();
+					foreach (JsonValue _remoteImage in _remoteImageList) {
+						_mainSystemIDToRemoteImageObjMap.Add ((int)_remoteImage ["ImageID"], _remoteImage);
+					}
+
+					//Loop through the local image list, downloading and saving the downloaded path
+					foreach (BusinessModel.Image _localImage in _localImageList) {
+						if (_localImage.FilePath == null || _localImage.FilePath == "") {
+							//Only perform download if the filepath was empty as it signify that the image is not downloaded yet
+							string _remoteRelativeFilePath = _mainSystemIDToRemoteImageObjMap [_localImage.MainSystemID] ["RelativeFilePath"];
+							string _downloadURL = string.Format (AppConfig.BaseSiteURL + "ImageHandler.ashx?path={0}", 
+							                                     _remoteRelativeFilePath);
+							string documentsPath = Environment.GetFolderPath (Environment.SpecialFolder.Personal); // Documents folder
+							string libraryPath = Path.Combine (documentsPath, "..", "Library"); // Library folder instead
+							//local save path in form of library/ExamImages/{RelativeSavePathOnServer with "/" replaced by "_"}
+							string _localSavePath = Path.Combine (libraryPath, "ExamImages", Regex.Replace (_remoteRelativeFilePath, "[/\\]", "_"));
+							if (!File.Exists (_localSavePath)) {
+								//Only download if the file has not existed
+								try {
+									_service.DownloadFile (_downloadURL, _localSavePath);
+								} catch (Exception ex) {
+									Console.WriteLine ("Error on downloading image id " + _localImage.ImageID);
+									Console.WriteLine (ex.ToString ());
+									return false;
+								}
+							}
+							_localImage.DownloadURL = _downloadURL;
+							_localImage.FilePath = _localSavePath;
+							_localImage.Save ();
+							                                 
+						}
+					}
+					return true;
+				}
+				return false;
+			}
+
+			private bool DownloadUserExamCompleteData (BusinessModel.User aUser, BusinessModel.Exam aExam)
+			{
+
+				string _serviceTargetURL = "";
+				string _responseString = "";
+				WebClient _service = new WebClient ();
+				
+				//Download exam base question data (question/image record/ answer option)
+				_serviceTargetURL = AppConfig.BaseWebserviceURL + string.Format (
+					"GetCompleteUserExamData/{0}/{1}", aUser.MainSystemID, aExam.MainSystemID);
+				
+				try {
+					_service.Headers.Add (HttpRequestHeader.Accept, "application/json");
+					_responseString = _service.DownloadString (_serviceTargetURL);
+				} catch (Exception ex) {
+					Console.WriteLine (ex.ToString ());
+					return false;
+				}
+				
+				if (_responseString != null && _responseString != "") {
+					JsonValue _userExamCompleteDataObj = JsonValue.Parse (_responseString);
+
+					// UPDATE LOCAL USER EXAM RECORD
+					//---------------------------------
+					BusinessModel.UserExam _localUserExam = 
+						BusinessModel.UserExam.GetFirstUserExamByUserIDAndExamID (aUser.UserID, aExam.ExamID);
+					JsonValue _remoteUserExam = _userExamCompleteDataObj ["UserExam"];
+					if (_localUserExam != null && _localUserExam.MainSystemID != _remoteUserExam ["UserExamID"]) {
+						//If the userexam is a different user exam than the one downloaded, 
+						//the user may have resetted the exam on the web before resynching.
+						//Because of this, we will delete the exam
+						_localUserExam.CascadeDelete ();
+						_localUserExam = new BusinessModel.UserExam ();
+						_localUserExam.MainSystemID = _remoteUserExam ["UserExamID"];
+					} else if (_localUserExam == null) {
+						_localUserExam = new BusinessModel.UserExam ();
+						_localUserExam.MainSystemID = _remoteUserExam ["UserExamID"];
+					}
+
+					_localUserExam.ExamID = aExam.ExamID;
+					_localUserExam.UserID = aUser.UserID;
+					_localUserExam.IsSubmitted = _remoteUserExam ["IsSubmitted"];
+					_localUserExam.IsLearningMode = _remoteUserExam ["IsInteractiveMode"];
+					_localUserExam.HasReadPrivacyPolicy = _remoteUserExam ["HasReadPrivacyPolicy"];
+					_localUserExam.HasReadDisclosure = _remoteUserExam ["HasReadDisclosure"];
+					_localUserExam.SecondsSpent = _remoteUserExam ["SecondsSpent"];
+					_localUserExam.DoSync = false;
+					_localUserExam.IsDownloaded = false;
+					_localUserExam.IsCompleted = false;
+					_localUserExam.Save ();
+
+					// GET USER QUESTIONS
+					//-------------------------
+					List<BusinessModel.UserQuestion> _localUserQuestionList = 
+						BusinessModel.UserQuestion.GetUserQuestionsBySQL (
+							"SELECT * UserQuestion WHERE fkUserExamID=" + _localUserExam.UserExamID);
+					if (_localUserQuestionList == null) {
+						_localUserQuestionList = new List<BusinessModel.UserQuestion> ();
+					}
+
+					Dictionary<int, int> _mainSystemToQuestionIDMap = 
+						BusinessModel.SQL.ExecuteIntIntDictionary (string.Format (
+						"SELECT MainSystemID, pkQuestionID FROM Question " +
+						"WHERE fkExamID={0}", aExam.ExamID));
+
+					JsonArray _remoteUserQuestionList = (JsonArray)_userExamCompleteDataObj ["UserQuestionList"];
+					foreach (JsonValue _remoteUserQuestion in _remoteUserQuestionList) {
+						BusinessModel.UserQuestion _matchingLocalQuestion = 
+							(from x in _localUserQuestionList 
+							 where x.MainSystemID == _remoteUserQuestion ["UserQuestionID"] select x).FirstOrDefault ();
+						if (_matchingLocalQuestion == null) {
+							_matchingLocalQuestion = new BusinessModel.UserQuestion ();
+							_matchingLocalQuestion.MainSystemID = _remoteUserQuestion ["UserQuestionID"];
+							_localUserQuestionList.Add (_matchingLocalQuestion);
+						}
+
+						_matchingLocalQuestion.QuestionID = _mainSystemToQuestionIDMap [_remoteUserQuestion ["QuestionID"]];
+						_matchingLocalQuestion.UserExamID = _localUserExam.UserExamID;
+						_matchingLocalQuestion.Sequence = _remoteUserQuestion ["Sequence"];
+						_matchingLocalQuestion.AnsweredDateTime = _remoteUserQuestion ["AnsweredDateTime"];
+						_matchingLocalQuestion.HasAnswered = _remoteUserQuestion ["HasAnswered"];
+						_matchingLocalQuestion.HasAnsweredCorrectly = _remoteUserQuestion ["HasAnsweredCorrectly"];
+						_matchingLocalQuestion.SecondsSpent = _remoteUserQuestion ["SecondsSpent"];
+						_matchingLocalQuestion.DoSync = false;
+					}
+
+					BusinessModel.UserQuestion.SaveAll (_localUserQuestionList);
+
+					Dictionary<int, int> _mainSystemToUserQuestionIDMap = 
+						_localUserQuestionList.ToDictionary (x => x.MainSystemID, x => x.UserQuestionID);
+
+
+					// GET USER ANSWER OPTIONS
+					//---------------------------
+
+					Dictionary<int,int> _mainSystemToAnswerOptionIDMap = 
+						BusinessModel.SQL.ExecuteIntIntDictionary (string.Format (
+							"SELECT AnswerOption.MainSystemID, pkAnswerOptionID FROM AnswerOption INNER JOIN Question " +
+						"ON AnswerOption.fkQuestionID = Question.pkQuestionID " +
+						"WHERE Question.fkExamID={0}", aExam.ExamID));
+
+					List<BusinessModel.UserAnswerOption> _localUserAnswerOptionList = 
+						BusinessModel.UserAnswerOption.GetUserAnswerOptionsBySQL (string.Format (
+							"SELECT UserAnswerOption.* FROM UserAnswerOption INNER JOIN UserQuestion " +
+						"ON UserAnswerOption.fkUserQuestionID = UserQuestion.pkUserQuestionID " +
+						"WHERE UserQuestion.fkUserExamID={0}", _localUserExam.UserExamID));
+					if (_localUserAnswerOptionList == null) {
+						_localUserAnswerOptionList = new List<BusinessModel.UserAnswerOption> ();
+					}
+
+					JsonArray _remoteUserAnswerOptionList = (JsonArray)_userExamCompleteDataObj ["UserAnswerOptionList"];
+					foreach (JsonValue _remoteUserAnswerOption in _remoteUserAnswerOptionList) {
+						BusinessModel.UserAnswerOption _matchingLocalUserAnswerOption = 
+							(from x in _localUserAnswerOptionList 
+							 where x.MainSystemID == _remoteUserAnswerOption ["UserAnswerOptionID"] select x).FirstOrDefault ();
+						if (_matchingLocalUserAnswerOption == null) {
+							_matchingLocalUserAnswerOption = new BusinessModel.UserAnswerOption ();
+							_matchingLocalUserAnswerOption.MainSystemID = _remoteUserAnswerOption ["AnswerOptionID"];
+							_localUserAnswerOptionList.Add (_matchingLocalUserAnswerOption);
+						}
+						_matchingLocalUserAnswerOption.UserQuestionID = 
+							_mainSystemToUserQuestionIDMap [_remoteUserAnswerOption ["UserQuestionID"]];
+						_matchingLocalUserAnswerOption.AnswerOptionID = 
+							_mainSystemToAnswerOptionIDMap [_remoteUserAnswerOption ["AnswerOptionID"]];
+						_matchingLocalUserAnswerOption.Sequence = _remoteUserAnswerOption ["Sequence"];
+						_matchingLocalUserAnswerOption.IsSelected = _remoteUserAnswerOption ["IsSelected"];
+					}
+					BusinessModel.UserAnswerOption.SaveAll (_localUserAnswerOptionList);
+
+					return true;
+
+				} else {
+					return false;
+				}
 			}
 
 			/// <summary>
@@ -461,11 +692,12 @@ namespace OasisMobile.iOS
 					_service.Headers.Add (HttpRequestHeader.Accept, "application/json");
 					_responseString = _service.DownloadString (_serviceTargetURL);
 				} catch (Exception ex) {
+					Console.WriteLine (ex.ToString ());
 					//Return right away when an exception occurs because that means the get has failed and no data should be returned  
 					return null;
 				}
 				if (_responseString != null && _responseString != "") {
-					JsonArray _remoteCategoryList = (JsonArray) JsonValue.Parse (_responseString);
+					JsonArray _remoteCategoryList = (JsonArray)JsonValue.Parse (_responseString);
 
 					// FIRST SAVE LOOP
 					//----------------------
@@ -508,8 +740,7 @@ namespace OasisMobile.iOS
 					BusinessModel.Category.SaveAll (_localCategoryList);
 
 					return _mainSystemIDToLocalIDCategoryMap;
-				}
-				else{
+				} else {
 					return null;
 				}
 			}

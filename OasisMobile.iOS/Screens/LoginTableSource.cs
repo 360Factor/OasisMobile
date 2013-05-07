@@ -212,6 +212,8 @@ namespace OasisMobile.iOS
 
 					}
 					catch(Exception ex){
+						Console.WriteLine ("Unable to login as the service encountered an error for username: " +userName);
+						Console.WriteLine (ex.ToString ());
 						_loginSuccessful = false;
 						_serviceReachable = false;
 					}
