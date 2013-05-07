@@ -5,7 +5,7 @@ using SQLite;
 using System.Collections.Generic;
 using System.Linq;
 
-namespace OasisMobile.BussinessLogicLayer
+namespace OasisMobile.BusinessModel
 {
 
     public partial class UserExam
@@ -27,6 +27,34 @@ namespace OasisMobile.BussinessLogicLayer
         public Boolean IsDownloaded {get; set;}
         public Boolean DoSync {get; set;}
         public int MainSystemID {get; set;}
+
+    public UserExam() {}
+
+    public UserExam(int NewUserID, 
+                  int NewExamID, 
+                  Boolean NewIsCompleted, 
+                  Boolean NewIsSubmitted, 
+                  Boolean NewIsLearningMode, 
+                  Boolean NewHasReadDisclosure, 
+                  Boolean NewHasReadPrivacyPolicy, 
+                  int NewSecondsSpent, 
+                  Boolean NewIsDownloaded, 
+                  Boolean NewDoSync, 
+                  int NewMainSystemID)
+    {
+              UserID = NewUserID;
+                 ExamID = NewExamID;
+                 IsCompleted = NewIsCompleted;
+                 IsSubmitted = NewIsSubmitted;
+                 IsLearningMode = NewIsLearningMode;
+                 HasReadDisclosure = NewHasReadDisclosure;
+                 HasReadPrivacyPolicy = NewHasReadPrivacyPolicy;
+                 SecondsSpent = NewSecondsSpent;
+                 IsDownloaded = NewIsDownloaded;
+                 DoSync = NewDoSync;
+                 MainSystemID = NewMainSystemID;
+
+    }
 
     public void Delete()
     {
@@ -57,7 +85,8 @@ namespace OasisMobile.BussinessLogicLayer
     public static UserExam GetUserExamByUserExamID(int UserExamID)
     {
         lock(Repository.Locker) {
-            return Repository.Instance.Table<UserExam>().Where(x => x.UserExamID == UserExamID).FirstOrDefault();
+            string _sql = string.Format("select * from UserExam where pkUserExamID = {0}", UserExamID);
+            return GetFirstUserExamBySQL(_sql);
         }
     }
 
@@ -75,6 +104,18 @@ namespace OasisMobile.BussinessLogicLayer
     {
         lock(Repository.Locker) {
             return Repository.Instance.Query<UserExam>(sql).ToList();
+        }
+    }
+
+    public static UserExam GetFirstUserExamBySQL(string sql)
+    {
+        lock(Repository.Locker) {
+            List<UserExam> _matches = GetUserExamsBySQL(sql);
+
+            if (_matches == null || _matches.Count == 0)
+                return null;
+            else
+                return _matches[0];
         }
     }
 
@@ -111,26 +152,10 @@ namespace OasisMobile.BussinessLogicLayer
         return GetUserExamsBySQL(_sql);
     }
 
-        public static UserExam GetUserExamByfkUserID(int TargetfkUserID)
-        {
-            string _sql = "select * from UserExam where fkUserID = " + TargetfkUserID;
-            List<UserExam> _UserExams = GetUserExamsBySQL(_sql);
-
-            if (_UserExams == null || _UserExams.Count == 0)
-                return null;
-            else
-                return _UserExams[0];
-        }
-
         public static UserExam GetUserExamByMainSystemID(int TargetMainSystemID)
         {
             string _sql = "select * from UserExam where MainSystemID = " + TargetMainSystemID;
-            List<UserExam> _UserExams = GetUserExamsBySQL(_sql);
-
-            if (_UserExams == null || _UserExams.Count == 0)
-                return null;
-            else
-                return _UserExams[0];
+            return GetFirstUserExamBySQL(_sql);
         }
     }
 

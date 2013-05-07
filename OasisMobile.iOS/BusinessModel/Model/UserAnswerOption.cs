@@ -5,7 +5,7 @@ using SQLite;
 using System.Collections.Generic;
 using System.Linq;
 
-namespace OasisMobile.BussinessLogicLayer
+namespace OasisMobile.BusinessModel
 {
 
     public partial class UserAnswerOption
@@ -21,6 +21,22 @@ namespace OasisMobile.BussinessLogicLayer
         public int Sequence {get; set;}
         public Boolean IsSelected {get; set;}
         public int MainSystemID {get; set;}
+
+    public UserAnswerOption() {}
+
+    public UserAnswerOption(int NewUserQuestionID, 
+                  int NewAnswerOptionID, 
+                  int NewSequence, 
+                  Boolean NewIsSelected, 
+                  int NewMainSystemID)
+    {
+              UserQuestionID = NewUserQuestionID;
+                 AnswerOptionID = NewAnswerOptionID;
+                 Sequence = NewSequence;
+                 IsSelected = NewIsSelected;
+                 MainSystemID = NewMainSystemID;
+
+    }
 
     public void Delete()
     {
@@ -51,7 +67,8 @@ namespace OasisMobile.BussinessLogicLayer
     public static UserAnswerOption GetUserAnswerOptionByUserAnswerOptionID(int UserAnswerOptionID)
     {
         lock(Repository.Locker) {
-            return Repository.Instance.Table<UserAnswerOption>().Where(x => x.UserAnswerOptionID == UserAnswerOptionID).FirstOrDefault();
+            string _sql = string.Format("select * from UserAnswerOption where pkUserAnswerOptionID = {0}", UserAnswerOptionID);
+            return GetFirstUserAnswerOptionBySQL(_sql);
         }
     }
 
@@ -69,6 +86,18 @@ namespace OasisMobile.BussinessLogicLayer
     {
         lock(Repository.Locker) {
             return Repository.Instance.Query<UserAnswerOption>(sql).ToList();
+        }
+    }
+
+    public static UserAnswerOption GetFirstUserAnswerOptionBySQL(string sql)
+    {
+        lock(Repository.Locker) {
+            List<UserAnswerOption> _matches = GetUserAnswerOptionsBySQL(sql);
+
+            if (_matches == null || _matches.Count == 0)
+                return null;
+            else
+                return _matches[0];
         }
     }
 
@@ -108,12 +137,7 @@ namespace OasisMobile.BussinessLogicLayer
         public static UserAnswerOption GetUserAnswerOptionByMainSystemID(int TargetMainSystemID)
         {
             string _sql = "select * from UserAnswerOption where MainSystemID = " + TargetMainSystemID;
-            List<UserAnswerOption> _UserAnswerOptions = GetUserAnswerOptionsBySQL(_sql);
-
-            if (_UserAnswerOptions == null || _UserAnswerOptions.Count == 0)
-                return null;
-            else
-                return _UserAnswerOptions[0];
+            return GetFirstUserAnswerOptionBySQL(_sql);
         }
     }
 

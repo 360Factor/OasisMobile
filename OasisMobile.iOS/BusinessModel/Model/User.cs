@@ -5,7 +5,7 @@ using SQLite;
 using System.Collections.Generic;
 using System.Linq;
 
-namespace OasisMobile.BussinessLogicLayer
+namespace OasisMobile.BusinessModel
 {
 
     public partial class User
@@ -20,6 +20,24 @@ namespace OasisMobile.BussinessLogicLayer
         public string UserName {get; set;}
         public int MainSystemID {get; set;}
         public DateTime LastLoginDate {get; set;}
+
+    public User() {}
+
+    public User(string NewLoginName, 
+                  string NewPassword, 
+                  string NewEmailAddress, 
+                  string NewUserName, 
+                  int NewMainSystemID, 
+                  DateTime NewLastLoginDate)
+    {
+              LoginName = NewLoginName;
+                 Password = NewPassword;
+                 EmailAddress = NewEmailAddress;
+                 UserName = NewUserName;
+                 MainSystemID = NewMainSystemID;
+                 LastLoginDate = NewLastLoginDate;
+
+    }
 
     public void Delete()
     {
@@ -50,7 +68,8 @@ namespace OasisMobile.BussinessLogicLayer
     public static User GetUserByUserID(int UserID)
     {
         lock(Repository.Locker) {
-            return Repository.Instance.Table<User>().Where(x => x.UserID == UserID).FirstOrDefault();
+            string _sql = string.Format("select * from User where pkUserID = {0}", UserID);
+            return GetFirstUserBySQL(_sql);
         }
     }
 
@@ -68,6 +87,18 @@ namespace OasisMobile.BussinessLogicLayer
     {
         lock(Repository.Locker) {
             return Repository.Instance.Query<User>(sql).ToList();
+        }
+    }
+
+    public static User GetFirstUserBySQL(string sql)
+    {
+        lock(Repository.Locker) {
+            List<User> _matches = GetUsersBySQL(sql);
+
+            if (_matches == null || _matches.Count == 0)
+                return null;
+            else
+                return _matches[0];
         }
     }
 
@@ -92,37 +123,22 @@ namespace OasisMobile.BussinessLogicLayer
             }
         }
 
-        public static User GetUserByLoginName(int TargetLoginName)
+        public static User GetUserByLoginName(string TargetLoginName)
         {
             string _sql = "select * from User where LoginName = " + TargetLoginName;
-            List<User> _Users = GetUsersBySQL(_sql);
-
-            if (_Users == null || _Users.Count == 0)
-                return null;
-            else
-                return _Users[0];
+            return GetFirstUserBySQL(_sql);
         }
 
-        public static User GetUserByEmailAddress(int TargetEmailAddress)
+        public static User GetUserByEmailAddress(string TargetEmailAddress)
         {
             string _sql = "select * from User where EmailAddress = " + TargetEmailAddress;
-            List<User> _Users = GetUsersBySQL(_sql);
-
-            if (_Users == null || _Users.Count == 0)
-                return null;
-            else
-                return _Users[0];
+            return GetFirstUserBySQL(_sql);
         }
 
         public static User GetUserByMainSystemID(int TargetMainSystemID)
         {
             string _sql = "select * from User where MainSystemID = " + TargetMainSystemID;
-            List<User> _Users = GetUsersBySQL(_sql);
-
-            if (_Users == null || _Users.Count == 0)
-                return null;
-            else
-                return _Users[0];
+            return GetFirstUserBySQL(_sql);
         }
     }
 

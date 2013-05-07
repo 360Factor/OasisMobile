@@ -5,7 +5,7 @@ using SQLite;
 using System.Collections.Generic;
 using System.Linq;
 
-namespace OasisMobile.BussinessLogicLayer
+namespace OasisMobile.BusinessModel
 {
 
     public partial class AnswerOption
@@ -20,9 +20,22 @@ namespace OasisMobile.BussinessLogicLayer
         public Boolean IsCorrect {get; set;}
         public int MainSystemID {get; set;}
 
+    public AnswerOption() {}
+
+    public AnswerOption(int NewQuestionID, 
+                  string NewAnswerText, 
+                  Boolean NewIsCorrect, 
+                  int NewMainSystemID)
+    {
+              QuestionID = NewQuestionID;
+                 AnswerText = NewAnswerText;
+                 IsCorrect = NewIsCorrect;
+                 MainSystemID = NewMainSystemID;
+
+    }
+
     public void Delete()
     {
-
         lock(Repository.Locker) {
             Repository.Instance.Delete(this);
         }
@@ -50,7 +63,8 @@ namespace OasisMobile.BussinessLogicLayer
     public static AnswerOption GetAnswerOptionByAnswerOptionID(int AnswerOptionID)
     {
         lock(Repository.Locker) {
-            return Repository.Instance.Table<AnswerOption>().Where(x => x.AnswerOptionID == AnswerOptionID).FirstOrDefault();
+            string _sql = string.Format("select * from AnswerOption where pkAnswerOptionID = {0}", AnswerOptionID);
+            return GetFirstAnswerOptionBySQL(_sql);
         }
     }
 
@@ -68,6 +82,18 @@ namespace OasisMobile.BussinessLogicLayer
     {
         lock(Repository.Locker) {
             return Repository.Instance.Query<AnswerOption>(sql).ToList();
+        }
+    }
+
+    public static AnswerOption GetFirstAnswerOptionBySQL(string sql)
+    {
+        lock(Repository.Locker) {
+            List<AnswerOption> _matches = GetAnswerOptionsBySQL(sql);
+
+            if (_matches == null || _matches.Count == 0)
+                return null;
+            else
+                return _matches[0];
         }
     }
 
@@ -97,6 +123,12 @@ namespace OasisMobile.BussinessLogicLayer
         string _sql = "select * from AnswerOption where fkQuestionID = " + QuestionID;
         return GetAnswerOptionsBySQL(_sql);
     }
+
+        public static AnswerOption GetAnswerOptionByMainSystemID(int TargetMainSystemID)
+        {
+            string _sql = "select * from AnswerOption where MainSystemID = " + TargetMainSystemID;
+            return GetFirstAnswerOptionBySQL(_sql);
+        }
     }
 
 }

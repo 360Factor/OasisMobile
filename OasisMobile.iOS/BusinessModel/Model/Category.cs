@@ -5,7 +5,7 @@ using SQLite;
 using System.Collections.Generic;
 using System.Linq;
 
-namespace OasisMobile.BussinessLogicLayer
+namespace OasisMobile.BusinessModel
 {
 
     public partial class Category
@@ -19,6 +19,22 @@ namespace OasisMobile.BussinessLogicLayer
         public int? ParentCategoryID {get; set;}
         public string ExpandedCategoryName {get; set;}
         public int MainSystemID {get; set;}
+
+    public Category() {}
+
+    public Category(string NewCategoryName, 
+                  int NewDisplayOrder, 
+                  int? NewParentCategoryID, 
+                  string NewExpandedCategoryName, 
+                  int NewMainSystemID)
+    {
+              CategoryName = NewCategoryName;
+                 DisplayOrder = NewDisplayOrder;
+                 ParentCategoryID = NewParentCategoryID;
+                 ExpandedCategoryName = NewExpandedCategoryName;
+                 MainSystemID = NewMainSystemID;
+
+    }
 
     public void Delete()
     {
@@ -49,7 +65,8 @@ namespace OasisMobile.BussinessLogicLayer
     public static Category GetCategoryByCategoryID(int CategoryID)
     {
         lock(Repository.Locker) {
-            return Repository.Instance.Table<Category>().Where(x => x.CategoryID == CategoryID).FirstOrDefault();
+            string _sql = string.Format("select * from Category where pkCategoryID = {0}", CategoryID);
+            return GetFirstCategoryBySQL(_sql);
         }
     }
 
@@ -67,6 +84,18 @@ namespace OasisMobile.BussinessLogicLayer
     {
         lock(Repository.Locker) {
             return Repository.Instance.Query<Category>(sql).ToList();
+        }
+    }
+
+    public static Category GetFirstCategoryBySQL(string sql)
+    {
+        lock(Repository.Locker) {
+            List<Category> _matches = GetCategorysBySQL(sql);
+
+            if (_matches == null || _matches.Count == 0)
+                return null;
+            else
+                return _matches[0];
         }
     }
 
@@ -89,6 +118,12 @@ namespace OasisMobile.BussinessLogicLayer
                 Repository.Instance.InsertAll(_newCategorys);
                 Repository.Instance.UpdateAll(_existingCategorys);
             }
+        }
+
+        public static Category GetCategoryByMainSystemID(int TargetMainSystemID)
+        {
+            string _sql = "select * from Category where MainSystemID = " + TargetMainSystemID;
+            return GetFirstCategoryBySQL(_sql);
         }
     }
 

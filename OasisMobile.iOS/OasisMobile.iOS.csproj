@@ -101,7 +101,6 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="Info.plist" />
-    <None Include="BusinessModel\Model\.DS_Store" />
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Main.cs" />
@@ -124,10 +123,17 @@
     <Compile Include="Screens\AccountView.designer.cs">
       <DependentUpon>AccountView.cs</DependentUpon>
     </Compile>
+    <Compile Include="Navigation\FlyoutNavigationBaseViewController.cs" />
+    <Compile Include="AppConfig.cs" />
+    <Compile Include="Utilities\Reachability.cs" />
+    <Compile Include="Utilities\AppSession.cs" />
+    <Compile Include="Utilities\SyncManager.cs" />
+    <Compile Include="BusinessModel\Constants\Enums.cs" />
     <Compile Include="BusinessModel\Model\AnswerOption.cs" />
     <Compile Include="BusinessModel\Model\Category.cs" />
     <Compile Include="BusinessModel\Model\Exam.cs" />
     <Compile Include="BusinessModel\Model\ExamAccess.cs" />
+    <Compile Include="BusinessModel\Model\ExamType.cs" />
     <Compile Include="BusinessModel\Model\Image.cs" />
     <Compile Include="BusinessModel\Model\Question.cs" />
     <Compile Include="BusinessModel\Model\User.cs" />
@@ -138,11 +144,16 @@
     <Compile Include="BusinessModel\ORM\Repository.cs" />
     <Compile Include="BusinessModel\ORM\SQL.cs" />
     <Compile Include="BusinessModel\ORM\SQLite.cs" />
-    <Compile Include="Navigation\FlyoutNavigationBaseViewController.cs" />
-    <Compile Include="AppConfig.cs" />
-    <Compile Include="Utilities\Reachability.cs" />
-    <Compile Include="Utilities\AppSession.cs" />
-    <Compile Include="Utilities\SyncManager.cs" />
+    <Compile Include="BusinessModel\Business\UserExam.cs" />
+    <Compile Include="Screens\ExamDetailView.cs" />
+    <Compile Include="Screens\ExamDetailView.designer.cs">
+      <DependentUpon>ExamDetailView.cs</DependentUpon>
+    </Compile>
+    <Compile Include="BusinessModel\Business\ExamAccess.cs" />
+    <Compile Include="Screens\ExamQuestionList_iPhone.cs" />
+    <Compile Include="Screens\ExamQuestionList_iPhone.designer.cs">
+      <DependentUpon>ExamQuestionList_iPhone.cs</DependentUpon>
+    </Compile>
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
   <ItemGroup>
@@ -154,6 +165,9 @@
     <InterfaceDefinition Include="Screens\AboutView_iPad.xib" />
     <InterfaceDefinition Include="Screens\AccountView_iPhone.xib" />
     <InterfaceDefinition Include="Screens\AccountView_iPad.xib" />
+    <InterfaceDefinition Include="Screens\ExamDetailView_iPhone.xib" />
+    <InterfaceDefinition Include="Screens\ExamDetailView_iPad.xib" />
+    <InterfaceDefinition Include="Screens\ExamQuestionList_iPhone.xib" />
   </ItemGroup>
   <ItemGroup>
     <XamarinComponentReference Include="flyoutnavigation">

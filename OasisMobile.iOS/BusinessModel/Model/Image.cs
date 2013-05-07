@@ -5,7 +5,7 @@ using SQLite;
 using System.Collections.Generic;
 using System.Linq;
 
-namespace OasisMobile.BussinessLogicLayer
+namespace OasisMobile.BusinessModel
 {
 
     public partial class Image
@@ -22,6 +22,26 @@ namespace OasisMobile.BussinessLogicLayer
         public string FilePath {get; set;}
         public string DownloadURL {get; set;}
         public int MainSystemID {get; set;}
+
+    public Image() {}
+
+    public Image(int NewQuestionID, 
+                  string NewTitle, 
+                  Boolean NewShowInQuestion, 
+                  Boolean NewShowInCommentary, 
+                  string NewFilePath, 
+                  string NewDownloadURL, 
+                  int NewMainSystemID)
+    {
+              QuestionID = NewQuestionID;
+                 Title = NewTitle;
+                 ShowInQuestion = NewShowInQuestion;
+                 ShowInCommentary = NewShowInCommentary;
+                 FilePath = NewFilePath;
+                 DownloadURL = NewDownloadURL;
+                 MainSystemID = NewMainSystemID;
+
+    }
 
     public void Delete()
     {
@@ -52,7 +72,8 @@ namespace OasisMobile.BussinessLogicLayer
     public static Image GetImageByImageID(int ImageID)
     {
         lock(Repository.Locker) {
-            return Repository.Instance.Table<Image>().Where(x => x.ImageID == ImageID).FirstOrDefault();
+            string _sql = string.Format("select * from Image where pkImageID = {0}", ImageID);
+            return GetFirstImageBySQL(_sql);
         }
     }
 
@@ -70,6 +91,18 @@ namespace OasisMobile.BussinessLogicLayer
     {
         lock(Repository.Locker) {
             return Repository.Instance.Query<Image>(sql).ToList();
+        }
+    }
+
+    public static Image GetFirstImageBySQL(string sql)
+    {
+        lock(Repository.Locker) {
+            List<Image> _matches = GetImagesBySQL(sql);
+
+            if (_matches == null || _matches.Count == 0)
+                return null;
+            else
+                return _matches[0];
         }
     }
 
@@ -103,12 +136,7 @@ namespace OasisMobile.BussinessLogicLayer
         public static Image GetImageByMainSystemID(int TargetMainSystemID)
         {
             string _sql = "select * from Image where MainSystemID = " + TargetMainSystemID;
-            List<Image> _Images = GetImagesBySQL(_sql);
-
-            if (_Images == null || _Images.Count == 0)
-                return null;
-            else
-                return _Images[0];
+            return GetFirstImageBySQL(_sql);
         }
     }
 

@@ -5,7 +5,7 @@ using SQLite;
 using System.Collections.Generic;
 using System.Linq;
 
-namespace OasisMobile.BussinessLogicLayer
+namespace OasisMobile.BusinessModel
 {
 
     public partial class Question
@@ -24,6 +24,28 @@ namespace OasisMobile.BussinessLogicLayer
         public int ExamID {get; set;}
         public double? PopulationCorrectPct {get; set;}
         public int MainSystemID {get; set;}
+
+    public Question() {}
+
+    public Question(string NewStem, 
+                  string NewLeadIn, 
+                  string NewCommentary, 
+                  string NewReference, 
+                  int NewCategoryID, 
+                  int NewExamID, 
+                  double? NewPopulationCorrectPct, 
+                  int NewMainSystemID)
+    {
+              Stem = NewStem;
+                 LeadIn = NewLeadIn;
+                 Commentary = NewCommentary;
+                 Reference = NewReference;
+                 CategoryID = NewCategoryID;
+                 ExamID = NewExamID;
+                 PopulationCorrectPct = NewPopulationCorrectPct;
+                 MainSystemID = NewMainSystemID;
+
+    }
 
     public void Delete()
     {
@@ -54,7 +76,8 @@ namespace OasisMobile.BussinessLogicLayer
     public static Question GetQuestionByQuestionID(int QuestionID)
     {
         lock(Repository.Locker) {
-            return Repository.Instance.Table<Question>().Where(x => x.QuestionID == QuestionID).FirstOrDefault();
+            string _sql = string.Format("select * from Question where pkQuestionID = {0}", QuestionID);
+            return GetFirstQuestionBySQL(_sql);
         }
     }
 
@@ -72,6 +95,18 @@ namespace OasisMobile.BussinessLogicLayer
     {
         lock(Repository.Locker) {
             return Repository.Instance.Query<Question>(sql).ToList();
+        }
+    }
+
+    public static Question GetFirstQuestionBySQL(string sql)
+    {
+        lock(Repository.Locker) {
+            List<Question> _matches = GetQuestionsBySQL(sql);
+
+            if (_matches == null || _matches.Count == 0)
+                return null;
+            else
+                return _matches[0];
         }
     }
 
@@ -111,12 +146,7 @@ namespace OasisMobile.BussinessLogicLayer
         public static Question GetQuestionByMainSystemID(int TargetMainSystemID)
         {
             string _sql = "select * from Question where MainSystemID = " + TargetMainSystemID;
-            List<Question> _Questions = GetQuestionsBySQL(_sql);
-
-            if (_Questions == null || _Questions.Count == 0)
-                return null;
-            else
-                return _Questions[0];
+            return GetFirstQuestionBySQL(_sql);
         }
     }
 

@@ -11,6 +11,7 @@ namespace OasisMobile.iOS
 {
 	public partial class ExamListView : FlyoutNavigationBaseViewController
 	{
+
 		static bool UserInterfaceIdiomIsPhone {
 			get { return UIDevice.CurrentDevice.UserInterfaceIdiom == UIUserInterfaceIdiom.Phone; }
 		}
@@ -24,7 +25,6 @@ namespace OasisMobile.iOS
 		{
 			// Releases the view if it doesn't have a superview.
 			base.DidReceiveMemoryWarning ();
-			
 			// Release any cached data, images, etc that aren't in use.
 		}
 		
@@ -40,103 +40,127 @@ namespace OasisMobile.iOS
 		public override void ViewWillAppear (bool animated)
 		{
 			base.ViewWillAppear (animated);
-//			if(tblvExamList.Source==null){
-//				tblvExamList.Source = new ExamListTableSource();
-//			}
+			if (AppSession.LoggedInUser != null) {
+				if (tblvExamList.Source == null) {
+					tblvExamList.Source = new ExamListTableSource (this);
+				}
+			}
+
 
 		}
 
-	}
 
-	public class ExamListTableSource : UITableViewSource
-	{
-		private List<BussinessLogicLayer.Exam> m_examList;
-		private List<BussinessLogicLayer.UserExam> m_userExamList;
-		private List<BussinessLogicLayer.Exam> m_startedExamList;
-		private List<BussinessLogicLayer.Exam> m_newExamList;
-
-		public ExamListTableSource ()
+		public class ExamListTableSource : UITableViewSource
 		{
-			m_examList = BussinessLogicLayer.Exam.GetAllExams ();
-			m_userExamList = BussinessLogicLayer.UserExam.GetUserExamsByUserID (AppSession.LoggedInUser.UserID);
-		
-			List<int> _startedExamIDList = (from x in m_userExamList select x.ExamID).ToList ();
-			List<int> _newExamIDList = (from x in m_examList 
-			                            where x.IsExpired && !_startedExamIDList.Contains (x.ExamID) 
-			                            select x.ExamID).ToList(); 
-			m_startedExamList = (from x in m_examList where _startedExamIDList.Contains (x.ExamID) select x).ToList();
-			m_newExamList = (from x in m_examList where _newExamIDList.Contains(x.ExamID) select x).ToList();
-		}
-		
-		#region implemented abstract members of UITableViewSource
-		
-		public override int RowsInSection (UITableView tableview, int section)
-		{
-			
-			switch (section) {
-			case 0:
-				return m_startedExamList.Count;
-			case 1:
-				return m_newExamList.Count;
-			default:
-				return 0;
+			private class ExamListData
+			{
+				public int ExamID { get; set; }
 				
+				public string ExamName { get; set; }
+				
+				public string ExamStatus { get; set; }
+				
+				public ExamListData ()
+				{
+				}
+				
+				
+			}		
+
+			private Dictionary<string, List<ExamListData>> m_userExamTableViewData = new Dictionary<string, List<ExamListData>> ();
+
+			private UIViewController m_currentViewController=null;
+
+			public ExamListTableSource (UIViewController ParentViewController)
+			{
+				m_currentViewController = ParentViewController;
+				string _examPurchaseFilter = "";
+				if (!AppConfig.AllowExamPurchase) {
+					_examPurchaseFilter = " AND ExamAccess.HasAccess = 1";
+				}
+				
+				List<Tuple<string,string,string>> _tempExamTuple = BusinessModel.SQL.Get3Tuples (string.Format (
+					"SELECT Exam.pkExamID, Exam.ExamName, " +
+					"(CASE WHEN UserExam.pkUserExamID IS NULL THEN 'New' WHEN UserExam.IsSubmitted=1 THEN 'Completed' ELSE 'Started' END) " +
+					"FROM Exam LEFT JOIN ExamAccess " +
+					"ON Exam.pkExamID = ExamAccess.fkExamID AND ExamAccess.fkUserID={0} LEFT JOIN UserExam " +
+					"ON Exam.pkExamID = UserExam.fkExamID AND UserExam.fkUserID={0} " +
+					"WHERE (ExamAccess.pkExamAccessID IS NOT NULL {1}) OR UserExam.pkUserExamID IS NOT NULL " +
+					"ORDER BY Exam.ExamName DESC", AppSession.LoggedInUser.UserID, _examPurchaseFilter));
+				
+				List<ExamListData> _userExamList = 
+					(from x in _tempExamTuple select new ExamListData (){
+						ExamID = Convert.ToInt32 (x.Item1),
+						ExamName = x.Item2,
+						ExamStatus = x.Item3}).ToList ();
+				
+				foreach (ExamListData _examData in _userExamList) {
+					if (m_userExamTableViewData.ContainsKey (_examData.ExamStatus)) {
+						//If the dictionary already contains the key, that means there is already another item in the list with the same exam status, so we just add the examData to the list referenced with the key
+						m_userExamTableViewData [_examData.ExamStatus].Add (_examData);
+					} else {
+						//Otherwise, there is no exam that is referenced by the key, that means we add the key to dictionary and create a new list of ExamListData with the exam we are adding as the first member
+						m_userExamTableViewData.Add (_examData.ExamStatus, new List<ExamListData>{_examData});
+					}
+				}
 			}
 			
-		}
-		
-		public override UITableViewCell GetCell (UITableView tableView, NSIndexPath indexPath)
-		{
+			#region implemented abstract members of UITableViewSource
 			
-			UITableViewCell cell;
-
-			cell = tableView.DequeueReusableCell ("cell");
-			if(cell==null){
-				cell = new UITableViewCell (UITableViewCellStyle.Default, "cell");
+			public override int RowsInSection (UITableView tableview, int section)
+			{
+				return m_userExamTableViewData.ElementAt (section).Value.Count;
 			}
-
-//			switch (indexPath.Section) {
-//			case 0:
-//				cell.TextLabel.Text = m_startedExamList[indexPath.Row].ExamName;
-//			case 1:
-//				cell.TextLabel.Text = m_newExamList[indexPath.Row].ExamName;
-//			default:
-//				cell.TextLabel.Text = "";
-//			}
-			return cell;
-		}
-		
-		#endregion
-		
-		public override int NumberOfSections (UITableView tableView)
-		{
-			return 2; //2 sections for exam list page. 1 for started, 1 for new
-			// TODO: Implement - see: http://go-mono.com/docs/index.aspx?link=T%3aMonoTouch.Foundation.ModelAttribute
-		}
-
-		public override string TitleForHeader (UITableView tableView, int section)
-		{
-			// NOTE: Don't call the base implementation on a Model class
-			// see http://docs.xamarin.com/ios/tutorials/Events%2c_Protocols_and_Delegates 
-			switch (section) {
-			case 0:
-				return "Started";
-			case 1:
-				return "New";
-			default:
-				return "";
+			
+			public override UITableViewCell GetCell (UITableView tableView, NSIndexPath indexPath)
+			{
+				
+				UITableViewCell cell;
+				
+				cell = tableView.DequeueReusableCell ("cell");
+				if (cell == null) {
+					cell = new UITableViewCell (UITableViewCellStyle.Default, "cell");
+				}
+				
+				ExamListData _cellExamData = m_userExamTableViewData.ElementAt (indexPath.Section).Value [indexPath.Row];
+				
+				cell.TextLabel.Text = _cellExamData.ExamName;
+				cell.Accessory = UITableViewCellAccessory.DisclosureIndicator;
+				
+				return cell;
 			}
-		}
-		
-		public override void RowSelected (UITableView tableView, NSIndexPath indexPath)
-		{
-			// NOTE: Don't call the base implementation on a Model class
-			// see http://docs.xamarin.com/ios/tutorials/Events%2c_Protocols_and_Delegates 
+			
+			#endregion
+			
+			public override int NumberOfSections (UITableView tableView)
+			{
+				return m_userExamTableViewData.Count;
+				// TODO: Implement - see: http://go-mono.com/docs/index.aspx?link=T%3aMonoTouch.Foundation.ModelAttribute
+			}
+			
+			public override string TitleForHeader (UITableView tableView, int section)
+			{
+				// NOTE: Don't call the base implementation on a Model class
+				// see http://docs.xamarin.com/ios/tutorials/Events%2c_Protocols_and_Delegates 
+				return m_userExamTableViewData.ElementAt (section).Key;
+			}
+			
+			public override void RowSelected (UITableView tableView, NSIndexPath indexPath)
+			{
+				// NOTE: Don't call the base implementation on a Model class
+				// see http://docs.xamarin.com/ios/tutorials/Events%2c_Protocols_and_Delegates 
+
+				ExamListData _cellExamData = m_userExamTableViewData.ElementAt (indexPath.Section).Value [indexPath.Row];
+				m_currentViewController.NavigationController.PushViewController (new ExamDetailView(_cellExamData.ExamID),true);
+				tableView.DeselectRow(indexPath,false);
+			}
+			
 			
 		}
 
 
 	}
+
 
 }
 

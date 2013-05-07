@@ -21,6 +21,12 @@ namespace OasisMobile.iOS
 				return true;
 			}
 		}
+
+		public static Boolean AllowExamPurchase{
+			get{
+				return true;
+			}
+		}
 	}
 }
 

@@ -5,7 +5,7 @@ using SQLite;
 using System.Collections.Generic;
 using System.Linq;
 
-namespace OasisMobile.BussinessLogicLayer
+namespace OasisMobile.BusinessModel
 {
 
     public partial class UserQuestion
@@ -25,6 +25,30 @@ namespace OasisMobile.BussinessLogicLayer
         public int SecondsSpent {get; set;}
         public Boolean DoSync {get; set;}
         public int MainSystemID {get; set;}
+
+    public UserQuestion() {}
+
+    public UserQuestion(int NewQuestionID, 
+                  int NewUserExamID, 
+                  int NewSequence, 
+                  DateTime? NewAnsweredDateTime, 
+                  Boolean NewHasAnswered, 
+                  Boolean NewHasAnsweredCorrectly, 
+                  int NewSecondsSpent, 
+                  Boolean NewDoSync, 
+                  int NewMainSystemID)
+    {
+              QuestionID = NewQuestionID;
+                 UserExamID = NewUserExamID;
+                 Sequence = NewSequence;
+                 AnsweredDateTime = NewAnsweredDateTime;
+                 HasAnswered = NewHasAnswered;
+                 HasAnsweredCorrectly = NewHasAnsweredCorrectly;
+                 SecondsSpent = NewSecondsSpent;
+                 DoSync = NewDoSync;
+                 MainSystemID = NewMainSystemID;
+
+    }
 
     public void Delete()
     {
@@ -55,7 +79,8 @@ namespace OasisMobile.BussinessLogicLayer
     public static UserQuestion GetUserQuestionByUserQuestionID(int UserQuestionID)
     {
         lock(Repository.Locker) {
-            return Repository.Instance.Table<UserQuestion>().Where(x => x.UserQuestionID == UserQuestionID).FirstOrDefault();
+            string _sql = string.Format("select * from UserQuestion where pkUserQuestionID = {0}", UserQuestionID);
+            return GetFirstUserQuestionBySQL(_sql);
         }
     }
 
@@ -73,6 +98,18 @@ namespace OasisMobile.BussinessLogicLayer
     {
         lock(Repository.Locker) {
             return Repository.Instance.Query<UserQuestion>(sql).ToList();
+        }
+    }
+
+    public static UserQuestion GetFirstUserQuestionBySQL(string sql)
+    {
+        lock(Repository.Locker) {
+            List<UserQuestion> _matches = GetUserQuestionsBySQL(sql);
+
+            if (_matches == null || _matches.Count == 0)
+                return null;
+            else
+                return _matches[0];
         }
     }
 
@@ -100,12 +137,7 @@ namespace OasisMobile.BussinessLogicLayer
         public static UserQuestion GetUserQuestionByMainSystemID(int TargetMainSystemID)
         {
             string _sql = "select * from UserQuestion where MainSystemID = " + TargetMainSystemID;
-            List<UserQuestion> _UserQuestions = GetUserQuestionsBySQL(_sql);
-
-            if (_UserQuestions == null || _UserQuestions.Count == 0)
-                return null;
-            else
-                return _UserQuestions[0];
+            return GetFirstUserQuestionBySQL(_sql);
         }
     }
 

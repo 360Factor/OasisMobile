@@ -1,7 +1,7 @@
 
 using System;
 
-namespace OasisMobile
+namespace OasisMobile.BusinessModel
 {
 	public class ConnectionString
 	{

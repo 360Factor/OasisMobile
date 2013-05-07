@@ -5,7 +5,7 @@ using SQLite;
 using System.Collections.Generic;
 using System.Linq;
 
-namespace OasisMobile
+namespace OasisMobile.BusinessModel
 {
 
     public class Repository : SQLiteConnection
@@ -16,11 +16,23 @@ namespace OasisMobile
 
     	private static readonly Repository _instance = new Repository (ConnectionString.DBPath);
 
+		private bool _isInitialized = false;
+
     	private Repository (string DBPath) : base(DBPath)
     	{
-    	    //if (!System.IO.File.Exists(ConnectionString.DBPath))
-                CreateDatabase();
+    
     	}
+
+		public void InitializeDb(){
+			if(_isInitialized){
+				throw new Exception("The database is already initialized, the initializeDb method should not be called twice");
+			}else{
+				CreateDatabase();
+				Constant.ExamType.SeedEnumTable();
+				_isInitialized = true;
+			}
+		
+		}
 
         private void CreateDatabase()
         {
@@ -32,11 +44,18 @@ namespace OasisMobile
 			"  [ExpandedCategoryName] TEXT NOT NULL ON CONFLICT ROLLBACK,  " +
 			"  [MainSystemID] INTEGER NOT NULL ON CONFLICT ROLLBACK); " );
 
-        this.Execute("CREATE INDEX IF NOT EXISTS [IX_Category_MainSystemID] ON [Category] ([MainSystemID]); " );
+        this.Execute("CREATE UNIQUE INDEX IF NOT EXISTS [IX_Category_MainSystemID] ON [Category] ([MainSystemID]); " );
+
+        this.Execute("CREATE TABLE IF NOT EXISTS [ExamType] ( " +
+			"  [pkExamTypeID] INTEGER NOT NULL ON CONFLICT ROLLBACK PRIMARY KEY ON CONFLICT ROLLBACK AUTOINCREMENT,  " +
+			"  [ExamTypeName] TEXT NOT NULL ON CONFLICT ROLLBACK); " );
+
+        this.Execute("CREATE UNIQUE INDEX IF NOT EXISTS [IX_ExamType_ExamTypeName] ON [ExamType] ([ExamTypeName]); " );
 
         this.Execute("CREATE TABLE IF NOT EXISTS [Exam] ( " +
 			"  [pkExamID] INTEGER NOT NULL ON CONFLICT ROLLBACK PRIMARY KEY ON CONFLICT ROLLBACK AUTOINCREMENT,  " +
 			"  [ExamName] TEXT NOT NULL ON CONFLICT ROLLBACK,  " +
+			"  [fkExamTypeID] INTEGER NOT NULL ON CONFLICT ROLLBACK CONSTRAINT [FK_Exam_ExamType_ExamTypeID] REFERENCES [ExamType]([pkExamTypeID]),  " +
 			"  [IsExpired] BOOLEAN NOT NULL ON CONFLICT ROLLBACK,  " +
 			"  [Credit] INTEGER NOT NULL ON CONFLICT ROLLBACK,  " +
 			"  [Price] REAL NOT NULL ON CONFLICT ROLLBACK,  " +
@@ -45,6 +64,8 @@ namespace OasisMobile
 			"  [PrivacyPolicy] TEXT NOT NULL ON CONFLICT ROLLBACK,  " +
 			"  [Description] TEXT NOT NULL ON CONFLICT ROLLBACK,  " +
 			"  [MainSystemID] INTEGER NOT NULL ON CONFLICT ROLLBACK); " );
+
+        this.Execute("CREATE INDEX IF NOT EXISTS [IX_Exam_ExamTypeID] ON [Exam] ([fkExamTypeID]); " );
 
         this.Execute("CREATE UNIQUE INDEX IF NOT EXISTS [IX_Exam_MainSystemID] ON [Exam] ([MainSystemID]); " );
 
@@ -72,7 +93,7 @@ namespace OasisMobile
 			"  [IsCorrect] BOOLEAN NOT NULL ON CONFLICT ROLLBACK,  " +
 			"  [MainSystemID] INTEGER NOT NULL ON CONFLICT ROLLBACK); " );
 
-        this.Execute("CREATE INDEX IF NOT EXISTS [IX_AnswerOption_MainSystemID] ON [AnswerOption] ([MainSystemID]); " );
+        this.Execute("CREATE UNIQUE INDEX IF NOT EXISTS [IX_AnswerOption_MainSystemID] ON [AnswerOption] ([MainSystemID]); " );
 
         this.Execute("CREATE INDEX IF NOT EXISTS [IX_AnswerOption_QuestionID] ON [AnswerOption] ([fkQuestionID]); " );
 
@@ -127,11 +148,11 @@ namespace OasisMobile
 			"  [DoSync] BOOLEAN NOT NULL ON CONFLICT ROLLBACK,  " +
 			"  [MainSystemID] INTEGER NOT NULL ON CONFLICT ROLLBACK); " );
 
-        this.Execute("CREATE INDEX IF NOT EXISTS [IX_UserQuestion_UserExamID] ON [UserQuestion] ([fkQuestionID]); " );
+        this.Execute("CREATE UNIQUE INDEX IF NOT EXISTS [IX_UserQuestion_MainSystemID] ON [UserQuestion] ([MainSystemID]); " );
 
         this.Execute("CREATE INDEX IF NOT EXISTS [IX_UserQuestion_QuestionID] ON [UserQuestion] ([fkQuestionID]); " );
 
-        this.Execute("CREATE UNIQUE INDEX IF NOT EXISTS [IX_UserQuestion_MainSystemID] ON [UserQuestion] ([MainSystemID]); " );
+        this.Execute("CREATE INDEX IF NOT EXISTS [IX_UserQuestion_UserExamID] ON [UserQuestion] ([fkUserExamID]); " );
 
         this.Execute("CREATE TABLE IF NOT EXISTS [UserAnswerOption] ( " +
 			"  [pkUserAnswerOptionID] INTEGER NOT NULL ON CONFLICT ROLLBACK PRIMARY KEY ON CONFLICT ROLLBACK AUTOINCREMENT,  " +
@@ -165,7 +186,7 @@ namespace OasisMobile
 
         this.Execute("CREATE UNIQUE INDEX IF NOT EXISTS [IX_UserExam_MainSystemID] ON [UserExam] ([MainSystemID]); " );
 
-        this.Execute("CREATE UNIQUE INDEX IF NOT EXISTS [IX_UserExam_UserID] ON [UserExam] ([fkUserID]); " );
+        this.Execute("CREATE INDEX IF NOT EXISTS [IX_UserExam_UserID] ON [UserExam] ([fkUserID]); " );
 
         }
     }

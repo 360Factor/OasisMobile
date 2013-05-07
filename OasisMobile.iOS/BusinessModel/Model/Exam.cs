@@ -5,7 +5,7 @@ using SQLite;
 using System.Collections.Generic;
 using System.Linq;
 
-namespace OasisMobile.BussinessLogicLayer
+namespace OasisMobile.BusinessModel
 {
 
     public partial class Exam
@@ -15,6 +15,8 @@ namespace OasisMobile.BussinessLogicLayer
         [Ignore]
         public bool IsNew {get {return ExamID == 0;}}
         public string ExamName {get; set;}
+        [Column("fkExamTypeID")]
+        public int ExamTypeID {get; set;}
         public Boolean IsExpired {get; set;}
         public int Credit {get; set;}
         public double Price {get; set;}
@@ -23,6 +25,32 @@ namespace OasisMobile.BussinessLogicLayer
         public string PrivacyPolicy {get; set;}
         public string Description {get; set;}
         public int MainSystemID {get; set;}
+
+    public Exam() {}
+
+    public Exam(string NewExamName, 
+                  int NewExamTypeID, 
+                  Boolean NewIsExpired, 
+                  int NewCredit, 
+                  double NewPrice, 
+                  double NewMinimumPassingScore, 
+                  string NewDisclosure, 
+                  string NewPrivacyPolicy, 
+                  string NewDescription, 
+                  int NewMainSystemID)
+    {
+              ExamName = NewExamName;
+                 ExamTypeID = NewExamTypeID;
+                 IsExpired = NewIsExpired;
+                 Credit = NewCredit;
+                 Price = NewPrice;
+                 MinimumPassingScore = NewMinimumPassingScore;
+                 Disclosure = NewDisclosure;
+                 PrivacyPolicy = NewPrivacyPolicy;
+                 Description = NewDescription;
+                 MainSystemID = NewMainSystemID;
+
+    }
 
     public void Delete()
     {
@@ -53,7 +81,8 @@ namespace OasisMobile.BussinessLogicLayer
     public static Exam GetExamByExamID(int ExamID)
     {
         lock(Repository.Locker) {
-            return Repository.Instance.Table<Exam>().Where(x => x.ExamID == ExamID).FirstOrDefault();
+            string _sql = string.Format("select * from Exam where pkExamID = {0}", ExamID);
+            return GetFirstExamBySQL(_sql);
         }
     }
 
@@ -71,6 +100,18 @@ namespace OasisMobile.BussinessLogicLayer
     {
         lock(Repository.Locker) {
             return Repository.Instance.Query<Exam>(sql).ToList();
+        }
+    }
+
+    public static Exam GetFirstExamBySQL(string sql)
+    {
+        lock(Repository.Locker) {
+            List<Exam> _matches = GetExamsBySQL(sql);
+
+            if (_matches == null || _matches.Count == 0)
+                return null;
+            else
+                return _matches[0];
         }
     }
 
@@ -95,26 +136,22 @@ namespace OasisMobile.BussinessLogicLayer
             }
         }
 
-        public static Exam GetExamByExamName(int TargetExamName)
+    public static List<Exam> GetExamsByExamTypeID(int ExamTypeID)
+    {
+        string _sql = "select * from Exam where fkExamTypeID = " + ExamTypeID;
+        return GetExamsBySQL(_sql);
+    }
+
+        public static Exam GetExamByExamName(string TargetExamName)
         {
             string _sql = "select * from Exam where ExamName = " + TargetExamName;
-            List<Exam> _Exams = GetExamsBySQL(_sql);
-
-            if (_Exams == null || _Exams.Count == 0)
-                return null;
-            else
-                return _Exams[0];
+            return GetFirstExamBySQL(_sql);
         }
 
         public static Exam GetExamByMainSystemID(int TargetMainSystemID)
         {
             string _sql = "select * from Exam where MainSystemID = " + TargetMainSystemID;
-            List<Exam> _Exams = GetExamsBySQL(_sql);
-
-            if (_Exams == null || _Exams.Count == 0)
-                return null;
-            else
-                return _Exams[0];
+            return GetFirstExamBySQL(_sql);
         }
     }
 

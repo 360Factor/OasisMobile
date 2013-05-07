@@ -30,8 +30,8 @@ namespace OasisMobile.iOS
 		{
 			window = new UIWindow (UIScreen.MainScreen.Bounds);
 
-			ConnectionString.SetDBPath (GetDatabaseFilePath());
-
+		 	BusinessModel.ConnectionString.SetDBPath (GetDatabaseFilePath());
+			BusinessModel.Repository.Instance.InitializeDb();
 
 			m_flyoutMenuController = new OasisFlyoutController();
 			window.RootViewController = m_flyoutMenuController;

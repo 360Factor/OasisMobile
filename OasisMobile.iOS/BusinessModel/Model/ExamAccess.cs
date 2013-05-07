@@ -5,7 +5,7 @@ using SQLite;
 using System.Collections.Generic;
 using System.Linq;
 
-namespace OasisMobile.BussinessLogicLayer
+namespace OasisMobile.BusinessModel
 {
 
     public partial class ExamAccess
@@ -19,6 +19,18 @@ namespace OasisMobile.BussinessLogicLayer
         [Column("fkExamID")]
         public int ExamID {get; set;}
         public Boolean HasAccess {get; set;}
+
+    public ExamAccess() {}
+
+    public ExamAccess(int NewUserID, 
+                  int NewExamID, 
+                  Boolean NewHasAccess)
+    {
+              UserID = NewUserID;
+                 ExamID = NewExamID;
+                 HasAccess = NewHasAccess;
+
+    }
 
     public void Delete()
     {
@@ -49,7 +61,8 @@ namespace OasisMobile.BussinessLogicLayer
     public static ExamAccess GetExamAccessByExamAccessID(int ExamAccessID)
     {
         lock(Repository.Locker) {
-            return Repository.Instance.Table<ExamAccess>().Where(x => x.ExamAccessID == ExamAccessID).FirstOrDefault();
+            string _sql = string.Format("select * from ExamAccess where pkExamAccessID = {0}", ExamAccessID);
+            return GetFirstExamAccessBySQL(_sql);
         }
     }
 
@@ -67,6 +80,18 @@ namespace OasisMobile.BussinessLogicLayer
     {
         lock(Repository.Locker) {
             return Repository.Instance.Query<ExamAccess>(sql).ToList();
+        }
+    }
+
+    public static ExamAccess GetFirstExamAccessBySQL(string sql)
+    {
+        lock(Repository.Locker) {
+            List<ExamAccess> _matches = GetExamAccesssBySQL(sql);
+
+            if (_matches == null || _matches.Count == 0)
+                return null;
+            else
+                return _matches[0];
         }
     }
 
