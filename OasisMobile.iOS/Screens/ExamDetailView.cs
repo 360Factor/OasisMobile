@@ -287,26 +287,38 @@ namespace OasisMobile.iOS
 			private void btnStartContinueExam_Clicked (object sender, EventArgs e)
 			{
 				if (AppSession.SelectedUserExam != null && AppSession.SelectedUserExam.IsDownloaded) {
-
+					//Navigate straight to the exam
+					m_currentViewController.NavigationController.PushViewController (new ExamQuestionList_iPhone (), true);
 				} else {
 					bool _isDownloadSuccessful = false;
 					BTProgressHUD.Show ("Downloading Exam");
 					Task.Factory.StartNew (() => {
 						if (AppSession.SelectedUserExam == null) {
-							//TODO: generate and download user exam 
+							//Direct the user to a specific page to select their exam types
+							
+							
+							
 						}
-						
-						if (DownloadExamBaseData (AppSession.SelectedExam) && 
-							DownloadExamImageFiles (AppSession.SelectedExam) && 
-							DownloadUserExamCompleteData (AppSession.LoggedInUser, AppSession.SelectedExam)) {
-							//Update the user exam to session just in case the user exam gets updated in download
-							AppSession.SelectedUserExam = BusinessModel.UserExam.GetFirstUserExamByUserIDAndExamID (
-															AppSession.LoggedInUser.UserID,
-															AppSession.SelectedExam.ExamID);
-							_isDownloadSuccessful = true;
-						} else {
-							_isDownloadSuccessful = false;
+						try{
+							if (DownloadExamBaseData (AppSession.SelectedExam) && 
+							    DownloadExamImageFiles (AppSession.SelectedExam) && 
+							    DownloadUserExamCompleteData (AppSession.LoggedInUser, AppSession.SelectedExam)) {
+								//Update the user exam to session just in case the user exam gets updated in download
+								AppSession.SelectedUserExam = BusinessModel.UserExam.GetFirstUserExamByUserIDAndExamID (
+									AppSession.LoggedInUser.UserID,
+									AppSession.SelectedExam.ExamID);
+
+								AppSession.SelectedUserExam.IsDownloaded = true;
+								AppSession.SelectedUserExam.Save ();
+								_isDownloadSuccessful = true;
+							} else {
+								_isDownloadSuccessful = false;
+							}
 						}
+						catch(Exception ex){
+							Console.WriteLine (ex.ToString());
+						}
+
 					}).ContinueWith (task1 => {
 						BTProgressHUD.Dismiss ();
 						if (_isDownloadSuccessful) {
@@ -316,9 +328,8 @@ namespace OasisMobile.iOS
 							_alert.Show ();
 						}
 					}, TaskScheduler.FromCurrentSynchronizationContext ());
-
-				
 				}
+
 			}
 
 			private bool DownloadExamBaseData (BusinessModel.Exam aExam)
@@ -406,7 +417,7 @@ namespace OasisMobile.iOS
 					//-----------------------------------------
 					List<BusinessModel.AnswerOption> _localAnswerOptionList = 
 						BusinessModel.AnswerOption.GetAnswerOptionsBySQL (string.Format (
-							"SELECT * FROM AnswerOption INNER JOIN Question " +
+						"SELECT AnswerOption.* FROM AnswerOption INNER JOIN Question " +
 						"ON AnswerOption.fkQuestionID = Question.pkQuestionID " +
 						"WHERE Question.fkExamID={0}", aExam.ExamID));
 					
@@ -450,6 +461,8 @@ namespace OasisMobile.iOS
 						if (_matchingLocalImage == null) {
 							_matchingLocalImage = new BusinessModel.Image ();
 							_matchingLocalImage.MainSystemID = _remoteImage ["ImageID"];
+							_matchingLocalImage.DownloadURL = "";
+							_matchingLocalImage.FilePath = "";
 							_localImageList.Add (_matchingLocalImage);
 						}
 						_matchingLocalImage.QuestionID = _mainSystemIDToQuestionIDMap [_remoteImage ["QuestionID"]];
@@ -514,10 +527,15 @@ namespace OasisMobile.iOS
 							string documentsPath = Environment.GetFolderPath (Environment.SpecialFolder.Personal); // Documents folder
 							string libraryPath = Path.Combine (documentsPath, "..", "Library"); // Library folder instead
 							//local save path in form of library/ExamImages/{RelativeSavePathOnServer with "/" replaced by "_"}
-							string _localSavePath = Path.Combine (libraryPath, "ExamImages", Regex.Replace (_remoteRelativeFilePath, "[/\\]", "_"));
+							string _localSavePath = Path.Combine (libraryPath, "ExamImages", Regex.Replace (_remoteRelativeFilePath, "[/\\\\]+", "_"));
+							string _localSaveDirectory = Path.GetDirectoryName(_localSavePath);
 							if (!File.Exists (_localSavePath)) {
+
 								//Only download if the file has not existed
 								try {
+									if(!Directory.Exists (_localSaveDirectory)){
+										Directory.CreateDirectory (_localSaveDirectory);
+									}
 									_service.DownloadFile (_downloadURL, _localSavePath);
 								} catch (Exception ex) {
 									Console.WriteLine ("Error on downloading image id " + _localImage.ImageID);
@@ -563,16 +581,16 @@ namespace OasisMobile.iOS
 					BusinessModel.UserExam _localUserExam = 
 						BusinessModel.UserExam.GetFirstUserExamByUserIDAndExamID (aUser.UserID, aExam.ExamID);
 					JsonValue _remoteUserExam = _userExamCompleteDataObj ["UserExam"];
-					if (_localUserExam != null && _localUserExam.MainSystemID != _remoteUserExam ["UserExamID"]) {
+					if (_localUserExam != null && _localUserExam.MainSystemID != _remoteUserExam ["UserExamMapID"]) {
 						//If the userexam is a different user exam than the one downloaded, 
 						//the user may have resetted the exam on the web before resynching.
 						//Because of this, we will delete the exam
 						_localUserExam.CascadeDelete ();
 						_localUserExam = new BusinessModel.UserExam ();
-						_localUserExam.MainSystemID = _remoteUserExam ["UserExamID"];
+						_localUserExam.MainSystemID = _remoteUserExam ["UserExamMapID"];
 					} else if (_localUserExam == null) {
 						_localUserExam = new BusinessModel.UserExam ();
-						_localUserExam.MainSystemID = _remoteUserExam ["UserExamID"];
+						_localUserExam.MainSystemID = _remoteUserExam ["UserExamMapID"];
 					}
 
 					_localUserExam.ExamID = aExam.ExamID;
@@ -591,7 +609,7 @@ namespace OasisMobile.iOS
 					//-------------------------
 					List<BusinessModel.UserQuestion> _localUserQuestionList = 
 						BusinessModel.UserQuestion.GetUserQuestionsBySQL (
-							"SELECT * UserQuestion WHERE fkUserExamID=" + _localUserExam.UserExamID);
+							"SELECT * FROM UserQuestion WHERE fkUserExamID=" + _localUserExam.UserExamID);
 					if (_localUserQuestionList == null) {
 						_localUserQuestionList = new List<BusinessModel.UserQuestion> ();
 					}
@@ -615,7 +633,13 @@ namespace OasisMobile.iOS
 						_matchingLocalQuestion.QuestionID = _mainSystemToQuestionIDMap [_remoteUserQuestion ["QuestionID"]];
 						_matchingLocalQuestion.UserExamID = _localUserExam.UserExamID;
 						_matchingLocalQuestion.Sequence = _remoteUserQuestion ["Sequence"];
-						_matchingLocalQuestion.AnsweredDateTime = _remoteUserQuestion ["AnsweredDateTime"];
+						if(_remoteUserQuestion ["AnwseredDateTime"] != null && 
+						   _remoteUserQuestion ["AnwseredDateTime"].ToString() !="" && 
+						   _remoteUserQuestion ["AnwseredDateTime"].ToString() !="\"\""){
+							_matchingLocalQuestion.AnsweredDateTime = DateTime.Parse(_remoteUserQuestion ["AnwseredDateTime"]);
+						}else{
+							_matchingLocalQuestion.AnsweredDateTime = null;
+						}
 						_matchingLocalQuestion.HasAnswered = _remoteUserQuestion ["HasAnswered"];
 						_matchingLocalQuestion.HasAnsweredCorrectly = _remoteUserQuestion ["HasAnsweredCorrectly"];
 						_matchingLocalQuestion.SecondsSpent = _remoteUserQuestion ["SecondsSpent"];
@@ -634,14 +658,14 @@ namespace OasisMobile.iOS
 					Dictionary<int,int> _mainSystemToAnswerOptionIDMap = 
 						BusinessModel.SQL.ExecuteIntIntDictionary (string.Format (
 							"SELECT AnswerOption.MainSystemID, pkAnswerOptionID FROM AnswerOption INNER JOIN Question " +
-						"ON AnswerOption.fkQuestionID = Question.pkQuestionID " +
-						"WHERE Question.fkExamID={0}", aExam.ExamID));
+							"ON AnswerOption.fkQuestionID = Question.pkQuestionID " +
+							"WHERE Question.fkExamID={0}", aExam.ExamID));
 
 					List<BusinessModel.UserAnswerOption> _localUserAnswerOptionList = 
 						BusinessModel.UserAnswerOption.GetUserAnswerOptionsBySQL (string.Format (
 							"SELECT UserAnswerOption.* FROM UserAnswerOption INNER JOIN UserQuestion " +
-						"ON UserAnswerOption.fkUserQuestionID = UserQuestion.pkUserQuestionID " +
-						"WHERE UserQuestion.fkUserExamID={0}", _localUserExam.UserExamID));
+							"ON UserAnswerOption.fkUserQuestionID = UserQuestion.pkUserQuestionID " +
+							"WHERE UserQuestion.fkUserExamID={0}", _localUserExam.UserExamID));
 					if (_localUserAnswerOptionList == null) {
 						_localUserAnswerOptionList = new List<BusinessModel.UserAnswerOption> ();
 					}
@@ -653,7 +677,7 @@ namespace OasisMobile.iOS
 							 where x.MainSystemID == _remoteUserAnswerOption ["UserAnswerOptionID"] select x).FirstOrDefault ();
 						if (_matchingLocalUserAnswerOption == null) {
 							_matchingLocalUserAnswerOption = new BusinessModel.UserAnswerOption ();
-							_matchingLocalUserAnswerOption.MainSystemID = _remoteUserAnswerOption ["AnswerOptionID"];
+							_matchingLocalUserAnswerOption.MainSystemID = _remoteUserAnswerOption ["UserAnswerOptionID"];
 							_localUserAnswerOptionList.Add (_matchingLocalUserAnswerOption);
 						}
 						_matchingLocalUserAnswerOption.UserQuestionID = 
@@ -661,7 +685,7 @@ namespace OasisMobile.iOS
 						_matchingLocalUserAnswerOption.AnswerOptionID = 
 							_mainSystemToAnswerOptionIDMap [_remoteUserAnswerOption ["AnswerOptionID"]];
 						_matchingLocalUserAnswerOption.Sequence = _remoteUserAnswerOption ["Sequence"];
-						_matchingLocalUserAnswerOption.IsSelected = _remoteUserAnswerOption ["IsSelected"];
+						_matchingLocalUserAnswerOption.IsSelected = _remoteUserAnswerOption ["IsUserSelection"];
 					}
 					BusinessModel.UserAnswerOption.SaveAll (_localUserAnswerOptionList);
 
@@ -685,7 +709,7 @@ namespace OasisMobile.iOS
 				}
 
 				//We dont have any categories yet, we will download the categories now.
-				string _serviceTargetURL = AppConfig.BaseWebserviceURL + "GetCategories";
+				string _serviceTargetURL = AppConfig.BaseWebserviceURL + "Categorys";
 				string _responseString = "";
 				try {
 					WebClient _service = new WebClient ();
@@ -734,7 +758,15 @@ namespace OasisMobile.iOS
 					//Also use this loop to generate the mainsystem to local id category map
 					foreach (JsonValue _remoteCategory in _remoteCategoryList) {
 						BusinessModel.Category _matchingLocalCategory = _mainSystemIDToCategoryObjMap [_remoteCategory ["CategoryID"]];
-						_matchingLocalCategory.ParentCategoryID = _mainSystemIDToCategoryObjMap [_remoteCategory ["ParentID"]].CategoryID;
+
+						if(_remoteCategory ["ParentID"] != null && 
+						   _remoteCategory ["ParentID"].ToString() !="" && 
+						   _remoteCategory ["ParentID"].ToString() !="\"\""){
+							_matchingLocalCategory.ParentCategoryID = _mainSystemIDToCategoryObjMap [_remoteCategory ["ParentID"]].CategoryID;
+						}
+						else{
+							_matchingLocalCategory.ParentCategoryID = null;
+						}
 						_mainSystemIDToLocalIDCategoryMap.Add (_matchingLocalCategory.MainSystemID, _matchingLocalCategory.CategoryID);
 					}
 					BusinessModel.Category.SaveAll (_localCategoryList);

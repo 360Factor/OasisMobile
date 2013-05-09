@@ -29,20 +29,21 @@ namespace OasisMobile.iOS
 			
 			// Perform any additional setup after loading the view, typically from a nib.
 			this.Title = "Questions";
+			tblvExamQuestionList.Source = new ExamQuestionsTableSource (this);
 		}
 
 		public class ExamQuestionsTableSource : UITableViewSource
 		{
 			private List<BusinessModel.UserQuestion> m_examQuestionListTableData;
-
-			private UIViewController m_currentViewController=null;
+			private UIViewController m_currentViewController = null;
 			
 			public ExamQuestionsTableSource (UIViewController ParentViewController)
 			{
 				m_currentViewController = ParentViewController;
-				m_examQuestionListTableData = BusinessModel.UserQuestion.GetUserQuestionsBySQL(string.Format (
+				m_examQuestionListTableData = BusinessModel.UserQuestion.GetUserQuestionsBySQL (string.Format (
 					"SELECT * FROM UserQuestion " +
 					"WHERE fkUserExamID={0} ORDER BY Sequence", AppSession.SelectedUserExam.UserExamID));
+
 			}
 			
 			#region implemented abstract members of UITableViewSource
@@ -62,11 +63,31 @@ namespace OasisMobile.iOS
 					cell = new UITableViewCell (UITableViewCellStyle.Default, "cell");
 				}
 				
-				BusinessModel.UserQuestion _userQuestion = m_examQuestionListTableData[indexPath.Row];
+				BusinessModel.UserQuestion _userQuestion = m_examQuestionListTableData [indexPath.Row];
 				
 				cell.TextLabel.Text = "Question " + _userQuestion.Sequence;
 				cell.Accessory = UITableViewCellAccessory.DisclosureIndicator;
-				
+				cell.ImageView.Frame.Height=12;
+				cell.ImageView.Bounds.Height=12;
+				if (_userQuestion.HasAnswered) {
+					if (AppSession.SelectedUserExam.IsSubmitted || AppSession.SelectedUserExam.IsLearningMode) {
+						//If exam is submitted or the exam is in learning mode, we show whether the answer is correct or not
+						if (_userQuestion.HasAnsweredCorrectly) {
+							cell.ImageView.Image = UIImage.FromBundle("Images/Icon-Yes.png");
+							cell.ImageView.ContentMode = UIViewContentMode.ScaleAspectFit;
+						} else {
+							cell.ImageView.Image = UIImage.FromBundle("Images/Icon-No.png");
+						}
+					} else {
+						//Otherwise, we just show the fact that the question has been answered (by removing the not answered mark)
+						cell.ImageView.Image = UIImage.FromBundle("Images/blank.gif");
+					
+					}
+				}
+				else{
+					cell.ImageView.Image = UIImage.FromBundle ("Images/Icon-QuestionMark.png");
+				}
+
 				return cell;
 			}
 			
@@ -77,14 +98,13 @@ namespace OasisMobile.iOS
 				return 1;
 				// TODO: Implement - see: http://go-mono.com/docs/index.aspx?link=T%3aMonoTouch.Foundation.ModelAttribute
 			}
-
 			
 			public override void RowSelected (UITableView tableView, NSIndexPath indexPath)
 			{
 				// NOTE: Don't call the base implementation on a Model class
 				// see http://docs.xamarin.com/ios/tutorials/Events%2c_Protocols_and_Delegates 
 
-				tableView.DeselectRow(indexPath,false);
+				tableView.DeselectRow (indexPath, false);
 			}
 			
 			
