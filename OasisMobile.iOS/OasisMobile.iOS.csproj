@@ -163,6 +163,11 @@
     <Compile Include="Screens\GenerateNewExamView.designer.cs">
       <DependentUpon>GenerateNewExamView.cs</DependentUpon>
     </Compile>
+    <Compile Include="Screens\Question_iPhone.cs" />
+    <Compile Include="Screens\Question_iPhone.designer.cs">
+      <DependentUpon>Question_iPhone.cs</DependentUpon>
+    </Compile>
+    <Compile Include="BusinessModel\Business\AnswerOptionDetail.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
   <ItemGroup>
@@ -179,6 +184,7 @@
     <InterfaceDefinition Include="Screens\ExamQuestionList_iPhone.xib" />
     <InterfaceDefinition Include="Screens\GenerateNewExamView_iPhone.xib" />
     <InterfaceDefinition Include="Screens\GenerateNewExamView_iPad.xib" />
+    <InterfaceDefinition Include="Screens\Question_iPhone.xib" />
   </ItemGroup>
   <ItemGroup>
     <XamarinComponentReference Include="flyoutnavigation">
@@ -209,5 +215,6 @@
     <BundleResource Include="Images\Icon-No.png" />
     <BundleResource Include="Images\Icon-Yes.png" />
     <BundleResource Include="Images\Icon-QuestionMark.png" />
+    <BundleResource Include="Images\transparent.png" />
   </ItemGroup>
 </Project>

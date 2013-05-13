@@ -29,20 +29,39 @@ namespace OasisMobile.iOS
 			
 			// Perform any additional setup after loading the view, typically from a nib.
 			this.Title = "Questions";
+			AppSession.SelectedExamUserQuestionList = BusinessModel.UserQuestion.GetUserQuestionsBySQL (string.Format (
+				"SELECT * FROM UserQuestion " +
+				"WHERE fkUserExamID={0} ORDER BY Sequence", AppSession.SelectedUserExam.UserExamID));
 			tblvExamQuestionList.Source = new ExamQuestionsTableSource (this);
+			UIViewController[] _originalNavigationStack = 	NavigationController.ViewControllers;
+			List<UIViewController> _updatedNavigationStack = new List<UIViewController>();
+
+			foreach(UIViewController _viewController in _originalNavigationStack){
+				//Eliminate the 
+				if(_viewController.GetType () != typeof(GenerateNewExamView)){
+					_updatedNavigationStack.Add (_viewController);
+				}
+			}
+			NavigationController.ViewControllers = _updatedNavigationStack.ToArray();
+
+		}
+		public override void ViewWillAppear (bool animated)
+		{
+			base.ViewWillAppear (animated);
+			if(tblvExamQuestionList.Source !=null){
+				tblvExamQuestionList.Source = new ExamQuestionsTableSource (this);
+				tblvExamQuestionList.ReloadData ();
+			}
+
 		}
 
 		public class ExamQuestionsTableSource : UITableViewSource
 		{
-			private List<BusinessModel.UserQuestion> m_examQuestionListTableData;
 			private UIViewController m_currentViewController = null;
 			
 			public ExamQuestionsTableSource (UIViewController ParentViewController)
 			{
 				m_currentViewController = ParentViewController;
-				m_examQuestionListTableData = BusinessModel.UserQuestion.GetUserQuestionsBySQL (string.Format (
-					"SELECT * FROM UserQuestion " +
-					"WHERE fkUserExamID={0} ORDER BY Sequence", AppSession.SelectedUserExam.UserExamID));
 
 			}
 			
@@ -50,7 +69,7 @@ namespace OasisMobile.iOS
 			
 			public override int RowsInSection (UITableView tableview, int section)
 			{
-				return m_examQuestionListTableData.Count;
+				return AppSession.SelectedExamUserQuestionList.Count;
 			}
 			
 			public override UITableViewCell GetCell (UITableView tableView, NSIndexPath indexPath)
@@ -63,12 +82,10 @@ namespace OasisMobile.iOS
 					cell = new UITableViewCell (UITableViewCellStyle.Default, "cell");
 				}
 				
-				BusinessModel.UserQuestion _userQuestion = m_examQuestionListTableData [indexPath.Row];
+				BusinessModel.UserQuestion _userQuestion = AppSession.SelectedExamUserQuestionList [indexPath.Row];
 				
 				cell.TextLabel.Text = "Question " + _userQuestion.Sequence;
 				cell.Accessory = UITableViewCellAccessory.DisclosureIndicator;
-				cell.ImageView.Frame.Height=12;
-				cell.ImageView.Bounds.Height=12;
 				if (_userQuestion.HasAnswered) {
 					if (AppSession.SelectedUserExam.IsSubmitted || AppSession.SelectedUserExam.IsLearningMode) {
 						//If exam is submitted or the exam is in learning mode, we show whether the answer is correct or not
@@ -77,15 +94,17 @@ namespace OasisMobile.iOS
 							cell.ImageView.ContentMode = UIViewContentMode.ScaleAspectFit;
 						} else {
 							cell.ImageView.Image = UIImage.FromBundle("Images/Icon-No.png");
+							cell.ImageView.ContentMode = UIViewContentMode.ScaleAspectFit;
 						}
 					} else {
 						//Otherwise, we just show the fact that the question has been answered (by removing the not answered mark)
-						cell.ImageView.Image = UIImage.FromBundle("Images/blank.gif");
-					
+						cell.ImageView.Image = UIImage.FromBundle("Images/transparent.png").Scale (new SizeF(32,32));
+						cell.ImageView.ContentMode = UIViewContentMode.ScaleAspectFit;
 					}
 				}
 				else{
 					cell.ImageView.Image = UIImage.FromBundle ("Images/Icon-QuestionMark.png");
+					cell.ImageView.ContentMode = UIViewContentMode.ScaleAspectFit;
 				}
 
 				return cell;
@@ -104,6 +123,8 @@ namespace OasisMobile.iOS
 				// NOTE: Don't call the base implementation on a Model class
 				// see http://docs.xamarin.com/ios/tutorials/Events%2c_Protocols_and_Delegates 
 
+				UIViewController _questionView = new Question_iPhone( AppSession.SelectedExamUserQuestionList[indexPath.Row]);
+				m_currentViewController.NavigationController.PushViewController (_questionView,true);
 				tableView.DeselectRow (indexPath, false);
 			}
 			

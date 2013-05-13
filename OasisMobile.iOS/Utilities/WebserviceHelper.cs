@@ -20,7 +20,7 @@ namespace OasisMobile.iOS
 			}
 		}
 
-		public static string GenerateUserExam (bool aIsLearningMode, int aExamID, int aUserID)
+		public static string GenerateUserExam (bool aIsLearningMode, int aRemoteExamID, int aRemoteUserID)
 		{
 			WebClient _service = new WebClient ();
 			string _postURL;
@@ -32,11 +32,10 @@ namespace OasisMobile.iOS
 			_service.Headers.Add (HttpRequestHeader.Accept, "application/json"); 
 			_service.Headers.Add (HttpRequestHeader.ContentType, "application/json"); 
 
-			GenerateUserExamRequestData _postObj = new GenerateUserExamRequestData (){ExamID = aExamID, UserID = aUserID};
+			GenerateUserExamRequestData _postObj = new GenerateUserExamRequestData (){ExamID = aRemoteExamID, UserID = aRemoteUserID};
 
 			string _postJSONString = JsonConvert.SerializeObject (_postObj);
 			string _response = _service.UploadString (_postURL, _postJSONString);
-
 			return _response ;
 
 		}

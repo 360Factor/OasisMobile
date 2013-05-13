@@ -8,17 +8,17 @@ using MonoTouch.Foundation;
 
 namespace OasisMobile.iOS
 {
-	[Register ("GenerateNewExamView")]
-	partial class GenerateNewExamView
+	[Register ("Question_iPhone")]
+	partial class Question_iPhone
 	{
 		[Outlet]
-		MonoTouch.UIKit.UITableView tblvGenerateExam { get; set; }
+		MonoTouch.UIKit.UITableView tblvQuestion { get; set; }
 		
 		void ReleaseDesignerOutlets ()
 		{
-			if (tblvGenerateExam != null) {
-				tblvGenerateExam.Dispose ();
-				tblvGenerateExam = null;
+			if (tblvQuestion != null) {
+				tblvQuestion.Dispose ();
+				tblvQuestion = null;
 			}
 		}
 	}

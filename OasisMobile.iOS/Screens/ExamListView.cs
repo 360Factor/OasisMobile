@@ -43,10 +43,14 @@ namespace OasisMobile.iOS
 			if (AppSession.LoggedInUser != null) {
 				if (tblvExamList.Source == null) {
 					tblvExamList.Source = new ExamListTableSource (this);
+				}else{
+					tblvExamList.Source = new ExamListTableSource (this);
+					tblvExamList.ReloadData ();
 				}
+				AppSession.SelectedExam = null;
+				AppSession.SelectedUserExam = null;
+
 			}
-
-
 		}
 
 
@@ -154,6 +158,7 @@ namespace OasisMobile.iOS
 				m_currentViewController.NavigationController.PushViewController (new ExamDetailView(_cellExamData.ExamID),true);
 				tableView.DeselectRow(indexPath,false);
 			}
+
 			
 			
 		}

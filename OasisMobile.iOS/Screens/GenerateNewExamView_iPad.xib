@@ -12,8 +12,6 @@
 		</object>
 		<array key="IBDocument.IntegratedClassDependencies">
 			<string>IBProxyObject</string>
-			<string>IBUINavigationBar</string>
-			<string>IBUINavigationItem</string>
 			<string>IBUITableView</string>
 			<string>IBUIView</string>
 		</array>
@@ -40,7 +38,7 @@
 					<object class="IBUITableView" id="510631774">
 						<reference key="NSNextResponder" ref="766721923"/>
 						<int key="NSvFlags">274</int>
-						<string key="NSFrame">{{0, 44}, {768, 960}}</string>
+						<string key="NSFrameSize">{768, 1004}</string>
 						<reference key="NSSuperview" ref="766721923"/>
 						<reference key="NSWindow"/>
 						<string key="NSReuseIdentifierKey">_NS:9</string>
@@ -59,22 +57,6 @@
 						<float key="IBUIRowHeight">44</float>
 						<float key="IBUISectionHeaderHeight">10</float>
 						<float key="IBUISectionFooterHeight">10</float>
-					</object>
-					<object class="IBUINavigationBar" id="735706715">
-						<reference key="NSNextResponder" ref="766721923"/>
-						<int key="NSvFlags">290</int>
-						<string key="NSFrameSize">{768, 44}</string>
-						<reference key="NSSuperview" ref="766721923"/>
-						<reference key="NSWindow"/>
-						<string key="NSReuseIdentifierKey">_NS:9</string>
-						<string key="targetRuntimeIdentifier">IBIPadFramework</string>
-						<array key="IBUIItems">
-							<object class="IBUINavigationItem" id="658669921">
-								<reference key="IBUINavigationBar" ref="735706715"/>
-								<string key="IBUITitle">Title</string>
-								<string key="targetRuntimeIdentifier">IBIPadFramework</string>
-							</object>
-						</array>
 					</object>
 				</array>
 				<string key="NSFrame">{{0, 20}, {768, 1004}}</string>
@@ -112,14 +94,6 @@
 					</object>
 					<int key="connectionID">7</int>
 				</object>
-				<object class="IBConnectionRecord">
-					<object class="IBCocoaTouchOutletConnection" key="connection">
-						<string key="label">navBar</string>
-						<reference key="source" ref="841351856"/>
-						<reference key="destination" ref="735706715"/>
-					</object>
-					<int key="connectionID">8</int>
-				</object>
 			</array>
 			<object class="IBMutableOrderedSet" key="objectRecords">
 				<array key="orderedObjects">
@@ -144,23 +118,9 @@
 						<int key="objectID">2</int>
 						<reference key="object" ref="766721923"/>
 						<array class="NSMutableArray" key="children">
-							<reference ref="735706715"/>
 							<reference ref="510631774"/>
 						</array>
 						<reference key="parent" ref="0"/>
-					</object>
-					<object class="IBObjectRecord">
-						<int key="objectID">4</int>
-						<reference key="object" ref="735706715"/>
-						<array class="NSMutableArray" key="children">
-							<reference ref="658669921"/>
-						</array>
-						<reference key="parent" ref="766721923"/>
-					</object>
-					<object class="IBObjectRecord">
-						<int key="objectID">5</int>
-						<reference key="object" ref="658669921"/>
-						<reference key="parent" ref="735706715"/>
 					</object>
 					<object class="IBObjectRecord">
 						<int key="objectID">6</int>
@@ -175,8 +135,6 @@
 				<string key="-2.CustomClassName">UIResponder</string>
 				<string key="-2.IBPluginDependency">com.apple.InterfaceBuilder.IBCocoaTouchPlugin</string>
 				<string key="2.IBPluginDependency">com.apple.InterfaceBuilder.IBCocoaTouchPlugin</string>
-				<string key="4.IBPluginDependency">com.apple.InterfaceBuilder.IBCocoaTouchPlugin</string>
-				<string key="5.IBPluginDependency">com.apple.InterfaceBuilder.IBCocoaTouchPlugin</string>
 				<string key="6.IBPluginDependency">com.apple.InterfaceBuilder.IBCocoaTouchPlugin</string>
 			</dictionary>
 			<dictionary class="NSMutableDictionary" key="unlocalizedProperties"/>
