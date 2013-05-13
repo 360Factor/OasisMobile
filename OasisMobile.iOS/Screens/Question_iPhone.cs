@@ -48,6 +48,8 @@ namespace OasisMobile.iOS
 
 			tblvQuestion.Source = new Question_iPhoneTableSource (m_userQuestionToDisplay, this);
 			tblvQuestion.ReloadData ();
+			//Scroll to the very first row so we see the top
+			tblvQuestion.ScrollToRow (NSIndexPath.FromRowSection (0,0),UITableViewScrollPosition.Top,false);
 		}
 
 		public class Question_iPhoneTableSource : UITableViewSource
