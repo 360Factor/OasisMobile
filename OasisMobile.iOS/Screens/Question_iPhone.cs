@@ -1,7 +1,5 @@
-
 using System;
 using System.Drawing;
-
 using MonoTouch.Foundation;
 using MonoTouch.UIKit;
 using System.Collections.Generic;
@@ -17,7 +15,7 @@ namespace OasisMobile.iOS
 		{
 			m_userQuestionToDisplay = aUserQuestion;
 		}
-		
+
 		public override void DidReceiveMemoryWarning ()
 		{
 			// Releases the view if it doesn't have a superview.
@@ -25,7 +23,7 @@ namespace OasisMobile.iOS
 			
 			// Release any cached data, images, etc that aren't in use.
 		}
-		
+
 		public override void ViewDidLoad ()
 		{
 			base.ViewDidLoad ();
@@ -35,12 +33,15 @@ namespace OasisMobile.iOS
 			                            AppSession.SelectedExamUserQuestionList.Count);
 
 			tblvQuestion.Source = new Question_iPhoneTableSource (m_userQuestionToDisplay, this);
-//			tblvQuestion.SelectRow (NSIndexPath.FromRowSection (1,1),
-//			                                                false,UITableViewScrollPosition.None);
 		}
 
 		public void DisplayUserQuestion (BusinessModel.UserQuestion aUserQuestion)
 		{
+			bool _isNewQuestion = false;
+			if(m_userQuestionToDisplay.UserQuestionID != aUserQuestion.UserQuestionID){
+				_isNewQuestion = true;
+			}
+
 			m_userQuestionToDisplay = aUserQuestion;
 
 			this.Title = string.Format ("{0} of {1}", m_userQuestionToDisplay.Sequence,
@@ -48,29 +49,37 @@ namespace OasisMobile.iOS
 
 			tblvQuestion.Source = new Question_iPhoneTableSource (m_userQuestionToDisplay, this);
 			tblvQuestion.ReloadData ();
-			//Scroll to the very first row so we see the top
-			tblvQuestion.ScrollToRow (NSIndexPath.FromRowSection (0,0),UITableViewScrollPosition.Top,false);
+			//Scroll to the very first row so we see the top if we display a new question in this view
+			if (_isNewQuestion) {
+				tblvQuestion.ScrollToRow (NSIndexPath.FromRowSection (0,0), UITableViewScrollPosition.Top, false);
+			}
+		
 		}
 
 		public class Question_iPhoneTableSource : UITableViewSource
 		{
 			public enum SubmittedQuestionViewSections
 			{
-				QuestionStemAndImages = 0,
-				QuestionAnswerOptions = 1,
-				QuestionCommentary = 2,
+				QuestionStemAndImages = 0
+,
+				QuestionAnswerOptions = 1
+,
+				QuestionCommentary = 2
+,
 				QuestionReferences = 3
 			}
 
 			public enum UnsubmittedQuestionViewSections
 			{
-				QuestionStemAndImages = 0,
-				QuestionAnswerOptions = 1,
+				QuestionStemAndImages = 0
+,
+				QuestionAnswerOptions = 1
+,
 				SubmitAnswerButton = 2
 			}
 
 			private Question_iPhone m_currentViewController;
-			private BusinessModel.UserQuestion  m_userQuestion;
+			private BusinessModel.UserQuestion m_userQuestion;
 			private BusinessModel.Question m_question;
 			private List<BusinessModel.Image> m_questionImages;
 			private List<BusinessModel.UserAnswerOptionDetail> m_questionAnswerOptions;
@@ -90,8 +99,6 @@ namespace OasisMobile.iOS
 				m_questionAnswerOptions = BusinessModel.UserAnswerOptionDetail.GetUserAnswerOptionDetailListByUserQuestionID (aUserQuestion.UserQuestionID);
 				m_questionAnswerOptions = (from x in m_questionAnswerOptions orderby x.Sequence select x).ToList ();
 
-				BusinessModel.UserAnswerOptionDetail _selectedAnswer = (from x in m_questionAnswerOptions where x.IsSelected select x).FirstOrDefault();
-
 				if (AppSession.SelectedUserExam.IsSubmitted || (aUserQuestion.HasAnswered && AppSession.SelectedUserExam.IsLearningMode)) {
 					m_showQuestionAnswer = true;
 				} else {
@@ -99,7 +106,6 @@ namespace OasisMobile.iOS
 				}
 
 			}
-			
 			#region implemented abstract members of UITableViewSource
 			
 			public override int RowsInSection (UITableView tableview, int section)
@@ -132,7 +138,7 @@ namespace OasisMobile.iOS
 			
 				
 			}
-			
+
 			public override UITableViewCell GetCell (UITableView tableView, NSIndexPath indexPath)
 			{
 				UITableViewCell cell;
@@ -148,7 +154,7 @@ namespace OasisMobile.iOS
 								cell = new UITableViewCell (UITableViewCellStyle.Default, "cell");
 							}
 							cell.TextLabel.Font = UIFont.SystemFontOfSize (14);
-							cell.TextLabel.Text = m_question.Stem;
+							cell.TextLabel.Text = m_question.Stem.Replace ("<br />","\n");
 							cell.TextLabel.Lines = 0;
 							cell.TextLabel.LineBreakMode = UILineBreakMode.WordWrap;
 						} else if (indexPath.Row == m_questionImages.Count + 1) {
@@ -188,9 +194,9 @@ namespace OasisMobile.iOS
 						}
 						break;
 					case (int)SubmittedQuestionViewSections.QuestionAnswerOptions:
-						cell = tableView.DequeueReusableCell ("cell");
+						cell = tableView.DequeueReusableCell ("answerOptionCell");
 						if (cell == null) {
-							cell = new UITableViewCell (UITableViewCellStyle.Default, "cell");
+							cell = new UITableViewCell (UITableViewCellStyle.Default, "answerOptionCell");
 						}
 						BusinessModel.UserAnswerOptionDetail _answerOption = m_questionAnswerOptions [indexPath.Row];
 						cell.TextLabel.Font = UIFont.SystemFontOfSize (14);
@@ -245,7 +251,7 @@ namespace OasisMobile.iOS
 								cell = new UITableViewCell (UITableViewCellStyle.Default, "cell");
 							}
 							cell.TextLabel.Font = UIFont.SystemFontOfSize (14);
-							cell.TextLabel.Text = m_question.Stem;
+							cell.TextLabel.Text = m_question.Stem.Replace ("<br />","\n");
 							cell.TextLabel.Lines = 0;
 							cell.TextLabel.LineBreakMode = UILineBreakMode.WordWrap;
 						} else if (indexPath.Row == m_questionImages.Count + 1) {
@@ -285,9 +291,9 @@ namespace OasisMobile.iOS
 						}
 						break;
 					case (int)UnsubmittedQuestionViewSections.QuestionAnswerOptions:
-						cell = tableView.DequeueReusableCell ("cell");
+						cell = tableView.DequeueReusableCell ("answerOptionCell");
 						if (cell == null) {
-							cell = new UITableViewCell (UITableViewCellStyle.Default, "cell");
+							cell = new UITableViewCell (UITableViewCellStyle.Default, "answerOptionCell");
 						}
 						BusinessModel.UserAnswerOptionDetail _answerOption = m_questionAnswerOptions [indexPath.Row];
 						cell.TextLabel.Font = UIFont.SystemFontOfSize (14);
@@ -305,7 +311,7 @@ namespace OasisMobile.iOS
 						btnSubmitQuestionAnswer.AutoresizingMask = UIViewAutoresizing.FlexibleWidth;
 						btnSubmitQuestionAnswer.Frame = new System.Drawing.RectangleF (0, 0, cell.ContentView.Frame.Width, 36);
 						btnSubmitQuestionAnswer.SetTitle ("Submit", UIControlState.Normal);
-						btnSubmitQuestionAnswer.TouchUpInside+=btnSubmitQuestionAnswer_Click;
+						btnSubmitQuestionAnswer.TouchUpInside += btnSubmitQuestionAnswer_Click;
 
 						foreach (UIView _subview in cell.ContentView.Subviews) {
 							_subview.RemoveFromSuperview ();
@@ -322,7 +328,6 @@ namespace OasisMobile.iOS
 				}
 				return cell;
 			}
-			
 			#endregion
 			
 			public override int NumberOfSections (UITableView tableView)
@@ -339,18 +344,17 @@ namespace OasisMobile.iOS
 			{
 				// NOTE: Don't call the base implementation on a Model class
 				// see http://docs.xamarin.com/ios/tutorials/Events%2c_Protocols_and_Delegates 
-				if(m_showQuestionAnswer)
-				{
+				if (m_showQuestionAnswer) {
 					return null;
-				}else{
-					if(indexPath.Section == (int)UnsubmittedQuestionViewSections.QuestionAnswerOptions){
+				} else {
+					if (indexPath.Section == (int)UnsubmittedQuestionViewSections.QuestionAnswerOptions) {
 						return indexPath;
-					}else{
+					} else {
 						return null;
 					}
 				}
 			}
-			
+
 			public override void RowSelected (UITableView tableView, NSIndexPath indexPath)
 			{
 				// NOTE: Don't call the base implementation on a Model class
@@ -360,7 +364,6 @@ namespace OasisMobile.iOS
 					tableView.DeselectRow (indexPath, false);
 				} else {
 					if (indexPath.Section == (int)UnsubmittedQuestionViewSections.QuestionAnswerOptions) {
-						BusinessModel.UserAnswerOptionDetail _selectedAnswerOption = m_questionAnswerOptions [indexPath.Row];
 						//Update the source global variable so we can pull the answer data later on
 						for (int i=0; i<m_questionAnswerOptions.Count; i++) {
 							BusinessModel.UserAnswerOptionDetail _answerOptionObj = m_questionAnswerOptions [i];
@@ -376,7 +379,7 @@ namespace OasisMobile.iOS
 					}
 				}
 			}
-			
+
 			public override float GetHeightForRow (UITableView tableView, NSIndexPath indexPath)
 			{
 				// NOTE: Don't call the base implementation on a Model class
@@ -387,7 +390,7 @@ namespace OasisMobile.iOS
 					switch (indexPath.Section) {
 					case (int) SubmittedQuestionViewSections.QuestionStemAndImages:
 						if (indexPath.Row == 0) {
-							return tableView.StringSize (m_question.Stem, UIFont.SystemFontOfSize (14), _bounds, UILineBreakMode.WordWrap).Height + 20; // add 20 px as padding
+							return tableView.StringSize (m_question.Stem.Replace ("<br />","\n"), UIFont.SystemFontOfSize (14), _bounds, UILineBreakMode.WordWrap).Height + 20; // add 20 px as padding
 						} else if (indexPath.Row == m_questionImages.Count + 1) {
 							return tableView.StringSize (m_question.LeadIn, UIFont.SystemFontOfSize (14), _bounds, UILineBreakMode.WordWrap).Height + 20; // add 20 px as padding
 						} else {
@@ -411,7 +414,7 @@ namespace OasisMobile.iOS
 					switch (indexPath.Section) {
 					case (int) UnsubmittedQuestionViewSections.QuestionStemAndImages:
 						if (indexPath.Row == 0) {
-							return tableView.StringSize (m_question.Stem, UIFont.SystemFontOfSize (14), _bounds, UILineBreakMode.WordWrap).Height + 20; // add 20 px as padding
+							return tableView.StringSize (m_question.Stem.Replace ("<br />","\n"), UIFont.SystemFontOfSize (14), _bounds, UILineBreakMode.WordWrap).Height + 20; // add 20 px as padding
 						} else if (indexPath.Row == m_questionImages.Count + 1) {
 							return tableView.StringSize (m_question.LeadIn, UIFont.SystemFontOfSize (14), _bounds, UILineBreakMode.WordWrap).Height + 20; // add 20 px as padding
 						} else {
@@ -435,7 +438,7 @@ namespace OasisMobile.iOS
 				return 0; //Catch all if we have not returned yet, should never reach here
 	
 			}
-			
+
 			public override string TitleForHeader (UITableView tableView, int section)
 			{
 				// NOTE: Don't call the base implementation on a Model class
@@ -472,7 +475,7 @@ namespace OasisMobile.iOS
 
 				return _headerText;
 			}
-			
+
 			public override void WillDisplay (UITableView tableView, UITableViewCell cell, NSIndexPath indexPath)
 			{
 				// NOTE: Don't call the base implementation on a Model class
@@ -487,7 +490,7 @@ namespace OasisMobile.iOS
 						cell.SelectionStyle = UITableViewCellSelectionStyle.Blue;
 						//also select the cell if the cell contains the selected answer option. 
 						//This is because selecting at getcell will show black bars
-						if(m_questionAnswerOptions[indexPath.Row].IsSelected){
+						if (m_questionAnswerOptions [indexPath.Row].IsSelected) {
 							cell.Selected = true;
 						}
 					} else {
@@ -499,6 +502,8 @@ namespace OasisMobile.iOS
 
 			private void btnSubmitQuestionAnswer_Click (object sender, EventArgs e)
 			{
+			 	BusinessModel.UserAnswerOption _previousSelectedAnswer =  BusinessModel.UserAnswerOption.GetFirstUserAnswerOptionBySQL (string.Format (
+					"SELECT * FROM UserAnswerOption WHERE fkUserQuestionID={0} AND IsSelected=1",m_userQuestion.UserQuestionID));
 				BusinessModel.UserAnswerOptionDetail _selectedAnswerOption = 
 					(from x in m_questionAnswerOptions where x.IsSelected select x).FirstOrDefault ();
 				if (_selectedAnswerOption == null) {
@@ -506,51 +511,73 @@ namespace OasisMobile.iOS
 					_requiredFieldAlert.Show ();
 					return;
 				}
-				int _hasAnsweredCorrectly;
-				if(_selectedAnswerOption.IsCorrect){
-					_hasAnsweredCorrectly = 1;
-				}else{
-					_hasAnsweredCorrectly = 0;
-				}
 
-				List<string> _queriesToExecute = new List<string>();
-
-				_queriesToExecute.Add (string.Format (
-					"UPDATE UserAnswerOption SET IsSelected=1 WHERE pkUserAnswerOptionID={0}", 
-					_selectedAnswerOption.UserAnswerOptionID));
-				_queriesToExecute.Add (string.Format (
-					"UPDATE UserAnswerOption SET IsSelected=0 " +
-					"WHERE pkUserAnswerOptionID!={0} AND fkUserQuestionID={1}", 
-					_selectedAnswerOption.UserAnswerOptionID, _selectedAnswerOption.UserQuestionID));
-				_queriesToExecute.Add (string.Format (
-					"UPDATE UserQuestion SET HasAnswered=1, HasAnsweredCorrectly={0} " +
-					"WHERE pkUserQuestionID={1}",_hasAnsweredCorrectly,_selectedAnswerOption.UserQuestionID));
 			
-					BusinessModel.SQL.Execute (_queriesToExecute);
-				//Update the userquestion session too
-				AppSession.SelectedExamUserQuestionList = BusinessModel.UserQuestion.GetUserQuestionsBySQL (string.Format (
-					"SELECT * FROM UserQuestion " +
-					"WHERE fkUserExamID={0} ORDER BY Sequence", AppSession.SelectedUserExam.UserExamID));
-
-				BusinessModel.UserQuestion _updatedUserQuestion = 
-					(from x in AppSession.SelectedExamUserQuestionList 
-					 where x.UserQuestionID == m_userQuestion.UserQuestionID select x).FirstOrDefault();
-
-				if(AppSession.SelectedUserExam.IsLearningMode){
-					//For learning mode, we update the interface to show the answer
-					m_currentViewController.DisplayUserQuestion (_updatedUserQuestion);
-				}else{
-					//For examination mode, we go to the next answer
-					int _currentQuestionIndex = AppSession.SelectedExamUserQuestionList.IndexOf (_updatedUserQuestion);
-					if(_currentQuestionIndex < AppSession.SelectedExamUserQuestionList.Count - 1){
-						m_currentViewController.DisplayUserQuestion (
-							AppSession.SelectedExamUserQuestionList[_currentQuestionIndex +1]);
-					}else{
-						m_currentViewController.NavigationController.PopViewControllerAnimated (true);
+				if (_previousSelectedAnswer == null || _selectedAnswerOption.UserAnswerOptionID == _previousSelectedAnswer.UserAnswerOptionID) {
+					//Only update the database if the answer has changed
+					int _hasAnsweredCorrectly;
+					if (_selectedAnswerOption.IsCorrect) {
+						_hasAnsweredCorrectly = 1;
+					} else {
+						_hasAnsweredCorrectly = 0;
 					}
-				}
-			}
 
+					List<string> _queriesToExecute = new List<string> ();
+
+					_queriesToExecute.Add (string.Format (
+						"UPDATE UserAnswerOption SET IsSelected=1 WHERE pkUserAnswerOptionID={0}", 
+						_selectedAnswerOption.UserAnswerOptionID));
+					_queriesToExecute.Add (string.Format (
+						"UPDATE UserAnswerOption SET IsSelected=0 " +
+						"WHERE pkUserAnswerOptionID!={0} AND fkUserQuestionID={1}", 
+						_selectedAnswerOption.UserAnswerOptionID, _selectedAnswerOption.UserQuestionID));
+					_queriesToExecute.Add (string.Format (
+						"UPDATE UserQuestion SET HasAnswered=1, HasAnsweredCorrectly={0}, AnsweredDateTime='{1}', DoSync=1 " +
+						"WHERE pkUserQuestionID={2}",_hasAnsweredCorrectly, DateTime.UtcNow ,_selectedAnswerOption.UserQuestionID));
+
+					BusinessModel.SQL.Execute (_queriesToExecute);
+					//Update the userquestion session too
+					AppSession.SelectedExamUserQuestionList = BusinessModel.UserQuestion.GetUserQuestionsBySQL (string.Format (
+						"SELECT * FROM UserQuestion " +
+						"WHERE fkUserExamID={0} ORDER BY Sequence", AppSession.SelectedUserExam.UserExamID));
+
+					BusinessModel.UserQuestion _updatedUserQuestion = 
+						(from x in AppSession.SelectedExamUserQuestionList 
+						 where x.UserQuestionID == m_userQuestion.UserQuestionID select x).FirstOrDefault ();
+
+					if (AppSession.SelectedUserExam.IsLearningMode) {
+						//For learning mode, we update the interface to show the answer
+						m_currentViewController.DisplayUserQuestion (_updatedUserQuestion);
+					} else {
+						//For examination mode, we go to the next answer
+						int _currentQuestionIndex = AppSession.SelectedExamUserQuestionList.IndexOf (_updatedUserQuestion);
+						if (_currentQuestionIndex < AppSession.SelectedExamUserQuestionList.Count - 1) {
+							m_currentViewController.DisplayUserQuestion (
+								AppSession.SelectedExamUserQuestionList [_currentQuestionIndex +1]);
+						} else {
+							m_currentViewController.NavigationController.PopViewControllerAnimated (true);
+						}
+					}
+
+				} else {
+					//The submit button should only shown in learning mode if the user has not answered, so we only need to code the examination mode to advance to next question
+					//For examination mode, we go to the next answer
+					if (AppSession.SelectedUserExam.IsLearningMode) {
+						throw new Exception ("There should not be any submit button in learning mode when question has been answered");
+					} else {
+						int _currentQuestionIndex = AppSession.SelectedExamUserQuestionList.IndexOf (m_userQuestion);
+						if (_currentQuestionIndex < AppSession.SelectedExamUserQuestionList.Count - 1) {
+							m_currentViewController.DisplayUserQuestion (
+								AppSession.SelectedExamUserQuestionList [_currentQuestionIndex +1]);
+						} else {
+							m_currentViewController.NavigationController.PopViewControllerAnimated (true);
+						}
+					}
+
+				}
+
+		
+			}
 		}
 	}
 }

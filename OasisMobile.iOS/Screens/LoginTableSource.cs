@@ -160,10 +160,11 @@ namespace OasisMobile.iOS
 		}
 
 		private void ProcessLogin(){
-			if (txtUserName.Text != "" && txtPassword.Text != "") {
+			if (txtUserName.Text!=null && txtPassword.Text!=null &&
+			    txtUserName.Text != "" && txtPassword.Text != "") {
 				if(Reachability.InternetConnectionStatus () == NetworkStatus.NotReachable){
 					//Not reachable, tell user to try again later
-					UIAlertView _alert = new UIAlertView ("Credential Required", "Please enter your credential in the provided field", null, "Ok", null);
+					UIAlertView _alert = new UIAlertView ("No Connection", "Please connect to the internet to login", null, "Ok", null);
 					_alert.Show ();
 					return;
 				}
@@ -202,7 +203,11 @@ namespace OasisMobile.iOS
 							_loggedInUser.Save ();
 							_loginSuccessful = true;
 							AppSession.LoggedInUser = _loggedInUser;
-							SyncManager.SyncExamDataFromServer();
+							int _examCount = BusinessModel.SQL.ExecuteScalar<int> ("SELECT COUNT(*) FROM Exam", new object[]{});
+							if(_examCount==0){
+								//Only sync if there is not exam for now
+								SyncManager.SyncExamDataFromServer();
+							}
 							SyncManager.SyncUserExamDataFromServer (AppSession.LoggedInUser);
 							SyncManager.SyncUserExamAccess (AppSession.LoggedInUser);
 							

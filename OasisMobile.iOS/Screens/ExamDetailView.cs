@@ -43,17 +43,21 @@ namespace OasisMobile.iOS
 			// Perform any additional setup after loading the view, typically from a nib.
 
 			this.Title = "Exam Info";
-
-			tblvExamDetail.Source = new ExamDetailTableSource (this, m_examID);
-//			using (MonoTouch.CoreGraphics.CGContext g = UIGraphics.GetCurrentContext ()) {
-//				g.SetLineWidth (5);
-//				g.SetStrokeColor (10,10,10,1);
-//				g.MoveTo (0,50);
-//				g.AddLineToPoint (this.View.Frame.Width,50);
-//				g.StrokePath ();
-//			}
 		}
 
+		public override void ViewWillAppear (bool animated)
+		{
+			base.ViewWillAppear (animated);
+			if (tblvExamDetail.Source != null) {
+				tblvExamDetail.Source = new ExamDetailTableSource (this, m_examID);
+				tblvExamDetail.ReloadData ();
+			} else {
+				tblvExamDetail.Source = new ExamDetailTableSource (this, m_examID);
+			}
+	
+		
+			AppSession.SelectedExamUserQuestionList = null;
+		}
 	
 
 		public class ExamDetailTableSource : UITableViewSource
@@ -186,11 +190,24 @@ namespace OasisMobile.iOS
 				if (indexPath.Section == (int)ExamDetailSection.ExamActionButtons) {
 					cell.BackgroundView = null;
 					cell.SelectionStyle = UITableViewCellSelectionStyle.None;
+				}else{
+					cell.SelectionStyle = UITableViewCellSelectionStyle.None;
 				}
 				
 				
 			}
-			
+
+			public override NSIndexPath WillSelectRow (UITableView tableView, NSIndexPath indexPath)
+			{
+				// NOTE: Don't call the base implementation on a Model class
+				// see http://docs.xamarin.com/ios/tutorials/Events%2c_Protocols_and_Delegates 
+				if (indexPath.Section == (int)ExamDetailSection.ExamActionButtons) {
+					return indexPath;
+				} else {
+					return null;
+				}
+			}
+
 			public override void RowSelected (UITableView tableView, NSIndexPath indexPath)
 			{
 				// NOTE: Don't call the base implementation on a Model class
@@ -212,6 +229,8 @@ namespace OasisMobile.iOS
 					return 44;
 				}
 			}
+
+
 
 			private string GetExamInfoText ()
 			{
@@ -298,8 +317,8 @@ namespace OasisMobile.iOS
 					}
 
 					BTProgressHUD.Show ("Downloading Exam", 0);
+					UIApplication.SharedApplication.IdleTimerDisabled = true;
 					Task.Factory.StartNew (() => {
-
 						try{
 							if (SyncManager.DownloadExamBaseData (AppSession.SelectedExam) && 
 							    SyncManager.DownloadExamImageFiles (AppSession.SelectedExam, DownloadExamImageProgressUpdated) && 
@@ -322,6 +341,7 @@ namespace OasisMobile.iOS
 
 					}).ContinueWith (task1 => {
 						BTProgressHUD.Dismiss ();
+						UIApplication.SharedApplication.IdleTimerDisabled = false;
 						if (_isDownloadSuccessful) {
 							m_currentViewController.NavigationController.PushViewController (new ExamQuestionList_iPhone (), true);
 						} else {

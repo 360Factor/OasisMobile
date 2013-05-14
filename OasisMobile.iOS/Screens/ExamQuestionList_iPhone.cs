@@ -32,7 +32,6 @@ namespace OasisMobile.iOS
 			AppSession.SelectedExamUserQuestionList = BusinessModel.UserQuestion.GetUserQuestionsBySQL (string.Format (
 				"SELECT * FROM UserQuestion " +
 				"WHERE fkUserExamID={0} ORDER BY Sequence", AppSession.SelectedUserExam.UserExamID));
-			tblvExamQuestionList.Source = new ExamQuestionsTableSource (this);
 			UIViewController[] _originalNavigationStack = 	NavigationController.ViewControllers;
 			List<UIViewController> _updatedNavigationStack = new List<UIViewController>();
 
@@ -48,10 +47,15 @@ namespace OasisMobile.iOS
 		public override void ViewWillAppear (bool animated)
 		{
 			base.ViewWillAppear (animated);
-			if(tblvExamQuestionList.Source !=null){
+			if (tblvExamQuestionList.Source != null) {
 				tblvExamQuestionList.Source = new ExamQuestionsTableSource (this);
 				tblvExamQuestionList.ReloadData ();
+			} else {
+				tblvExamQuestionList.Source = new ExamQuestionsTableSource (this);
 			}
+			AppSession.CurrentDisplayedUserQuestion = null;
+			AppSession.NextUserQuestion = null;
+			AppSession.PreviousUserQuestion = null;
 
 		}
 
@@ -98,7 +102,7 @@ namespace OasisMobile.iOS
 						}
 					} else {
 						//Otherwise, we just show the fact that the question has been answered (by removing the not answered mark)
-						cell.ImageView.Image = UIImage.FromBundle("Images/transparent.png").Scale (new SizeF(32,32));
+						cell.ImageView.Image = UIImage.FromBundle("Images/Transparent.png").Scale (new SizeF(32,32));
 						cell.ImageView.ContentMode = UIViewContentMode.ScaleAspectFit;
 					}
 				}

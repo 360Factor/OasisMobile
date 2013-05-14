@@ -17,6 +17,8 @@ namespace OasisMobile.iOS
 		public static BusinessModel.UserQuestion NextUserQuestion {get; set;}
 
 		public static BusinessModel.UserQuestion PreviousUserQuestion {get; set;}
+
+		//public static DateTime QuestionViewStartTimeStamp{ get; set; }
 	}
 }
 

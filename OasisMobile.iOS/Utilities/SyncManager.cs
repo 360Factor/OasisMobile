@@ -98,7 +98,7 @@ namespace OasisMobile.iOS
 				var _jsonResponseArr = (JsonArray)JsonValue.Parse (_responseString);
 				List<int> _remoteUserExamIDList = new List<int> ();
 				foreach (JsonValue _remoteUserExam in _jsonResponseArr) {
-					if(_mainSystemExamIDToLocalExamIDMap.ContainsKey (_remoteUserExam ["ExamID"])){
+					if (_mainSystemExamIDToLocalExamIDMap.ContainsKey (_remoteUserExam ["ExamID"])) {
 						//Only populate user exam that maps to a published/ retired exams, exams that are not published are not good
 						BusinessModel.UserExam _userExamToSave = 
 							(from x in _localUserExamList where x.MainSystemID == _remoteUserExam ["UserExamMapID"] select x).FirstOrDefault ();
@@ -110,7 +110,7 @@ namespace OasisMobile.iOS
 							_userExamToSave.IsCompleted = false;
 							_localUserExamList.Add (_userExamToSave);
 						}
-						_userExamToSave.ExamID = _mainSystemExamIDToLocalExamIDMap[_remoteUserExam ["ExamID"]];
+						_userExamToSave.ExamID = _mainSystemExamIDToLocalExamIDMap [_remoteUserExam ["ExamID"]];
 						_userExamToSave.UserID = aUser.UserID;
 						_userExamToSave.IsSubmitted = _remoteUserExam ["IsSubmitted"];
 						_userExamToSave.IsLearningMode = _remoteUserExam ["IsInteractiveMode"];
@@ -123,20 +123,20 @@ namespace OasisMobile.iOS
 
 				}
 				//Save all changes in one transaction
-				BusinessModel.UserExam.SaveAll(_localUserExamList);
+				BusinessModel.UserExam.SaveAll (_localUserExamList);
 
 				//Delete all local user exam record that no longer exist in server
 				List<BusinessModel.UserExam> _userExamsToDelete;
-				_userExamsToDelete = (from x in _localUserExamList where !_remoteUserExamIDList.Contains (x.MainSystemID) select x).ToList ();;
-				if(_userExamsToDelete.Count>0){
-					List<string> _deleteSqlList = new List<string>();
+				_userExamsToDelete = (from x in _localUserExamList where !_remoteUserExamIDList.Contains (x.MainSystemID) select x).ToList ();
+				;
+				if (_userExamsToDelete.Count > 0) {
+					List<string> _deleteSqlList = new List<string> ();
 					foreach (BusinessModel.UserExam _userExam in _userExamsToDelete) {
 						_deleteSqlList.AddRange (_userExam.GetCascadeDeleteSql ());
 					}
-					try{
+					try {
 						BusinessModel.SQL.Execute (_deleteSqlList);
-					}
-					catch(Exception ex){
+					} catch (Exception ex) {
 						Console.WriteLine (ex.ToString ());
 					}
 			
@@ -145,7 +145,8 @@ namespace OasisMobile.iOS
 			return _localUserExamList;
 		}
 
-		public static List<BusinessModel.ExamAccess> SyncUserExamAccess(BusinessModel.User aUser){
+		public static List<BusinessModel.ExamAccess> SyncUserExamAccess (BusinessModel.User aUser)
+		{
 			//Create the Exam main system id to local id mapping
 			Dictionary<int,int> _mainSystemExamIDToLocalExamIDMap = 
 				BusinessModel.SQL.ExecuteIntIntDictionary ("SELECT MainSystemID, pkExamID FROM Exam");
@@ -154,8 +155,8 @@ namespace OasisMobile.iOS
 			List<BusinessModel.ExamAccess> _localExamAccessList =
 				BusinessModel.ExamAccess.GetExamAccesssByUserID (aUser.UserID);
 
-			if(_localExamAccessList == null){
-				_localExamAccessList =  new List<BusinessModel.ExamAccess>();
+			if (_localExamAccessList == null) {
+				_localExamAccessList = new List<BusinessModel.ExamAccess> ();
 			}
 
 			string _serviceTargetURL = AppConfig.BaseWebserviceURL + "ExamAccessByUserID/" + aUser.MainSystemID;
@@ -164,21 +165,21 @@ namespace OasisMobile.iOS
 			string _responseString = _service.DownloadString (_serviceTargetURL);
 			if (_responseString != null && _responseString != "") {
 				var _jsonResponseArr = (JsonArray)JsonValue.Parse (_responseString);
-				List<int> _remoteExamAccessLocalExamIDList = new List<int>();
+				List<int> _remoteExamAccessLocalExamIDList = new List<int> ();
 				foreach (JsonValue _remoteExamAccess in _jsonResponseArr) {
-					if(_mainSystemExamIDToLocalExamIDMap.ContainsKey (_remoteExamAccess["ExamID"])){
-						int _localExamIDForAccess = _mainSystemExamIDToLocalExamIDMap[_remoteExamAccess["ExamID"]];
+					if (_mainSystemExamIDToLocalExamIDMap.ContainsKey (_remoteExamAccess["ExamID"])) {
+						int _localExamIDForAccess = _mainSystemExamIDToLocalExamIDMap [_remoteExamAccess["ExamID"]];
 						_remoteExamAccessLocalExamIDList.Add (_localExamIDForAccess);
 						BusinessModel.ExamAccess _examAccessToSave = 
 							(from x in _localExamAccessList where x.ExamID == _localExamIDForAccess
 							 select x).FirstOrDefault ();
-						if(_examAccessToSave == null){
-							_examAccessToSave = new BusinessModel.ExamAccess();
+						if (_examAccessToSave == null) {
+							_examAccessToSave = new BusinessModel.ExamAccess ();
 							_examAccessToSave.UserID = aUser.UserID;
 							_examAccessToSave.ExamID = _localExamIDForAccess;
 							_localExamAccessList.Add (_examAccessToSave);
 						}
-						_examAccessToSave.HasAccess = _remoteExamAccess["HasPurchased"];
+						_examAccessToSave.HasAccess = _remoteExamAccess ["HasPurchased"];
 					}
 				}
 				//Save the updated list to db
@@ -188,9 +189,9 @@ namespace OasisMobile.iOS
 				//If there are such records found, we delete them to keep local same as server
 				List<int> _examAccessIDToDeleteList = 
 					(from x in _localExamAccessList 
-					 where !_remoteExamAccessLocalExamIDList.Contains(x.ExamID) 
-					 select x.ExamAccessID).ToList();
-				if(_examAccessIDToDeleteList.Count>0){
+					 where !_remoteExamAccessLocalExamIDList.Contains (x.ExamID) 
+					 select x.ExamAccessID).ToList ();
+				if (_examAccessIDToDeleteList.Count > 0) {
 					BusinessModel.SQL.ExecuteNonQuery (string.Format(
 						"DELETE FROM ExamAccess WHERE pkExamAccessID IN({0})",
 						string.Join (",",_examAccessIDToDeleteList)));
@@ -207,7 +208,6 @@ namespace OasisMobile.iOS
 			string _serviceTargetURL = "";
 			string _responseString = "";
 			WebClient _service = new WebClient ();
-			System.Threading.AutoResetEvent waiter = new System.Threading.AutoResetEvent (false);
 
 			//Since categories are not expected to change in the lifetime of the application, 
 			//we will just pull the the category once and resync categories when a category does not exist in the downloaded exam question
@@ -352,7 +352,7 @@ namespace OasisMobile.iOS
 		}
 
 		public delegate void ImageDownloadProgressUpdatedHandler (float downloadedImagePercentage);
-		
+
 		public static bool DownloadExamImageFiles (BusinessModel.Exam aExam, ImageDownloadProgressUpdatedHandler aImageDownloadProgressUpdate)
 		{
 			string _serviceTargetURL = "";
@@ -404,12 +404,12 @@ namespace OasisMobile.iOS
 						string libraryPath = Path.Combine (documentsPath, "..", "Library"); // Library folder instead
 						//local save path in form of library/ExamImages/{RelativeSavePathOnServer with "/" replaced by "_"}
 						string _localSavePath = Path.Combine (libraryPath, "ExamImages", Regex.Replace (_remoteRelativeFilePath, "[/\\\\]+", "_"));
-						string _localSaveDirectory = Path.GetDirectoryName(_localSavePath);
+						string _localSaveDirectory = Path.GetDirectoryName (_localSavePath);
 						if (!File.Exists (_localSavePath)) {
 							
 							//Only download if the file has not existed
 							try {
-								if(!Directory.Exists (_localSaveDirectory)){
+								if (!Directory.Exists (_localSaveDirectory)) {
 									Directory.CreateDirectory (_localSaveDirectory);
 								}
 								_service.DownloadFile (_downloadURL, _localSavePath);
@@ -425,13 +425,13 @@ namespace OasisMobile.iOS
 					}
 					_downloadedImageCount++;
 
-					aImageDownloadProgressUpdate((float)(_downloadedImageCount/(float)_imageToDownloadCount));
+					aImageDownloadProgressUpdate ((float)(_downloadedImageCount/(float)_imageToDownloadCount));
 				}
 				return true;
 			}
 			return false;
 		}
-		
+
 		public static bool DownloadUserExamCompleteData (BusinessModel.User aUser, BusinessModel.Exam aExam)
 		{
 			
@@ -487,7 +487,7 @@ namespace OasisMobile.iOS
 				//-------------------------
 				List<BusinessModel.UserQuestion> _localUserQuestionList = 
 					BusinessModel.UserQuestion.GetUserQuestionsBySQL (
-						"SELECT * FROM UserQuestion WHERE fkUserExamID=" + _localUserExam.UserExamID);
+					"SELECT * FROM UserQuestion WHERE fkUserExamID=" + _localUserExam.UserExamID);
 				if (_localUserQuestionList == null) {
 					_localUserQuestionList = new List<BusinessModel.UserQuestion> ();
 				}
@@ -511,11 +511,11 @@ namespace OasisMobile.iOS
 					_matchingLocalQuestion.QuestionID = _mainSystemToQuestionIDMap [_remoteUserQuestion ["QuestionID"]];
 					_matchingLocalQuestion.UserExamID = _localUserExam.UserExamID;
 					_matchingLocalQuestion.Sequence = _remoteUserQuestion ["Sequence"];
-					if(_remoteUserQuestion ["AnwseredDateTime"] != null && 
-					   _remoteUserQuestion ["AnwseredDateTime"].ToString() !="" && 
-					   _remoteUserQuestion ["AnwseredDateTime"].ToString() !="\"\""){
-						_matchingLocalQuestion.AnsweredDateTime = DateTime.Parse(_remoteUserQuestion ["AnwseredDateTime"]);
-					}else{
+					if (_remoteUserQuestion ["AnwseredDateTime"] != null && 
+						_remoteUserQuestion ["AnwseredDateTime"].ToString () != "" && 
+						_remoteUserQuestion ["AnwseredDateTime"].ToString () != "\"\"") {
+						_matchingLocalQuestion.AnsweredDateTime = DateTime.Parse (_remoteUserQuestion ["AnwseredDateTime"]);
+					} else {
 						_matchingLocalQuestion.AnsweredDateTime = null;
 					}
 					_matchingLocalQuestion.HasAnswered = _remoteUserQuestion ["HasAnswered"];
@@ -573,7 +573,6 @@ namespace OasisMobile.iOS
 				return false;
 			}
 		}
-		
 		/// <summary>
 		/// Downloads the categories. Returns a dictionary of MainSystemID to local CategoryID or null if the connection fails
 		/// </summary>
@@ -637,12 +636,11 @@ namespace OasisMobile.iOS
 				foreach (JsonValue _remoteCategory in _remoteCategoryList) {
 					BusinessModel.Category _matchingLocalCategory = _mainSystemIDToCategoryObjMap [_remoteCategory ["CategoryID"]];
 					
-					if(_remoteCategory ["ParentID"] != null && 
-					   _remoteCategory ["ParentID"].ToString() !="" && 
-					   _remoteCategory ["ParentID"].ToString() !="\"\""){
+					if (_remoteCategory ["ParentID"] != null && 
+						_remoteCategory ["ParentID"].ToString () != "" && 
+						_remoteCategory ["ParentID"].ToString () != "\"\"") {
 						_matchingLocalCategory.ParentCategoryID = _mainSystemIDToCategoryObjMap [_remoteCategory ["ParentID"]].CategoryID;
-					}
-					else{
+					} else {
 						_matchingLocalCategory.ParentCategoryID = null;
 					}
 					_mainSystemIDToLocalIDCategoryMap.Add (_matchingLocalCategory.MainSystemID, _matchingLocalCategory.CategoryID);
@@ -655,7 +653,123 @@ namespace OasisMobile.iOS
 			}
 		}
 
-	}
+		public static bool PushAllDoSyncData ()
+		{
+			Console.WriteLine ("Pushing data to server");
+			WebserviceHelper.SyncUserExamPostData _postData = new WebserviceHelper.SyncUserExamPostData ();
+			_postData.UserExamList = new List<WebserviceHelper.SyncUserExamPostData.UserExamSyncData> ();
+			string _query = "SELECT UserQuestion.AnsweredDateTime, UserQuestion.SecondsSpent, " +
+				"UserQuestion.MainSystemID AS UserQuestionMainSystemID, " +
+				"UserAnswerOption.MainSystemID AS SelectedAnswerOptionMainSystemID " +
+				"FROM UserQuestion LEFT JOIN UserAnswerOption " +
+				"ON UserQuestion.pkUserQuestionID = UserAnswerOption.fkUserQuestionID AND UserAnswerOption.IsSelected = 1 " +
+				"WHERE UserQuestion.DoSync=1";
+			
+			_postData.UserQuestionAnswerPairList = BusinessModel.Repository.Instance.Query<WebserviceHelper.SyncUserExamPostData.UserQuestionAnswerSyncData> (_query);
+			if (_postData.UserQuestionAnswerPairList == null) {
+				_postData.UserQuestionAnswerPairList = new List<WebserviceHelper.SyncUserExamPostData.UserQuestionAnswerSyncData> ();
+			}
+			List<int> _userQuestionToUpdateIDList = (from x in _postData.UserQuestionAnswerPairList select x.UserQuestionMainSystemID).ToList ();
+			if(_postData.UserExamList.Count>0 || _postData.UserQuestionAnswerPairList.Count>0){
+				try {
+					WebserviceHelper.SyncUserExamData (_postData);
+					BusinessModel.SQL.ExecuteNonQuery (string.Format ("UPDATE UserQuestion SET DoSync=0 WHERE MainSystemID IN ({0})",
+					                                                  string.Join (",",_userQuestionToUpdateIDList)));
+				} catch (Exception ex) {
+					Console.WriteLine (ex.ToString ());
+					return false;
+				}
+			}
+			Console.WriteLine ("Data push success");
+			return true;
 
+		}
+
+		public static bool SyncUserQuestionAndAnswerFromServer (BusinessModel.User aUser, bool aDoSyncSubmittedExam)
+		{
+			Console.WriteLine ("Pulling data from server for user: " + aUser.LoginName );
+			string _query = "";
+			if (aDoSyncSubmittedExam) {
+				_query = string.Format ("SELECT * FROM UserExam WHERE IsDownloaded=1 AND fkUserID={0}", aUser.UserID);
+			} else {
+				_query = string.Format ("SELECT * FROM UserExam WHERE IsDownloaded=1 AND fkUserID={0} AND IsSubmitted=0", aUser.UserID);
+			}
+
+			List<BusinessModel.UserExam> _userExamToSyncList = BusinessModel.UserExam.GetUserExamsBySQL (_query);
+
+			foreach (BusinessModel.UserExam _userExam in _userExamToSyncList) {
+				string _response = "";
+				try {
+					_response = WebserviceHelper.GetRemoteUserQuestionDataByUserExamID (_userExam.MainSystemID);
+				} catch (Exception ex) {
+					Console.WriteLine (ex.ToString ());
+					return false;
+
+				}
+				if (_response == null || _response == "") {
+					continue;
+				}
+
+				JsonArray _remoteUserQuestionList = (JsonArray)JsonValue.Parse (_response);
+				List<BusinessModel.UserQuestion> _localUserQuestionList = BusinessModel.UserQuestion.GetUserQuestionsBySQL ("SELECT * FROM UserQuestion WHERE fkUserExamID=" + _userExam.UserExamID);
+				List<string> _answerOptionUpdateQueryList = new List<String> ();
+				foreach (JsonValue _remoteUserQuestion in _remoteUserQuestionList) {
+					BusinessModel.UserQuestion _matchingLocalUserQuestion = (from x in _localUserQuestionList where x.MainSystemID == _remoteUserQuestion ["UserQuestionID"] select x).FirstOrDefault ();
+					if (!_matchingLocalUserQuestion.DoSync) {
+						if (_remoteUserQuestion ["AnwseredDateTime"] != null &&
+							_remoteUserQuestion ["AnwseredDateTime"].ToString () != "" && 
+							_remoteUserQuestion ["AnwseredDateTime"].ToString () != "\"\"") {
+							DateTime _remoteUserQuestionAnsweredDate = DateTime.Parse (_remoteUserQuestion["AnwseredDateTime"]);
+							if (_matchingLocalUserQuestion.AnsweredDateTime == null || _matchingLocalUserQuestion.AnsweredDateTime != _remoteUserQuestionAnsweredDate) {
+								//Since the answered date time does not match, we will check if the answer has changed
+								try {
+									string _answerOptionResponse = WebserviceHelper.GetRemoteUserAnswerOptionDataByUserQuestionID (_matchingLocalUserQuestion.MainSystemID);
+									JsonArray _remoteAnswerOptionList = (JsonArray)JsonValue.Parse (_answerOptionResponse);
+									int _selectedAnswerOptionMainSystemID = -1;
+									foreach (JsonValue _remoteAnswerOption in _remoteAnswerOptionList) {
+										if(_remoteAnswerOption["IsUserSelection"]){
+											_selectedAnswerOptionMainSystemID = _remoteAnswerOption["UserAnswerOptionID"];
+										}
+									}
+									if(_selectedAnswerOptionMainSystemID>0){
+										_answerOptionUpdateQueryList.Add ("UPDATE UserAnswerOption SET IsSelected=0 WHERE fkUserQuestionID=" + _matchingLocalUserQuestion.UserQuestionID); 
+										_answerOptionUpdateQueryList.Add ("UPDATE UserAnswerOption SET IsSelected=1 WHERE MainSystemID=" + _selectedAnswerOptionMainSystemID); 
+									}else{
+										Console.WriteLine ("Error on updating remote question id: " +_matchingLocalUserQuestion.MainSystemID + ". AnswerDateTime exist but no answer is selected");
+									}
+
+								} catch (Exception ex) {
+									Console.WriteLine (ex.ToString ());
+									return false;
+								}
+								_matchingLocalUserQuestion.AnsweredDateTime = _remoteUserQuestionAnsweredDate;
+							}
+						
+						} else {
+							if (_matchingLocalUserQuestion.AnsweredDateTime != null) {
+								_matchingLocalUserQuestion.AnsweredDateTime = null;
+								//Since there are no answered date time, we should also unselect the answer
+								_answerOptionUpdateQueryList.Add ("UPDATE UserAnswerOption SET IsSelected=0 WHERE fkUserQuestionID=" + _matchingLocalUserQuestion.UserQuestionID);
+							}
+
+						}
+
+
+						_matchingLocalUserQuestion.HasAnswered = _remoteUserQuestion ["HasAnswered"];
+						_matchingLocalUserQuestion.HasAnsweredCorrectly = _remoteUserQuestion ["HasAnsweredCorrectly"];
+						_matchingLocalUserQuestion.SecondsSpent = _remoteUserQuestion ["SecondsSpent"];
+					}
+				}
+
+				BusinessModel.SQL.Execute (_answerOptionUpdateQueryList);
+				BusinessModel.UserQuestion.SaveAll (_localUserQuestionList);
+			}
+			Console.WriteLine ("Pull Success");
+			return true;
+
+
+
+		}
+	}
 }
 
