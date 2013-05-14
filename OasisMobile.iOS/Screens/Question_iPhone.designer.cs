@@ -12,13 +12,13 @@ namespace OasisMobile.iOS
 	partial class Question_iPhone
 	{
 		[Outlet]
-		MonoTouch.UIKit.UITableView tblvQuestion { get; set; }
+		MonoTouch.UIKit.UIScrollView svQuestionPager { get; set; }
 		
 		void ReleaseDesignerOutlets ()
 		{
-			if (tblvQuestion != null) {
-				tblvQuestion.Dispose ();
-				tblvQuestion = null;
+			if (svQuestionPager != null) {
+				svQuestionPager.Dispose ();
+				svQuestionPager = null;
 			}
 		}
 	}

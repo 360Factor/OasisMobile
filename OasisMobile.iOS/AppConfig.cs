@@ -28,12 +28,6 @@ namespace OasisMobile.iOS
 			}
 		}
 
-		public static TimeZoneInfo ServerTimeZone{
-			get{
-				return TimeZoneInfo.FindSystemTimeZoneById ("UTC");
-			}
-		}
-
 	}
 }
 

@@ -9,11 +9,39 @@ namespace OasisMobile.iOS
 {
 	public partial class Question_iPhone : UIViewController
 	{
-		private BusinessModel.UserQuestion m_userQuestionToDisplay;
+		private BusinessModel.UserQuestion m_currentQuestionToDisplay;
+		private int m_currentQuestionToDisplayIndex = 0;
+		private int m_totalQuestionInExam = 0;
+		private UITableView tblvCurrentQuestion = null;
+		private UITableView tblvPreviousQuestion = null;
+		private UITableView tblvNextQuestion = null;
+
+		public int CurrentQuestionToDisplayIndex{
+			get{
+				return m_currentQuestionToDisplayIndex;
+			}
+		}
+
+		public int TotalQuestionInExam{
+			get{
+				return m_totalQuestionInExam;
+			}
+		}
+
+		public BusinessModel.UserQuestion CurrentQuestionToDisplay{
+			get{
+				return m_currentQuestionToDisplay;
+			}
+		}
+
 
 		public Question_iPhone (BusinessModel.UserQuestion aUserQuestion) : base ("Question_iPhone", null)
 		{
-			m_userQuestionToDisplay = aUserQuestion;
+			m_currentQuestionToDisplay = 
+				(from x in AppSession.SelectedExamUserQuestionList 
+				 where x.UserQuestionID == aUserQuestion.UserQuestionID select x).FirstOrDefault ();
+			m_currentQuestionToDisplayIndex = AppSession.SelectedExamUserQuestionList.IndexOf (m_currentQuestionToDisplay);
+			m_totalQuestionInExam = AppSession.SelectedExamUserQuestionList.Count;
 		}
 
 		public override void DidReceiveMemoryWarning ()
@@ -27,34 +55,181 @@ namespace OasisMobile.iOS
 		public override void ViewDidLoad ()
 		{
 			base.ViewDidLoad ();
-			
-			// Perform any additional setup after loading the view, typically from a nib.
-			this.Title = string.Format ("{0} of {1}", m_userQuestionToDisplay.Sequence,
-			                            AppSession.SelectedExamUserQuestionList.Count);
 
-			tblvQuestion.Source = new Question_iPhoneTableSource (m_userQuestionToDisplay, this);
+			// Perform any additional setup after loading the view, typically from a nib.
+			this.Title = string.Format ("{0} of {1}", m_currentQuestionToDisplay.Sequence,
+			                            m_totalQuestionInExam);
+
+			svQuestionPager.Scrolled += svQuestionPager_Scrolled;
 		}
 
-		public void DisplayUserQuestion (BusinessModel.UserQuestion aUserQuestion)
+		public override void ViewDidLayoutSubviews ()
 		{
-			bool _isNewQuestion = false;
-			if(m_userQuestionToDisplay.UserQuestionID != aUserQuestion.UserQuestionID){
-				_isNewQuestion = true;
+			base.ViewDidLayoutSubviews ();
+
+			//Make the scrollview content size to fit all question in exam
+			RectangleF _scrollViewFrame = this.View.Frame;
+			_scrollViewFrame.Width = _scrollViewFrame.Width * m_totalQuestionInExam;
+			svQuestionPager.ContentSize = _scrollViewFrame.Size;
+
+			// Create TableView for current question
+			//----------------------------------------
+			RectangleF _currentQuestionFrame = svQuestionPager.Frame;
+			PointF _currentQuestionLocation = new PointF ();
+			_currentQuestionLocation.X = svQuestionPager.Frame.Width * m_currentQuestionToDisplayIndex;
+			_currentQuestionFrame.Location = _currentQuestionLocation;
+
+			tblvCurrentQuestion = new UITableView (_currentQuestionFrame, UITableViewStyle.Grouped);
+			tblvCurrentQuestion.Source =  new Question_iPhoneTableSource (m_currentQuestionToDisplay, this);
+			svQuestionPager.AddSubview (tblvCurrentQuestion);
+
+			if (m_currentQuestionToDisplayIndex > 0) {
+				//We should have previous question here
+
+				// Create TableView for previous question
+				//----------------------------------------
+				RectangleF _previousQuestionFrame = svQuestionPager.Frame;
+				PointF _previousQuestionLocation = new PointF ();
+				_previousQuestionLocation.X = svQuestionPager.Frame.Width * (m_currentQuestionToDisplayIndex-1);
+				_previousQuestionFrame.Location = _previousQuestionLocation;
+
+				tblvPreviousQuestion = new UITableView (_previousQuestionFrame, UITableViewStyle.Grouped);
+				tblvPreviousQuestion.Source =  new Question_iPhoneTableSource (AppSession.SelectedExamUserQuestionList[m_currentQuestionToDisplayIndex-1], this);
+				svQuestionPager.AddSubview (tblvPreviousQuestion);
+			}
+			if(m_currentQuestionToDisplayIndex < m_totalQuestionInExam - 1){
+				//We should have next question here
+
+				// Create TableView for next question
+				//----------------------------------------
+				RectangleF _nextQuestionFrame = svQuestionPager.Frame;
+				PointF _nextQuestionLocation = new PointF ();
+				_nextQuestionLocation.X = svQuestionPager.Frame.Width * (m_currentQuestionToDisplayIndex+1);
+				_nextQuestionFrame.Location = _nextQuestionLocation;
+
+				tblvNextQuestion = new UITableView (_nextQuestionFrame, UITableViewStyle.Grouped);
+				tblvNextQuestion.Source =  new Question_iPhoneTableSource (AppSession.SelectedExamUserQuestionList[m_currentQuestionToDisplayIndex+1], this);
+				svQuestionPager.AddSubview (tblvNextQuestion);
 			}
 
-			m_userQuestionToDisplay = aUserQuestion;
+			//Set the current scroll position
+			svQuestionPager.SetContentOffset (_currentQuestionLocation,false);
 
-			this.Title = string.Format ("{0} of {1}", m_userQuestionToDisplay.Sequence,
-			                            AppSession.SelectedExamUserQuestionList.Count);
+		}
 
-			tblvQuestion.Source = new Question_iPhoneTableSource (m_userQuestionToDisplay, this);
-			tblvQuestion.ReloadData ();
-			//Scroll to the very first row so we see the top if we display a new question in this view
-			if (_isNewQuestion) {
-				tblvQuestion.ScrollToRow (NSIndexPath.FromRowSection (0,0), UITableViewScrollPosition.Top, false);
+		private void svQuestionPager_Scrolled(object sender, EventArgs e){
+			int _scrollViewDisplayIndex = (int) Math.Floor ((svQuestionPager.ContentOffset.X +svQuestionPager.Frame.Width/2) /svQuestionPager.Frame.Width);
+			if (_scrollViewDisplayIndex == m_currentQuestionToDisplayIndex) {
+				return;
 			}
+
+			if (_scrollViewDisplayIndex == m_currentQuestionToDisplayIndex + 1) {
+				//Set the next question as current one and load the next one
+				//-----------------------------------------------------
+
+				//Remove the previous question tableview from scrollview to save memory
+				if(tblvPreviousQuestion!=null){
+					tblvPreviousQuestion.RemoveFromSuperview ();
+				}
+
+				tblvPreviousQuestion = tblvCurrentQuestion; //The current question becomes the previous one
+				tblvCurrentQuestion = tblvNextQuestion; //The next question becomes the current one
+
+				m_currentQuestionToDisplayIndex ++;
+				m_currentQuestionToDisplay = AppSession.SelectedExamUserQuestionList [m_currentQuestionToDisplayIndex];
+
+				if (m_currentQuestionToDisplayIndex < m_totalQuestionInExam - 1) {
+					//Load the question to populate to the next question tableview
+					RectangleF _nextQuestionFrame = svQuestionPager.Frame;
+					PointF _nextQuestionLocation = new PointF ();
+					_nextQuestionLocation.X = svQuestionPager.Frame.Width * (m_currentQuestionToDisplayIndex+1);
+					_nextQuestionFrame.Location = _nextQuestionLocation;
+					tblvNextQuestion = new UITableView (_nextQuestionFrame, UITableViewStyle.Grouped);
+					tblvNextQuestion.Source =  new Question_iPhoneTableSource (AppSession.SelectedExamUserQuestionList[m_currentQuestionToDisplayIndex+1], this);
+					svQuestionPager.AddSubview (tblvNextQuestion);
+				}else{
+					//We are at the last question in exam, there are no next question available
+					tblvNextQuestion = null;
+				}
+
+			} else if (_scrollViewDisplayIndex == m_currentQuestionToDisplayIndex - 1) {
+				//Set the previous question as current one and load the previous one
+				//-----------------------------------------------------
+
+				//Remove the next question tableview from scrollview to save memory
+				if(tblvNextQuestion!=null){
+					tblvNextQuestion.RemoveFromSuperview ();
+				}
+
+				tblvNextQuestion = tblvCurrentQuestion; //The current question becomes the next question
+				tblvCurrentQuestion = tblvPreviousQuestion; //The previous question becomes the current one
+
+				m_currentQuestionToDisplayIndex --;
+				m_currentQuestionToDisplay = AppSession.SelectedExamUserQuestionList [m_currentQuestionToDisplayIndex];
+
+				if (m_currentQuestionToDisplayIndex > 0) {
+					//Load the question to populate to the previous question tableview
+					RectangleF _previousQuestionFrame = svQuestionPager.Frame;
+					PointF _previousQuestionLocation = new PointF ();
+					_previousQuestionLocation.X = svQuestionPager.Frame.Width * (m_currentQuestionToDisplayIndex-1);
+					_previousQuestionFrame.Location = _previousQuestionLocation;
+					tblvPreviousQuestion = new UITableView (_previousQuestionFrame, UITableViewStyle.Grouped);
+					tblvPreviousQuestion.Source =  new Question_iPhoneTableSource (AppSession.SelectedExamUserQuestionList[m_currentQuestionToDisplayIndex-1], this);
+					svQuestionPager.AddSubview (tblvPreviousQuestion);
+				}else{
+					//We are at the first question in exam, there are no previous question available
+					tblvPreviousQuestion = null;
+				}
+
+			} else {
+				throw new Exception ("Scroll view index should only return the question before or after the current question");
+			}
+
+			this.Title = string.Format ("{0} of {1}", m_currentQuestionToDisplay.Sequence,
+			                            m_totalQuestionInExam);
+
+		}
+
+		private void GoToNextQuestion(){
+			PointF _targetLocation = new PointF (svQuestionPager.Frame.Width * (m_currentQuestionToDisplayIndex + 1), 0);
+			svQuestionPager.SetContentOffset (_targetLocation,true);
 		
 		}
+
+		private void GoToPreviousQuestion(){
+			PointF _targetLocation = new PointF (svQuestionPager.Frame.Width * (m_currentQuestionToDisplayIndex - 1), 0);
+			svQuestionPager.SetContentOffset (_targetLocation,true);
+		}
+
+
+//		public void DisplayUserQuestion (BusinessModel.UserQuestion aUserQuestion)
+//		{
+//			bool _isNewQuestion = false;
+//			if(m_currentQuestionToDisplay.UserQuestionID != aUserQuestion.UserQuestionID){
+//				_isNewQuestion = true;
+//			}
+//
+//			m_currentQuestionToDisplay = aUserQuestion;
+//
+//			this.Title = string.Format ("{0} of {1}", m_currentQuestionToDisplay.Sequence,
+//			                            AppSession.SelectedExamUserQuestionList.Count);
+//
+////			tblvQuestion.Source = new Question_iPhoneTableSource (m_userQuestionToDisplay, this);
+////			tblvQuestion.ReloadData ();
+////			//Scroll to the very first row so we see the top if we display a new question in this view
+////			if (_isNewQuestion) {
+////				tblvQuestion.ScrollToRow (NSIndexPath.FromRowSection (0,0), UITableViewScrollPosition.Top, false);
+////			}
+//		
+//		}
+
+		public void ReloadCurrentQuestion(){
+			m_currentQuestionToDisplay = AppSession.SelectedExamUserQuestionList [m_currentQuestionToDisplayIndex];
+			tblvCurrentQuestion.Source = new Question_iPhoneTableSource (AppSession.SelectedExamUserQuestionList[m_currentQuestionToDisplayIndex], this);
+			tblvCurrentQuestion.ReloadData ();
+		}
+
+
 
 		public class Question_iPhoneTableSource : UITableViewSource
 		{
@@ -183,7 +358,7 @@ namespace OasisMobile.iOS
 							} else {
 								int _imageWidth = (int)(_widthToHeightRatio * _maxDimension);
 								_imageSize = new SizeF (_imageWidth, _maxDimension);
-								_startingLocation = new PointF ((cell.ContentView.Frame.Width - _imageWidth) / 2, 0);
+								_startingLocation = new PointF ((cell.ContentView.Frame.Width - _imageWidth) / 2, 10);
 							}
 							UIImageView _imageView = new UIImageView (new RectangleF (_startingLocation, _imageSize));
 							_imageView.Image = _imageAtRow;
@@ -279,7 +454,7 @@ namespace OasisMobile.iOS
 							} else {
 								int _imageWidth = (int)(_widthToHeightRatio * _maxDimension);
 								_imageSize = new SizeF (_imageWidth, _maxDimension);
-								_startingLocation = new PointF ((cell.ContentView.Frame.Width - _imageWidth) / 2, 0);
+								_startingLocation = new PointF ((cell.ContentView.Frame.Width - _imageWidth) / 2, 10);
 							} 
 							UIImageView _imageView = new UIImageView (new RectangleF (_startingLocation, _imageSize));
 							_imageView.Image = _imageAtRow;
@@ -541,19 +716,13 @@ namespace OasisMobile.iOS
 						"SELECT * FROM UserQuestion " +
 						"WHERE fkUserExamID={0} ORDER BY Sequence", AppSession.SelectedUserExam.UserExamID));
 
-					BusinessModel.UserQuestion _updatedUserQuestion = 
-						(from x in AppSession.SelectedExamUserQuestionList 
-						 where x.UserQuestionID == m_userQuestion.UserQuestionID select x).FirstOrDefault ();
-
 					if (AppSession.SelectedUserExam.IsLearningMode) {
 						//For learning mode, we update the interface to show the answer
-						m_currentViewController.DisplayUserQuestion (_updatedUserQuestion);
+						m_currentViewController.ReloadCurrentQuestion ();
 					} else {
 						//For examination mode, we go to the next answer
-						int _currentQuestionIndex = AppSession.SelectedExamUserQuestionList.IndexOf (_updatedUserQuestion);
-						if (_currentQuestionIndex < AppSession.SelectedExamUserQuestionList.Count - 1) {
-							m_currentViewController.DisplayUserQuestion (
-								AppSession.SelectedExamUserQuestionList [_currentQuestionIndex +1]);
+						if (m_currentViewController.CurrentQuestionToDisplayIndex < m_currentViewController.TotalQuestionInExam - 1) {
+							m_currentViewController.GoToNextQuestion ();
 						} else {
 							m_currentViewController.NavigationController.PopViewControllerAnimated (true);
 						}
@@ -565,10 +734,8 @@ namespace OasisMobile.iOS
 					if (AppSession.SelectedUserExam.IsLearningMode) {
 						throw new Exception ("There should not be any submit button in learning mode when question has been answered");
 					} else {
-						int _currentQuestionIndex = AppSession.SelectedExamUserQuestionList.IndexOf (m_userQuestion);
-						if (_currentQuestionIndex < AppSession.SelectedExamUserQuestionList.Count - 1) {
-							m_currentViewController.DisplayUserQuestion (
-								AppSession.SelectedExamUserQuestionList [_currentQuestionIndex +1]);
+						if (m_currentViewController.CurrentQuestionToDisplayIndex < m_currentViewController.TotalQuestionInExam - 1) {
+							m_currentViewController.GoToNextQuestion ();
 						} else {
 							m_currentViewController.NavigationController.PopViewControllerAnimated (true);
 						}

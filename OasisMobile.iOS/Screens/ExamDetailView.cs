@@ -117,9 +117,12 @@ namespace OasisMobile.iOS
 					}
 					btnStartContinueExam = new UIButton (UIButtonType.RoundedRect);
 					btnStartContinueExam.AutoresizingMask = UIViewAutoresizing.FlexibleWidth;
-					btnStartContinueExam.Frame = new System.Drawing.RectangleF (0, 0, cell.Frame.Width, 36);
+					btnStartContinueExam.Frame = new System.Drawing.RectangleF (0, 0, cell.ContentView.Frame.Width, 36);
 					btnStartContinueExam.SetTitle (_buttonTitle, UIControlState.Normal);
 					btnStartContinueExam.TouchUpInside += btnStartContinueExam_Clicked;
+					foreach (UIView _subview in cell.ContentView.Subviews) {
+						_subview.RemoveFromSuperview ();
+					}
 					cell.ContentView.AddSubview (btnStartContinueExam);
 				} else {
 					cell = tableView.DequeueReusableCell ("cell");

@@ -71,7 +71,7 @@ namespace OasisMobile.iOS
 		private void ScheduleNextRun ()
 		{
 			using (var pool = new NSAutoreleasePool()) {
-				m_syncTimer = NSTimer.CreateScheduledTimer (60, delegate { 
+				m_syncTimer = NSTimer.CreateScheduledTimer (300, delegate { 
 					SyncManager.PushAllDoSyncData ();
 					ScheduleNextRun ();
 				});

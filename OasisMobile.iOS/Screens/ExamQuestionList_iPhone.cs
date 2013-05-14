@@ -59,6 +59,11 @@ namespace OasisMobile.iOS
 
 		}
 
+		public override void ViewDidLayoutSubviews ()
+		{
+			base.ViewDidLayoutSubviews ();
+		}
+
 		public class ExamQuestionsTableSource : UITableViewSource
 		{
 			private UIViewController m_currentViewController = null;
