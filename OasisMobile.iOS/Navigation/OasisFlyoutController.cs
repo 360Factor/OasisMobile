@@ -13,14 +13,17 @@ namespace OasisMobile.iOS
 {
 	public class OasisFlyoutController : FlyoutNavigationController
 	{
+		private UINavigationController m_examTab;
+		private UINavigationController m_accountTab;
+		private UINavigationController m_aboutTab;
 		public OasisFlyoutController () : base()
 		{
-			var vc1 = new UINavigationController ();
-			vc1.PushViewController (new ExamListView (), false);
-			var vc2 = new UINavigationController ();
-			vc2.PushViewController (new AccountView (), false);
-			var vc3 = new UINavigationController ();
-			vc3.PushViewController (new AboutView (), false);
+			m_examTab = new UINavigationController ();
+			m_examTab.PushViewController (new ExamListView (), false);
+			m_accountTab = new UINavigationController ();
+			m_accountTab.PushViewController (new AccountView (), false);
+			m_aboutTab = new UINavigationController ();
+			m_aboutTab.PushViewController (new AboutView (), false);
 
 			// Create the navigation menu
 			NavigationRoot = new RootElement ("Navigation") {
@@ -41,20 +44,20 @@ namespace OasisMobile.iOS
 					{ 
 						BackgroundColor = UIColor.Clear, 
 						TextColor = UIColor.DarkGray,
-						Image = UIImage.FromBundle ("Images/Icon-Experiment.png") 
+						Image = UIImage.FromBundle ("Images/Icon-Experiment.png")
 					}
 				}
 			};
 
-
-
-			// Supply view controllers corresponding to menu items:
 			ViewControllers = new UIViewController[] {
-				vc1, vc2, vc3
+				m_examTab, m_accountTab, m_aboutTab
 			};
 
 			NavigationTableView.BackgroundView = new UIImageView (UIImage.FromBundle ("Images/Background-Paper.jpg"));
 			NavigationTableView.SeparatorColor = UIColor.DarkGray;
+
 		}
+
 	}
+
 }

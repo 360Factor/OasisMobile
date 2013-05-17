@@ -1,7 +1,5 @@
-
 using System;
 using System.Drawing;
-
 using MonoTouch.Foundation;
 using MonoTouch.UIKit;
 using BigTed;
@@ -28,7 +26,7 @@ namespace OasisMobile.iOS
 		{
 			m_examID = SelectedExamID;
 		}
-		
+
 		public override void DidReceiveMemoryWarning ()
 		{
 			// Releases the view if it doesn't have a superview.
@@ -36,7 +34,7 @@ namespace OasisMobile.iOS
 			
 			// Release any cached data, images, etc that aren't in use.
 		}
-		
+
 		public override void ViewDidLoad ()
 		{
 			base.ViewDidLoad ();
@@ -58,7 +56,6 @@ namespace OasisMobile.iOS
 		
 			AppSession.SelectedExamUserQuestionList = null;
 		}
-	
 
 		public class ExamDetailTableSource : UITableViewSource
 		{
@@ -66,27 +63,30 @@ namespace OasisMobile.iOS
 			private string m_examInfoText;
 			private string m_examCreditInfoText;
 			private UIButton btnStartContinueExam;
+
 			public enum ExamDetailSection
 			{
-				ExamTitle = 0,
-				ExamInfo = 1,
-				CreditInfo = 2,
+				ExamTitle = 0
+,
+				ExamInfo = 1
+,
+				CreditInfo = 2
+,
 				ExamActionButtons = 3
 			}
 
 			private UIViewController m_currentViewController;
-			
+
 			public ExamDetailTableSource (UIViewController ParentViewController, int aExamID)
 			{
 				m_currentViewController = ParentViewController;
 				AppSession.SelectedExam = BusinessModel.Exam.GetExamByExamID (aExamID);
 				AppSession.SelectedUserExam = BusinessModel.UserExam.GetFirstUserExamByUserIDAndExamID (AppSession.LoggedInUser.UserID, aExamID);
 				m_currentExamAccess = BusinessModel.ExamAccess.GetFirstExamAccessByUserIDAndExamID (AppSession.LoggedInUser.UserID,
-				                                                                                   AppSession.SelectedExam.ExamID);
+				                                                                                    AppSession.SelectedExam.ExamID);
 				m_examInfoText = GetExamInfoText ();
 				m_examCreditInfoText = GetExamCreditInfoText ();
 			}
-			
 			#region implemented abstract members of UITableViewSource
 			
 			public override int RowsInSection (UITableView tableview, int section)
@@ -97,7 +97,7 @@ namespace OasisMobile.iOS
 					return 1;
 				}
 			}
-			
+
 			public override UITableViewCell GetCell (UITableView tableView, NSIndexPath indexPath)
 			{
 				
@@ -159,7 +159,6 @@ namespace OasisMobile.iOS
 				
 				return cell;
 			}
-			
 			#endregion
 			
 			public override int NumberOfSections (UITableView tableView)
@@ -167,7 +166,7 @@ namespace OasisMobile.iOS
 				return Enum.GetValues (typeof(ExamDetailSection)).Length;
 				// TODO: Implement - see: http://go-mono.com/docs/index.aspx?link=T%3aMonoTouch.Foundation.ModelAttribute
 			}
-			
+
 			public override string TitleForHeader (UITableView tableView, int section)
 			{
 				// NOTE: Don't call the base implementation on a Model class
@@ -193,7 +192,7 @@ namespace OasisMobile.iOS
 				if (indexPath.Section == (int)ExamDetailSection.ExamActionButtons) {
 					cell.BackgroundView = null;
 					cell.SelectionStyle = UITableViewCellSelectionStyle.None;
-				}else{
+				} else {
 					cell.SelectionStyle = UITableViewCellSelectionStyle.None;
 				}
 				
@@ -220,7 +219,7 @@ namespace OasisMobile.iOS
 				}
 				
 			}
-			
+
 			public override float GetHeightForRow (UITableView tableView, NSIndexPath indexPath)
 			{
 				// NOTE: Don't call the base implementation on a Model class
@@ -232,8 +231,6 @@ namespace OasisMobile.iOS
 					return 44;
 				}
 			}
-
-
 
 			private string GetExamInfoText ()
 			{
@@ -310,12 +307,23 @@ namespace OasisMobile.iOS
 			{
 				if (AppSession.SelectedUserExam != null && AppSession.SelectedUserExam.IsDownloaded) {
 					//Navigate straight to the exam
-					m_currentViewController.NavigationController.PushViewController (new ExamQuestionList_iPhone (), true);
+					if (UserInterfaceIdiomIsPhone) {
+						m_currentViewController.NavigationController.PushViewController (new ExamQuestionList_iPhone (), true);
+					} else {
+						QuestionSplitView _questionSplitView = new QuestionSplitView ();
+						UIView.Transition (AppDelegate.window,
+						                   0.5,
+						                   UIViewAnimationOptions.TransitionFlipFromRight,
+						                   () => {
+												AppDelegate.window.RootViewController = _questionSplitView;
+											},null);
+					}
+				
 				} else {
 					bool _isDownloadSuccessful = false;
 					if (AppSession.SelectedUserExam == null) {
 						//Direct the user to a specific page to select their exam types
-						m_currentViewController.NavigationController.PushViewController (new GenerateNewExamView(),true);
+						m_currentViewController.NavigationController.PushViewController (new GenerateNewExamView(), true);
 						return;
 					}
 
@@ -346,7 +354,20 @@ namespace OasisMobile.iOS
 						BTProgressHUD.Dismiss ();
 						UIApplication.SharedApplication.IdleTimerDisabled = false;
 						if (_isDownloadSuccessful) {
-							m_currentViewController.NavigationController.PushViewController (new ExamQuestionList_iPhone (), true);
+							if(UserInterfaceIdiomIsPhone){
+								m_currentViewController.NavigationController.PushViewController (new ExamQuestionList_iPhone (), true);
+							}else{
+								QuestionSplitView _questionSplitView = new QuestionSplitView();
+								UIView.Transition (AppDelegate.window,
+								                   0.5,
+								                   UIViewAnimationOptions.TransitionFlipFromRight,
+								                   () => {
+														bool _isAnimated = UIView.AnimationsEnabled;
+														UIView.AnimationsEnabled = false;
+														AppDelegate.window.RootViewController = _questionSplitView;
+														UIView.AnimationsEnabled = _isAnimated;
+													},null);
+							}
 						} else {
 							UIAlertView _alert = new UIAlertView ("Download Failed", "We could not download your exam right now. Please try again later", null, "Ok", null);
 							_alert.Show ();
@@ -356,12 +377,11 @@ namespace OasisMobile.iOS
 
 			}
 
-			public void DownloadExamImageProgressUpdated(float aDownloadProgressPct){
+			public void DownloadExamImageProgressUpdated (float aDownloadProgressPct)
+			{
 				BTProgressHUD.Show ("Downloading Exam", aDownloadProgressPct);
 			}
-
 		}
-
 	}
 }
 

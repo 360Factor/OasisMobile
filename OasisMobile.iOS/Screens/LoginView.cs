@@ -34,9 +34,13 @@ namespace OasisMobile.iOS
 			UIImageView loginBgView = new UIImageView(loginImage);
 			loginBgView.ContentMode=UIViewContentMode.ScaleAspectFill;
 			tblvLogin.BackgroundView = loginBgView;
-			tblvLogin.Source = new LoginTableSource();
 		}
 
+		public override void ViewDidLayoutSubviews ()
+		{
+			base.ViewDidLayoutSubviews ();
+			tblvLogin.Source = new LoginTableSource();
+		}
 
 
 	}

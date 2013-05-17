@@ -12,12 +12,6 @@ namespace OasisMobile.iOS
 
 		public static List<BusinessModel.UserQuestion> SelectedExamUserQuestionList {get; set;}
 
-		public static BusinessModel.UserQuestion CurrentDisplayedUserQuestion {get; set;}
-
-		public static BusinessModel.UserQuestion NextUserQuestion {get; set;}
-
-		public static BusinessModel.UserQuestion PreviousUserQuestion {get; set;}
-
 		//public static DateTime QuestionViewStartTimeStamp{ get; set; }
 	}
 }

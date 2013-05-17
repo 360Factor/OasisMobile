@@ -27,6 +27,7 @@ namespace OasisMobile.iOS
 			});
 			NavigationItem.SetLeftBarButtonItem (bbi, false);
 		}
+	
 	}
 
 

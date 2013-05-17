@@ -36,7 +36,7 @@ namespace OasisMobile.iOS
 			BusinessModel.Repository.Instance.InitializeDb ();
 
 			m_flyoutMenuController = new OasisFlyoutController ();
-			window.RootViewController = m_flyoutMenuController;
+			window.RootViewController =  m_flyoutMenuController ;
 			window.MakeKeyAndVisible ();
 			m_loginViewController = new LoginView ();
 			m_loginViewController.ModalInPopover = false;

@@ -103,6 +103,7 @@
     <Folder Include="Images\" />
     <Folder Include="Utilities\" />
     <Folder Include="BusinessModel\Business\" />
+    <Folder Include="CustomCells\" />
   </ItemGroup>
   <ItemGroup>
     <None Include="Info.plist" />
@@ -170,6 +171,12 @@
       <DependentUpon>Question_iPhone.cs</DependentUpon>
     </Compile>
     <Compile Include="BusinessModel\Business\AnswerOptionDetail.cs" />
+    <Compile Include="Screens\ExamQuestionList_iPad.cs" />
+    <Compile Include="Screens\Question_iPad.cs" />
+    <Compile Include="CustomCells\CustomImageCell.cs" />
+    <Compile Include="CustomCells\CustomTextFieldCell.cs" />
+    <Compile Include="Screens\QuestionSplitView.cs" />
+    <Compile Include="Screens\QuestionFlyoutSplitView.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
   <ItemGroup>

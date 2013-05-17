@@ -1,6 +1,5 @@
 using System;
 using System.Collections.Generic;
-
 using MonoTouch.UIKit;
 using MonoTouch.Foundation;
 using BigTed;
@@ -17,9 +16,7 @@ namespace OasisMobile.iOS
 
 		private UITextField txtUserName;
 		private UITextField txtPassword;
-		private UIImageView imgLogo;
 		private UIButton btnLogin;
-	
 		#region implemented abstract members of UITableViewSource
 		
 		public override int RowsInSection (UITableView tableview, int section)
@@ -38,46 +35,76 @@ namespace OasisMobile.iOS
 			}
 
 		}
-		
+
 		public override UITableViewCell GetCell (UITableView tableView, NSIndexPath indexPath)
 		{
-
 			UITableViewCell cell;
-			
 			switch (indexPath.Section) {
 			case 0:
 				cell = tableView.DequeueReusableCell ("logoCell");
 				if (cell == null) {
-					cell = new UITableViewCell (UITableViewCellStyle.Default, "logoCell");
+					cell = new CustomImageCell ("logoCell");
+//					imgLogo = new UIImageView (loginLogoImage);
+//					imgLogo.Frame = new System.Drawing.RectangleF (tableView.Frame.Width/ 2 - 140, 10, 280, 90); 
+
+//					cell.ContentView.AddSubview (imgLogo);
 				}
 				UIImage loginLogoImage = new UIImage ("Images/OasisLogo560px.png");
-				imgLogo = new UIImageView (loginLogoImage);
-				imgLogo.Frame = new System.Drawing.RectangleF (cell.ContentView.Frame.Width / 2 - 140, 10, 280, 90); 
-				cell.ContentView.AddSubview (imgLogo);
-				return cell;
+				((CustomImageCell)cell).MaxImageDimension = loginLogoImage.Size.Width / 2; //We use retina image
+				cell.ImageView.Image = loginLogoImage;
+				break;
 			case 1:
-				cell = tableView.DequeueReusableCell ("cell");
+				cell = tableView.DequeueReusableCell ("inputCell");
 				if (cell == null) {
-					cell = new UITableViewCell (UITableViewCellStyle.Default, "cell");
+					cell = new CustomTextFieldCell ( "inputCell");
 					cell.SelectionStyle = UITableViewCellSelectionStyle.None;
 				}
+				var inputCell = (CustomTextFieldCell)cell;
+				if(UIDevice.CurrentDevice.UserInterfaceIdiom== UIUserInterfaceIdiom.Pad){
+					inputCell.InputTextWidthPct = 75;
+				}
+
 				if (indexPath.Row == 0) {
-					cell.TextLabel.Text = "Username";
-					txtUserName = new UITextField (new System.Drawing.RectangleF (110, 10, 185, 30));
+
+					inputCell.TextLabel.Text = "Username";
+
+					if (txtUserName == null) {
+						txtUserName = inputCell.InputTextField;
+					}
+					else{
+						string _userName = txtUserName.Text;
+						txtUserName = inputCell.InputTextField;
+						txtUserName.Text = _userName;
+					}
 					txtUserName.KeyboardType = UIKeyboardType.Default;
 					txtUserName.Placeholder = "Enter your Username";
 					txtUserName.AutocapitalizationType = UITextAutocapitalizationType.None;
-					txtUserName.AutocorrectionType=UITextAutocorrectionType.No;
+					txtUserName.AutocorrectionType = UITextAutocorrectionType.No;
 					txtUserName.ShouldReturn += delegate {
 						txtUserName.ResignFirstResponder ();
 						txtPassword.BecomeFirstResponder ();
 						return true;
 					};
-					cell.ContentView.AddSubview (txtUserName);
+
+//					txtUserName = new UITextField (new System.Drawing.RectangleF (110, 10, 185, 30));
+
+
+//					foreach (UIView _subview in cell.ContentView.Subviews) {
+//						_subview.RemoveFromSuperview ();
+//					}
+//					cell.ContentView.AddSubview (txtUserName);
 				} else if (indexPath.Row == 1) {
 					
-					cell.TextLabel.Text = "Password";
-					txtPassword = new UITextField (new System.Drawing.RectangleF (110, 10, 185, 30));
+					inputCell.TextLabel.Text = "Password";
+					if (txtPassword == null) {
+						txtPassword = inputCell.InputTextField;
+				
+					} else {
+						string _password = txtPassword.Text;
+						txtPassword = inputCell.InputTextField;
+						txtPassword.Text = _password;
+					}
+
 					txtPassword.KeyboardType = UIKeyboardType.Default;
 					txtPassword.SecureTextEntry = true;
 					txtPassword.Placeholder = "Enter your Password";
@@ -86,32 +113,35 @@ namespace OasisMobile.iOS
 						ProcessLogin ();
 						return true;
 					};
-					cell.ContentView.AddSubview (txtPassword);
+//					txtPassword = new UITextField (new System.Drawing.RectangleF (110, 10, 185, 30));
+//					cell.ContentView.AddSubview (txtPassword);
 				}
-				return cell;
+				break;
 			case 2:
-				cell = new UITableViewCell ();
+				cell = tableView.DequeueReusableCell ("buttonCell");
+				if (cell == null) {
+					cell = new UITableViewCell (UITableViewCellStyle.Default, "buttonCell");
+				}
 		
 				btnLogin = new UIButton (UIButtonType.RoundedRect);
 				btnLogin.AutoresizingMask = UIViewAutoresizing.FlexibleWidth;
-				btnLogin.Frame = new System.Drawing.RectangleF (0, 0, cell.Frame.Width, 36);
+				btnLogin.Frame = new System.Drawing.RectangleF (0, 0, cell.ContentView.Frame.Width, 36);
 				btnLogin.SetTitle ("Login", UIControlState.Normal);
 				btnLogin.TouchUpInside += btnLogin_Clicked;
 				cell.ContentView.AddSubview (btnLogin);
-				return cell;
+				break;
 			default:
 				cell = tableView.DequeueReusableCell ("cell");
 				if (cell == null) {
 					cell = new UITableViewCell (UITableViewCellStyle.Default, "cell");
 
 				}
-				return cell;
+				break;
 			}
-
+			return cell;
 
 
 		}
-		
 		#endregion
 		
 		public override int NumberOfSections (UITableView tableView)
@@ -156,13 +186,14 @@ namespace OasisMobile.iOS
 
 		private void btnLogin_Clicked (object sender, EventArgs e)
 		{
-			ProcessLogin();
+			ProcessLogin ();
 		}
 
-		private void ProcessLogin(){
-			if (txtUserName.Text!=null && txtPassword.Text!=null &&
-			    txtUserName.Text != "" && txtPassword.Text != "") {
-				if(Reachability.InternetConnectionStatus () == NetworkStatus.NotReachable){
+		private void ProcessLogin ()
+		{
+			if (txtUserName.Text != null && txtPassword.Text != null &&
+				txtUserName.Text != "" && txtPassword.Text != "") {
+				if (Reachability.InternetConnectionStatus () == NetworkStatus.NotReachable) {
 					//Not reachable, tell user to try again later
 					UIAlertView _alert = new UIAlertView ("No Connection", "Please connect to the internet to login", null, "Ok", null);
 					_alert.Show ();
@@ -247,7 +278,6 @@ namespace OasisMobile.iOS
 				_requiredFieldAlert.Show ();
 			}
 		}
-
 	}
 }
 

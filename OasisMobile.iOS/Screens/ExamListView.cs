@@ -34,7 +34,6 @@ namespace OasisMobile.iOS
 			this.Title = "Exams";
 			// Perform any additional setup after loading the view, typically from a nib.
 
-
 		}
 
 		public override void ViewWillAppear (bool animated)
