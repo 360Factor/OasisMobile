@@ -581,6 +581,7 @@ namespace OasisMobile.iOS
 							if (i == indexPath.Row) {
 								_answerOptionObj.IsSelected = true;
 							} else {
+								tableView.CellAt (NSIndexPath.FromRowSection (i,(int)UnsubmittedQuestionViewSections.QuestionAnswerOptions)).Selected=false;
 								_answerOptionObj.IsSelected = false;
 							}
 						}
