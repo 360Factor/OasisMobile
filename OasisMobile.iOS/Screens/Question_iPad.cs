@@ -85,6 +85,16 @@ namespace OasisMobile.iOS
 			// Release any cached data, images, etc that aren't in use.
 		}
 
+		private void navBackButton_Clicked(object sender, EventArgs e){
+			UIView.Transition (AppDelegate.window,
+			                   0.5,
+			                   UIViewAnimationOptions.TransitionFlipFromLeft,
+			                   () => {
+				AppDelegate.window.RootViewController = AppDelegate.m_flyoutMenuController;
+				AppDelegate.m_flyoutMenuController.WillAnimateRotation (this.InterfaceOrientation, 0);
+			},null);
+		}
+
 		public override void ViewDidLoad ()
 		{
 			base.ViewDidLoad ();
@@ -98,17 +108,20 @@ namespace OasisMobile.iOS
 			//navBar.TopItem.Title = this.Title;
 			var navItem = new UINavigationItem (this.Title);
 			navBackButton = new UIBarButtonItem (UIBarButtonSystemItem.Rewind);
-			navBackButton.Clicked += (object sender, EventArgs e) => {
-				UIView.Transition (AppDelegate.window,
-				                   0.5,
-				                   UIViewAnimationOptions.TransitionFlipFromLeft,
-				                   () => {
-					AppDelegate.window.RootViewController = AppDelegate.m_flyoutMenuController;
-				},null);
-			};
+//			navBackButton.Clicked += (object sender, EventArgs e) => {
+//				UIView.Transition (AppDelegate.window,
+//				                   0.5,
+//				                   UIViewAnimationOptions.TransitionFlipFromLeft,
+//				                   () => {
+//					AppDelegate.window.RootViewController = AppDelegate.m_flyoutMenuController;
+//					AppDelegate.m_flyoutMenuController.WillAnimateRotation (this.InterfaceOrientation, 0);
+//				},null);
+//			};
+			navBackButton.Clicked += navBackButton_Clicked;
 			navItem.LeftBarButtonItems = new UIBarButtonItem[] {navBackButton};
 			navBar.SetItems (new UINavigationItem[]{navItem},false);
-			svQuestionPager = new UIScrollView (this.View.Bounds);
+			RectangleF _scrollViewFrame = new RectangleF (0, navBar.Frame.Height, this.View.Bounds.Width, this.View.Bounds.Height - navBar.Frame.Height);
+			svQuestionPager = new UIScrollView (_scrollViewFrame);
 
 			svQuestionPager.PagingEnabled = true;
 			svQuestionPager.ShowsHorizontalScrollIndicator = false;
@@ -116,6 +129,12 @@ namespace OasisMobile.iOS
 
 			View.AddSubview (svQuestionPager);
 			View.AddSubview (navBar);
+
+			RectangleF _scrollViewContentFrame = svQuestionPager.Frame;
+			_scrollViewContentFrame.Width = _scrollViewContentFrame.Width * m_totalQuestionInExam;
+			svQuestionPager.ContentSize = _scrollViewContentFrame.Size;
+
+			DisplayCurrentQuestionInScrollView ();
 
 			svQuestionPager.Scrolled += svQuestionPager_Scrolled;
 		}
@@ -130,7 +149,7 @@ namespace OasisMobile.iOS
 			_scrollViewContentFrame.Width = _scrollViewContentFrame.Width * m_totalQuestionInExam;
 			svQuestionPager.ContentSize = _scrollViewContentFrame.Size;
 
-			DisplayCurrentQuestionInScrollView ();
+			Console.WriteLine ("Content Size = " + svQuestionPager.ContentSize.ToString());
 		}
 
 		private void DisplayCurrentQuestionInScrollView(){
@@ -147,6 +166,7 @@ namespace OasisMobile.iOS
 			_currentQuestionFrame.Location = _currentQuestionLocation;
 
 			tblvCurrentQuestion = new UITableView (_currentQuestionFrame, UITableViewStyle.Grouped);
+			tblvCurrentQuestion.AutoresizingMask = UIViewAutoresizing.All;
 			tblvCurrentQuestion.Source =  new Question_iPadTableSource (m_currentQuestionToDisplay, this);
 			svQuestionPager.AddSubview (tblvCurrentQuestion);
 
@@ -161,6 +181,7 @@ namespace OasisMobile.iOS
 				_previousQuestionFrame.Location = _previousQuestionLocation;
 
 				tblvPreviousQuestion = new UITableView (_previousQuestionFrame, UITableViewStyle.Grouped);
+				tblvPreviousQuestion.AutoresizingMask = UIViewAutoresizing.All;
 				tblvPreviousQuestion.Source =  new Question_iPadTableSource (AppSession.SelectedExamUserQuestionList[m_currentQuestionToDisplayIndex-1], this);
 				svQuestionPager.AddSubview (tblvPreviousQuestion);
 			}else{
@@ -177,6 +198,7 @@ namespace OasisMobile.iOS
 				_nextQuestionFrame.Location = _nextQuestionLocation;
 
 				tblvNextQuestion = new UITableView (_nextQuestionFrame, UITableViewStyle.Grouped);
+				tblvNextQuestion.AutoresizingMask = UIViewAutoresizing.All;
 				tblvNextQuestion.Source =  new Question_iPadTableSource (AppSession.SelectedExamUserQuestionList[m_currentQuestionToDisplayIndex+1], this);
 				svQuestionPager.AddSubview (tblvNextQuestion);
 			}
@@ -233,6 +255,7 @@ namespace OasisMobile.iOS
 					_nextQuestionLocation.X = svQuestionPager.Frame.Width * (m_currentQuestionToDisplayIndex+1);
 					_nextQuestionFrame.Location = _nextQuestionLocation;
 					tblvNextQuestion = new UITableView (_nextQuestionFrame, UITableViewStyle.Grouped);
+					tblvNextQuestion.AutoresizingMask = UIViewAutoresizing.All;
 					tblvNextQuestion.Source =  new Question_iPadTableSource (AppSession.SelectedExamUserQuestionList[m_currentQuestionToDisplayIndex+1], this);
 					svQuestionPager.AddSubview (tblvNextQuestion);
 				}else{
@@ -264,6 +287,7 @@ namespace OasisMobile.iOS
 					_previousQuestionLocation.X = svQuestionPager.Frame.Width * (m_currentQuestionToDisplayIndex-1);
 					_previousQuestionFrame.Location = _previousQuestionLocation;
 					tblvPreviousQuestion = new UITableView (_previousQuestionFrame, UITableViewStyle.Grouped);
+					tblvPreviousQuestion.AutoresizingMask = UIViewAutoresizing.All;
 					tblvPreviousQuestion.Source =  new Question_iPadTableSource (AppSession.SelectedExamUserQuestionList[m_currentQuestionToDisplayIndex-1], this);
 					svQuestionPager.AddSubview (tblvPreviousQuestion);
 				}else{

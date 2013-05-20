@@ -34,13 +34,19 @@ namespace OasisMobile.iOS
 						TextColor = UIColor.DarkGray, 
 						Image = UIImage.FromBundle ("Images/Icon-Book.png")
 					},
-					new StyledStringElement ("Account")    
+					new StyledStringElement ("Settings")    
 					{ 
 						BackgroundColor = UIColor.Clear, 
 						TextColor = UIColor.DarkGray,
 						Image = UIImage.FromBundle ("Images/Icon-User.png") 
 					},
-					new StyledStringElement ("About Oasis")
+					new StyledStringElement ("Support")
+					{ 
+						BackgroundColor = UIColor.Clear, 
+						TextColor = UIColor.DarkGray,
+						Image = UIImage.FromBundle ("Images/Icon-Experiment.png")
+					},
+					new StyledStringElement ("About")
 					{ 
 						BackgroundColor = UIColor.Clear, 
 						TextColor = UIColor.DarkGray,

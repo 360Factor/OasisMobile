@@ -311,12 +311,15 @@ namespace OasisMobile.iOS
 						m_currentViewController.NavigationController.PushViewController (new ExamQuestionList_iPhone (), true);
 					} else {
 						QuestionSplitView _questionSplitView = new QuestionSplitView ();
+						AppDelegate.window.RootViewController = _questionSplitView;
+					
 						UIView.Transition (AppDelegate.window,
 						                   0.5,
 						                   UIViewAnimationOptions.TransitionFlipFromRight,
 						                   () => {
-												AppDelegate.window.RootViewController = _questionSplitView;
-											},null);
+							AppDelegate.window.RootViewController = _questionSplitView;
+							_questionSplitView.WillAnimateRotation (m_currentViewController.InterfaceOrientation, 0);
+						}, null);
 					}
 				
 				} else {
@@ -358,14 +361,13 @@ namespace OasisMobile.iOS
 								m_currentViewController.NavigationController.PushViewController (new ExamQuestionList_iPhone (), true);
 							}else{
 								QuestionSplitView _questionSplitView = new QuestionSplitView();
+								AppDelegate.window.RootViewController = _questionSplitView;
 								UIView.Transition (AppDelegate.window,
 								                   0.5,
 								                   UIViewAnimationOptions.TransitionFlipFromRight,
 								                   () => {
-														bool _isAnimated = UIView.AnimationsEnabled;
-														UIView.AnimationsEnabled = false;
 														AppDelegate.window.RootViewController = _questionSplitView;
-														UIView.AnimationsEnabled = _isAnimated;
+														_questionSplitView.WillAnimateRotation (m_currentViewController.InterfaceOrientation, 0);
 													},null);
 							}
 						} else {
