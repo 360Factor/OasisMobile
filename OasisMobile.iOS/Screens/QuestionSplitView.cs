@@ -17,7 +17,7 @@ namespace OasisMobile.iOS
 		{
 			if (AppSession.SelectedExamUserQuestionList == null) {
 				AppSession.SelectedExamUserQuestionList = BusinessModel.UserQuestion.GetUserQuestionsBySQL (string.Format (
-					"SELECT * FROM UserQuestion " +
+					"SELECT * FROM tblUserQuestion " +
 					"WHERE fkUserExamID={0} ORDER BY Sequence", AppSession.SelectedUserExam.UserExamID));
 			}
 			this.ShouldHideViewController = delegate(UISplitViewController svc, UIViewController viewController, UIInterfaceOrientation inOrientation) {
@@ -59,7 +59,7 @@ namespace OasisMobile.iOS
 			base.ViewWillAppear (animated);
 			if (AppSession.SelectedExamUserQuestionList == null) {
 				AppSession.SelectedExamUserQuestionList = BusinessModel.UserQuestion.GetUserQuestionsBySQL (string.Format (
-					"SELECT * FROM UserQuestion " +
+					"SELECT * FROM tblUserQuestion " +
 					"WHERE fkUserExamID={0} ORDER BY Sequence", AppSession.SelectedUserExam.UserExamID));
 			}
 

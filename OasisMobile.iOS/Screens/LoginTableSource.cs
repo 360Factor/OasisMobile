@@ -234,7 +234,7 @@ namespace OasisMobile.iOS
 							_loggedInUser.Save ();
 							_loginSuccessful = true;
 							AppSession.LoggedInUser = _loggedInUser;
-							int _examCount = BusinessModel.SQL.ExecuteScalar<int> ("SELECT COUNT(*) FROM Exam", new object[]{});
+							int _examCount = BusinessModel.SQL.ExecuteScalar<int> ("SELECT COUNT(*) FROM tblExam", new object[]{});
 							if(_examCount==0){
 								//Only sync if there is not exam for now
 								SyncManager.SyncExamDataFromServer();

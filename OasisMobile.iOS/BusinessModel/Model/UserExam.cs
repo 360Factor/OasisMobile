@@ -8,6 +8,7 @@ using System.Linq;
 namespace OasisMobile.BusinessModel
 {
 
+    [Table("tblUserExam")]
     public partial class UserExam
     {
         [PrimaryKey, AutoIncrement, Column("pkUserExamID")]
@@ -85,7 +86,7 @@ namespace OasisMobile.BusinessModel
     public static UserExam GetUserExamByUserExamID(int UserExamID)
     {
         lock(Repository.Locker) {
-            string _sql = string.Format("select * from UserExam where pkUserExamID = {0}", UserExamID);
+            string _sql = string.Format("select * from tblUserExam where pkUserExamID = {0}", UserExamID);
             return GetFirstUserExamBySQL(_sql);
         }
     }
@@ -95,7 +96,7 @@ namespace OasisMobile.BusinessModel
         if (UserExamIDs == null || UserExamIDs.Count == 0)
             return null;
 
-        string _sql = string.Format("select * from UserExam where pkUserExamID in ({0})", string.Join(",", UserExamIDs.ToArray()));
+        string _sql = string.Format("select * from tblUserExam where pkUserExamID in ({0})", string.Join(",", UserExamIDs.ToArray()));
 
         return GetUserExamsBySQL(_sql);;
     }
@@ -142,19 +143,19 @@ namespace OasisMobile.BusinessModel
 
     public static List<UserExam> GetUserExamsByExamID(int ExamID)
     {
-        string _sql = "select * from UserExam where fkExamID = " + ExamID;
+        string _sql = "select * from tblUserExam where fkExamID = " + ExamID;
         return GetUserExamsBySQL(_sql);
     }
 
     public static List<UserExam> GetUserExamsByUserID(int UserID)
     {
-        string _sql = "select * from UserExam where fkUserID = " + UserID;
+        string _sql = "select * from tblUserExam where fkUserID = " + UserID;
         return GetUserExamsBySQL(_sql);
     }
 
         public static UserExam GetUserExamByMainSystemID(int TargetMainSystemID)
         {
-            string _sql = "select * from UserExam where MainSystemID = " + TargetMainSystemID;
+            string _sql = "select * from tblUserExam where MainSystemID = " + TargetMainSystemID;
             return GetFirstUserExamBySQL(_sql);
         }
     }

@@ -8,6 +8,7 @@ using System.Linq;
 namespace OasisMobile.BusinessModel
 {
 
+    [Table("tblUserQuestion")]
     public partial class UserQuestion
     {
         [PrimaryKey, AutoIncrement, Column("pkUserQuestionID")]
@@ -79,7 +80,7 @@ namespace OasisMobile.BusinessModel
     public static UserQuestion GetUserQuestionByUserQuestionID(int UserQuestionID)
     {
         lock(Repository.Locker) {
-            string _sql = string.Format("select * from UserQuestion where pkUserQuestionID = {0}", UserQuestionID);
+            string _sql = string.Format("select * from tblUserQuestion where pkUserQuestionID = {0}", UserQuestionID);
             return GetFirstUserQuestionBySQL(_sql);
         }
     }
@@ -89,7 +90,7 @@ namespace OasisMobile.BusinessModel
         if (UserQuestionIDs == null || UserQuestionIDs.Count == 0)
             return null;
 
-        string _sql = string.Format("select * from UserQuestion where pkUserQuestionID in ({0})", string.Join(",", UserQuestionIDs.ToArray()));
+        string _sql = string.Format("select * from tblUserQuestion where pkUserQuestionID in ({0})", string.Join(",", UserQuestionIDs.ToArray()));
 
         return GetUserQuestionsBySQL(_sql);;
     }
@@ -136,7 +137,7 @@ namespace OasisMobile.BusinessModel
 
         public static UserQuestion GetUserQuestionByMainSystemID(int TargetMainSystemID)
         {
-            string _sql = "select * from UserQuestion where MainSystemID = " + TargetMainSystemID;
+            string _sql = "select * from tblUserQuestion where MainSystemID = " + TargetMainSystemID;
             return GetFirstUserQuestionBySQL(_sql);
         }
     }

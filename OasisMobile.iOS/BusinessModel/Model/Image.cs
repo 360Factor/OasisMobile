@@ -8,6 +8,7 @@ using System.Linq;
 namespace OasisMobile.BusinessModel
 {
 
+    [Table("tblImage")]
     public partial class Image
     {
         [PrimaryKey, AutoIncrement, Column("pkImageID")]
@@ -72,7 +73,7 @@ namespace OasisMobile.BusinessModel
     public static Image GetImageByImageID(int ImageID)
     {
         lock(Repository.Locker) {
-            string _sql = string.Format("select * from Image where pkImageID = {0}", ImageID);
+            string _sql = string.Format("select * from tblImage where pkImageID = {0}", ImageID);
             return GetFirstImageBySQL(_sql);
         }
     }
@@ -82,7 +83,7 @@ namespace OasisMobile.BusinessModel
         if (ImageIDs == null || ImageIDs.Count == 0)
             return null;
 
-        string _sql = string.Format("select * from Image where pkImageID in ({0})", string.Join(",", ImageIDs.ToArray()));
+        string _sql = string.Format("select * from tblImage where pkImageID in ({0})", string.Join(",", ImageIDs.ToArray()));
 
         return GetImagesBySQL(_sql);;
     }
@@ -129,13 +130,13 @@ namespace OasisMobile.BusinessModel
 
     public static List<Image> GetImagesByQuestionID(int QuestionID)
     {
-        string _sql = "select * from Image where fkQuestionID = " + QuestionID;
+        string _sql = "select * from tblImage where fkQuestionID = " + QuestionID;
         return GetImagesBySQL(_sql);
     }
 
         public static Image GetImageByMainSystemID(int TargetMainSystemID)
         {
-            string _sql = "select * from Image where MainSystemID = " + TargetMainSystemID;
+            string _sql = "select * from tblImage where MainSystemID = " + TargetMainSystemID;
             return GetFirstImageBySQL(_sql);
         }
     }

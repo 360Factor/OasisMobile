@@ -21,7 +21,7 @@ namespace OasisMobile.Constant
 
         public static void SeedEnumTable()
         {
-            Dictionary<int, string> _idAndValues = BusinessModel.SQL.ExecuteIntStringDictionary("select pkExamTypeID, ExamTypeName from ExamType");
+			Dictionary<int, string> _idAndValues = BusinessModel.SQL.ExecuteIntStringDictionary("select pkExamTypeID, ExamTypeName from tblExamType");
 
              UpdateOrInsert(_idAndValues, 1, "CME Assessment");
              UpdateOrInsert(_idAndValues, 2, "Fellow PreTest");

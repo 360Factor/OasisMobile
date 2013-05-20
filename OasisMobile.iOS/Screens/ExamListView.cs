@@ -79,17 +79,17 @@ namespace OasisMobile.iOS
 				m_currentViewController = ParentViewController;
 				string _examPurchaseFilter = "";
 				if (!AppConfig.AllowExamPurchase) {
-					_examPurchaseFilter = " AND ExamAccess.HasAccess = 1";
+					_examPurchaseFilter = " AND tblExamAccess.HasAccess = 1";
 				}
 				
 				List<Tuple<string,string,string>> _tempExamTuple = BusinessModel.SQL.Get3Tuples (string.Format (
-					"SELECT Exam.pkExamID, Exam.ExamName, " +
-					"(CASE WHEN UserExam.pkUserExamID IS NULL THEN 'New' WHEN UserExam.IsSubmitted=1 THEN 'Completed' ELSE 'Started' END) " +
-					"FROM Exam LEFT JOIN ExamAccess " +
-					"ON Exam.pkExamID = ExamAccess.fkExamID AND ExamAccess.fkUserID={0} LEFT JOIN UserExam " +
-					"ON Exam.pkExamID = UserExam.fkExamID AND UserExam.fkUserID={0} " +
-					"WHERE (ExamAccess.pkExamAccessID IS NOT NULL {1}) OR UserExam.pkUserExamID IS NOT NULL " +
-					"ORDER BY Exam.ExamName DESC", AppSession.LoggedInUser.UserID, _examPurchaseFilter));
+					"SELECT tblExam.pkExamID, tblExam.ExamName, " +
+					"(CASE WHEN tblUserExam.pkUserExamID IS NULL THEN 'New' WHEN tblUserExam.IsSubmitted=1 THEN 'Completed' ELSE 'Started' END) " +
+					"FROM tblExam LEFT JOIN tblExamAccess " +
+					"ON tblExam.pkExamID = tblExamAccess.fkExamID AND tblExamAccess.fkUserID={0} LEFT JOIN tblUserExam " +
+					"ON tblExam.pkExamID = tblUserExam.fkExamID AND tblUserExam.fkUserID={0} " +
+					"WHERE (tblExamAccess.pkExamAccessID IS NOT NULL {1}) OR tblUserExam.pkUserExamID IS NOT NULL " +
+					"ORDER BY tblExam.ExamName DESC", AppSession.LoggedInUser.UserID, _examPurchaseFilter));
 				
 				List<ExamListData> _userExamList = 
 					(from x in _tempExamTuple select new ExamListData (){

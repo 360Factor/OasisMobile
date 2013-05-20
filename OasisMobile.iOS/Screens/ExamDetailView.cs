@@ -240,7 +240,7 @@ namespace OasisMobile.iOS
 					if (AppSession.SelectedUserExam.IsDownloaded) {
 						//Progress Info
 						Tuple<string,string> _userExamQuestionAnsweredPair = BusinessModel.SQL.Get2Tuples (string.Format (
-							"SELECT SUM(HasAnswered), COUNT(*)  FROM UserQuestion WHERE fkUserExamID={0}", AppSession.SelectedUserExam.UserExamID)) [0];
+							"SELECT SUM(HasAnswered), COUNT(*)  FROM tblUserQuestion WHERE fkUserExamID={0}", AppSession.SelectedUserExam.UserExamID)) [0];
 
 						_examProgressInfo = string.Format ("You have answered {0} of {1} questions.",
 						                                   _userExamQuestionAnsweredPair.Item1, _userExamQuestionAnsweredPair.Item2);

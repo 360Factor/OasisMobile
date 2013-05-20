@@ -30,7 +30,7 @@ namespace OasisMobile.iOS
 			// Perform any additional setup after loading the view, typically from a nib.
 			this.Title = "Questions";
 			AppSession.SelectedExamUserQuestionList = BusinessModel.UserQuestion.GetUserQuestionsBySQL (string.Format (
-				"SELECT * FROM UserQuestion " +
+				"SELECT * FROM tblUserQuestion " +
 				"WHERE fkUserExamID={0} ORDER BY Sequence", AppSession.SelectedUserExam.UserExamID));
 			UIViewController[] _originalNavigationStack = 	NavigationController.ViewControllers;
 			List<UIViewController> _updatedNavigationStack = new List<UIViewController>();

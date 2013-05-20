@@ -8,6 +8,7 @@ using System.Linq;
 namespace OasisMobile.BusinessModel
 {
 
+    [Table("tblAnswerOption")]
     public partial class AnswerOption
     {
         [PrimaryKey, AutoIncrement, Column("pkAnswerOptionID")]
@@ -63,7 +64,7 @@ namespace OasisMobile.BusinessModel
     public static AnswerOption GetAnswerOptionByAnswerOptionID(int AnswerOptionID)
     {
         lock(Repository.Locker) {
-            string _sql = string.Format("select * from AnswerOption where pkAnswerOptionID = {0}", AnswerOptionID);
+            string _sql = string.Format("select * from tblAnswerOption where pkAnswerOptionID = {0}", AnswerOptionID);
             return GetFirstAnswerOptionBySQL(_sql);
         }
     }
@@ -73,7 +74,7 @@ namespace OasisMobile.BusinessModel
         if (AnswerOptionIDs == null || AnswerOptionIDs.Count == 0)
             return null;
 
-        string _sql = string.Format("select * from AnswerOption where pkAnswerOptionID in ({0})", string.Join(",", AnswerOptionIDs.ToArray()));
+        string _sql = string.Format("select * from tblAnswerOption where pkAnswerOptionID in ({0})", string.Join(",", AnswerOptionIDs.ToArray()));
 
         return GetAnswerOptionsBySQL(_sql);;
     }
@@ -120,13 +121,13 @@ namespace OasisMobile.BusinessModel
 
     public static List<AnswerOption> GetAnswerOptionsByQuestionID(int QuestionID)
     {
-        string _sql = "select * from AnswerOption where fkQuestionID = " + QuestionID;
+        string _sql = "select * from tblAnswerOption where fkQuestionID = " + QuestionID;
         return GetAnswerOptionsBySQL(_sql);
     }
 
         public static AnswerOption GetAnswerOptionByMainSystemID(int TargetMainSystemID)
         {
-            string _sql = "select * from AnswerOption where MainSystemID = " + TargetMainSystemID;
+            string _sql = "select * from tblAnswerOption where MainSystemID = " + TargetMainSystemID;
             return GetFirstAnswerOptionBySQL(_sql);
         }
     }

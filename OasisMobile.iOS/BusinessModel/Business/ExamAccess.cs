@@ -8,7 +8,7 @@ namespace OasisMobile.BusinessModel
 		
 		public static BusinessModel.ExamAccess GetFirstExamAccessByUserIDAndExamID(int aUserID, int aExamID){
 			return BusinessModel.ExamAccess .GetFirstExamAccessBySQL (string.Format(
-				"SELECT * FROM ExamAccess " +
+				"SELECT * FROM tblExamAccess " +
 				"WHERE fkUserID={0} AND fkExamID={1} LIMIT 1", aUserID, aExamID));
 		}
 		

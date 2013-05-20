@@ -8,6 +8,7 @@ using System.Linq;
 namespace OasisMobile.BusinessModel
 {
 
+    [Table("tblExam")]
     public partial class Exam
     {
         [PrimaryKey, AutoIncrement, Column("pkExamID")]
@@ -81,7 +82,7 @@ namespace OasisMobile.BusinessModel
     public static Exam GetExamByExamID(int ExamID)
     {
         lock(Repository.Locker) {
-            string _sql = string.Format("select * from Exam where pkExamID = {0}", ExamID);
+            string _sql = string.Format("select * from tblExam where pkExamID = {0}", ExamID);
             return GetFirstExamBySQL(_sql);
         }
     }
@@ -91,7 +92,7 @@ namespace OasisMobile.BusinessModel
         if (ExamIDs == null || ExamIDs.Count == 0)
             return null;
 
-        string _sql = string.Format("select * from Exam where pkExamID in ({0})", string.Join(",", ExamIDs.ToArray()));
+        string _sql = string.Format("select * from tblExam where pkExamID in ({0})", string.Join(",", ExamIDs.ToArray()));
 
         return GetExamsBySQL(_sql);;
     }
@@ -138,19 +139,19 @@ namespace OasisMobile.BusinessModel
 
     public static List<Exam> GetExamsByExamTypeID(int ExamTypeID)
     {
-        string _sql = "select * from Exam where fkExamTypeID = " + ExamTypeID;
+        string _sql = "select * from tblExam where fkExamTypeID = " + ExamTypeID;
         return GetExamsBySQL(_sql);
     }
 
         public static Exam GetExamByExamName(string TargetExamName)
         {
-            string _sql = "select * from Exam where ExamName = " + TargetExamName;
+            string _sql = "select * from tblExam where ExamName = " + TargetExamName;
             return GetFirstExamBySQL(_sql);
         }
 
         public static Exam GetExamByMainSystemID(int TargetMainSystemID)
         {
-            string _sql = "select * from Exam where MainSystemID = " + TargetMainSystemID;
+            string _sql = "select * from tblExam where MainSystemID = " + TargetMainSystemID;
             return GetFirstExamBySQL(_sql);
         }
     }

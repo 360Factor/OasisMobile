@@ -8,6 +8,7 @@ using System.Linq;
 namespace OasisMobile.BusinessModel
 {
 
+    [Table("tblQuestion")]
     public partial class Question
     {
         [PrimaryKey, AutoIncrement, Column("pkQuestionID")]
@@ -76,7 +77,7 @@ namespace OasisMobile.BusinessModel
     public static Question GetQuestionByQuestionID(int QuestionID)
     {
         lock(Repository.Locker) {
-            string _sql = string.Format("select * from Question where pkQuestionID = {0}", QuestionID);
+            string _sql = string.Format("select * from tblQuestion where pkQuestionID = {0}", QuestionID);
             return GetFirstQuestionBySQL(_sql);
         }
     }
@@ -86,7 +87,7 @@ namespace OasisMobile.BusinessModel
         if (QuestionIDs == null || QuestionIDs.Count == 0)
             return null;
 
-        string _sql = string.Format("select * from Question where pkQuestionID in ({0})", string.Join(",", QuestionIDs.ToArray()));
+        string _sql = string.Format("select * from tblQuestion where pkQuestionID in ({0})", string.Join(",", QuestionIDs.ToArray()));
 
         return GetQuestionsBySQL(_sql);;
     }
@@ -133,19 +134,19 @@ namespace OasisMobile.BusinessModel
 
     public static List<Question> GetQuestionsByExamID(int ExamID)
     {
-        string _sql = "select * from Question where fkExamID = " + ExamID;
+        string _sql = "select * from tblQuestion where fkExamID = " + ExamID;
         return GetQuestionsBySQL(_sql);
     }
 
     public static List<Question> GetQuestionsByCategoryID(int CategoryID)
     {
-        string _sql = "select * from Question where fkCategoryID = " + CategoryID;
+        string _sql = "select * from tblQuestion where fkCategoryID = " + CategoryID;
         return GetQuestionsBySQL(_sql);
     }
 
         public static Question GetQuestionByMainSystemID(int TargetMainSystemID)
         {
-            string _sql = "select * from Question where MainSystemID = " + TargetMainSystemID;
+            string _sql = "select * from tblQuestion where MainSystemID = " + TargetMainSystemID;
             return GetFirstQuestionBySQL(_sql);
         }
     }

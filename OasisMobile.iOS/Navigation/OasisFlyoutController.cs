@@ -28,7 +28,7 @@ namespace OasisMobile.iOS
 			// Create the navigation menu
 			NavigationRoot = new RootElement ("Navigation") {
 				new Section () {
-					new StyledStringElement ("Exams")      
+					new StyledStringElement ("My Exams")      
 					{ 
 						BackgroundColor = UIColor.Clear, 
 						TextColor = UIColor.DarkGray, 

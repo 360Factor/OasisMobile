@@ -8,6 +8,7 @@ using System.Linq;
 namespace OasisMobile.BusinessModel
 {
 
+    [Table("tblExamType")]
     public partial class ExamType
     {
         [PrimaryKey, AutoIncrement, Column("pkExamTypeID")]
@@ -53,7 +54,7 @@ namespace OasisMobile.BusinessModel
     public static ExamType GetExamTypeByExamTypeID(int ExamTypeID)
     {
         lock(Repository.Locker) {
-            string _sql = string.Format("select * from ExamType where pkExamTypeID = {0}", ExamTypeID);
+            string _sql = string.Format("select * from tblExamType where pkExamTypeID = {0}", ExamTypeID);
             return GetFirstExamTypeBySQL(_sql);
         }
     }
@@ -63,7 +64,7 @@ namespace OasisMobile.BusinessModel
         if (ExamTypeIDs == null || ExamTypeIDs.Count == 0)
             return null;
 
-        string _sql = string.Format("select * from ExamType where pkExamTypeID in ({0})", string.Join(",", ExamTypeIDs.ToArray()));
+        string _sql = string.Format("select * from tblExamType where pkExamTypeID in ({0})", string.Join(",", ExamTypeIDs.ToArray()));
 
         return GetExamTypesBySQL(_sql);;
     }
@@ -110,7 +111,7 @@ namespace OasisMobile.BusinessModel
 
         public static ExamType GetExamTypeByExamTypeName(string TargetExamTypeName)
         {
-            string _sql = "select * from ExamType where ExamTypeName = " + TargetExamTypeName;
+            string _sql = "select * from tblExamType where ExamTypeName = " + TargetExamTypeName;
             return GetFirstExamTypeBySQL(_sql);
         }
     }

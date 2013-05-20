@@ -82,7 +82,7 @@ namespace OasisMobile.iOS
 		{
 			//Create the Exam main system id to local id mapping
 			Dictionary<int,int> _mainSystemExamIDToLocalExamIDMap = 
-				BusinessModel.SQL.ExecuteIntIntDictionary ("SELECT MainSystemID, pkExamID FROM Exam");
+				BusinessModel.SQL.ExecuteIntIntDictionary ("SELECT MainSystemID, pkExamID FROM tblExam");
 
 			//Get Local User Exams
 			List<BusinessModel.UserExam> _localUserExamList = BusinessModel.UserExam.GetUserExamsByUserID (aUser.UserID);
@@ -149,7 +149,7 @@ namespace OasisMobile.iOS
 		{
 			//Create the Exam main system id to local id mapping
 			Dictionary<int,int> _mainSystemExamIDToLocalExamIDMap = 
-				BusinessModel.SQL.ExecuteIntIntDictionary ("SELECT MainSystemID, pkExamID FROM Exam");
+				BusinessModel.SQL.ExecuteIntIntDictionary ("SELECT MainSystemID, pkExamID FROM tblExam");
 
 			//Get the local userExamAccess
 			List<BusinessModel.ExamAccess> _localExamAccessList =
@@ -193,7 +193,7 @@ namespace OasisMobile.iOS
 					 select x.ExamAccessID).ToList ();
 				if (_examAccessIDToDeleteList.Count > 0) {
 					BusinessModel.SQL.ExecuteNonQuery (string.Format(
-						"DELETE FROM ExamAccess WHERE pkExamAccessID IN({0})",
+						"DELETE FROM tblExamAccess WHERE pkExamAccessID IN({0})",
 						string.Join (",",_examAccessIDToDeleteList)));
 				}
 
@@ -211,7 +211,7 @@ namespace OasisMobile.iOS
 
 			//Since categories are not expected to change in the lifetime of the application, 
 			//we will just pull the the category once and resync categories when a category does not exist in the downloaded exam question
-			Dictionary<int,int> _mainSystemIDToCategoryIDMap = BusinessModel.SQL.ExecuteIntIntDictionary ("SELECT MainSystemID, pkCategoryID FROM Category");
+			Dictionary<int,int> _mainSystemIDToCategoryIDMap = BusinessModel.SQL.ExecuteIntIntDictionary ("SELECT MainSystemID, pkCategoryID FROM tblCategory");
 			if (_mainSystemIDToCategoryIDMap.Count == 0) {
 				//If there are no categories yet, we download the categories from the webservice
 				_mainSystemIDToCategoryIDMap = DownloadCategories ();
@@ -288,9 +288,9 @@ namespace OasisMobile.iOS
 				//-----------------------------------------
 				List<BusinessModel.AnswerOption> _localAnswerOptionList = 
 					BusinessModel.AnswerOption.GetAnswerOptionsBySQL (string.Format (
-						"SELECT AnswerOption.* FROM AnswerOption INNER JOIN Question " +
-						"ON AnswerOption.fkQuestionID = Question.pkQuestionID " +
-						"WHERE Question.fkExamID={0}", aExam.ExamID));
+						"SELECT tblAnswerOption.* FROM tblAnswerOption INNER JOIN tblQuestion " +
+						"ON tblAnswerOption.fkQuestionID = tblQuestion.pkQuestionID " +
+						"WHERE tblQuestion.fkExamID={0}", aExam.ExamID));
 				
 				if (_localAnswerOptionList == null) {
 					_localAnswerOptionList = new List<BusinessModel.AnswerOption> ();
@@ -316,9 +316,9 @@ namespace OasisMobile.iOS
 				//-----------------------------------------
 				List<BusinessModel.Image> _localImageList = 
 					BusinessModel.Image.GetImagesBySQL (string.Format (
-						"SELECT Image.* FROM Image INNER JOIN Question " +
-						"ON Image.fkQuestionID = Question.pkQuestionID " +
-						"WHERE Question.fkExamID={0}", aExam.ExamID));
+						"SELECT tblImage.* FROM tblImage INNER JOIN tblQuestion " +
+						"ON tblImage.fkQuestionID = tblQuestion.pkQuestionID " +
+						"WHERE tblQuestion.fkExamID={0}", aExam.ExamID));
 				
 				if (_localImageList == null) {
 					_localImageList = new List<BusinessModel.Image> ();
@@ -362,9 +362,9 @@ namespace OasisMobile.iOS
 			//Get the local image records on db
 			List<BusinessModel.Image> _localImageList = 
 				BusinessModel.Image.GetImagesBySQL (string.Format (
-					"SELECT Image.* FROM Image INNER JOIN Question " +
-					"ON Image.fkQuestionID = Question.pkQuestionID " +
-					"WHERE Question.fkExamID={0}", aExam.ExamID));
+					"SELECT tblImage.* FROM tblImage INNER JOIN tblQuestion " +
+					"ON tblImage.fkQuestionID = tblQuestion.pkQuestionID " +
+					"WHERE tblQuestion.fkExamID={0}", aExam.ExamID));
 			
 			if (_localImageList == null) {
 				_localImageList = new List<BusinessModel.Image> ();
@@ -487,14 +487,14 @@ namespace OasisMobile.iOS
 				//-------------------------
 				List<BusinessModel.UserQuestion> _localUserQuestionList = 
 					BusinessModel.UserQuestion.GetUserQuestionsBySQL (
-					"SELECT * FROM UserQuestion WHERE fkUserExamID=" + _localUserExam.UserExamID);
+						"SELECT * FROM tblUserQuestion WHERE fkUserExamID=" + _localUserExam.UserExamID);
 				if (_localUserQuestionList == null) {
 					_localUserQuestionList = new List<BusinessModel.UserQuestion> ();
 				}
 				
 				Dictionary<int, int> _mainSystemToQuestionIDMap = 
 					BusinessModel.SQL.ExecuteIntIntDictionary (string.Format (
-						"SELECT MainSystemID, pkQuestionID FROM Question " +
+						"SELECT MainSystemID, pkQuestionID FROM tblQuestion " +
 						"WHERE fkExamID={0}", aExam.ExamID));
 				
 				JsonArray _remoteUserQuestionList = (JsonArray)_userExamCompleteDataObj ["UserQuestionList"];
@@ -535,15 +535,15 @@ namespace OasisMobile.iOS
 				
 				Dictionary<int,int> _mainSystemToAnswerOptionIDMap = 
 					BusinessModel.SQL.ExecuteIntIntDictionary (string.Format (
-						"SELECT AnswerOption.MainSystemID, pkAnswerOptionID FROM AnswerOption INNER JOIN Question " +
-						"ON AnswerOption.fkQuestionID = Question.pkQuestionID " +
-						"WHERE Question.fkExamID={0}", aExam.ExamID));
+						"SELECT tblAnswerOption.MainSystemID, pkAnswerOptionID FROM tblAnswerOption INNER JOIN tblQuestion " +
+						"ON tblAnswerOption.fkQuestionID = tblQuestion.pkQuestionID " +
+						"WHERE tblQuestion.fkExamID={0}", aExam.ExamID));
 				
 				List<BusinessModel.UserAnswerOption> _localUserAnswerOptionList = 
 					BusinessModel.UserAnswerOption.GetUserAnswerOptionsBySQL (string.Format (
-						"SELECT UserAnswerOption.* FROM UserAnswerOption INNER JOIN UserQuestion " +
-						"ON UserAnswerOption.fkUserQuestionID = UserQuestion.pkUserQuestionID " +
-						"WHERE UserQuestion.fkUserExamID={0}", _localUserExam.UserExamID));
+						"SELECT tblUserAnswerOption.* FROM tblUserAnswerOption INNER JOIN tblUserQuestion " +
+						"ON tblUserAnswerOption.fkUserQuestionID = tblUserQuestion.pkUserQuestionID " +
+						"WHERE tblUserQuestion.fkUserExamID={0}", _localUserExam.UserExamID));
 				if (_localUserAnswerOptionList == null) {
 					_localUserAnswerOptionList = new List<BusinessModel.UserAnswerOption> ();
 				}
@@ -658,12 +658,12 @@ namespace OasisMobile.iOS
 			Console.WriteLine ("Pushing data to server");
 			WebserviceHelper.SyncUserExamPostData _postData = new WebserviceHelper.SyncUserExamPostData ();
 			_postData.UserExamList = new List<WebserviceHelper.SyncUserExamPostData.UserExamSyncData> ();
-			string _query = "SELECT UserQuestion.AnsweredDateTime, UserQuestion.SecondsSpent, " +
-				"UserQuestion.MainSystemID AS UserQuestionMainSystemID, " +
-				"UserAnswerOption.MainSystemID AS SelectedAnswerOptionMainSystemID " +
-				"FROM UserQuestion LEFT JOIN UserAnswerOption " +
-				"ON UserQuestion.pkUserQuestionID = UserAnswerOption.fkUserQuestionID AND UserAnswerOption.IsSelected = 1 " +
-				"WHERE UserQuestion.DoSync=1";
+			string _query = "SELECT tblUserQuestion.AnsweredDateTime, tblUserQuestion.SecondsSpent, " +
+				"tblUserQuestion.MainSystemID AS UserQuestionMainSystemID, " +
+				"tblUserAnswerOption.MainSystemID AS SelectedAnswerOptionMainSystemID " +
+				"FROM tblUserQuestion LEFT JOIN tblUserAnswerOption " +
+				"ON tblUserQuestion.pkUserQuestionID = tblUserAnswerOption.fkUserQuestionID AND tblUserAnswerOption.IsSelected = 1 " +
+				"WHERE tblUserQuestion.DoSync=1";
 			
 			_postData.UserQuestionAnswerPairList = BusinessModel.Repository.Instance.Query<WebserviceHelper.SyncUserExamPostData.UserQuestionAnswerSyncData> (_query);
 			if (_postData.UserQuestionAnswerPairList == null) {
@@ -673,7 +673,7 @@ namespace OasisMobile.iOS
 			if(_postData.UserExamList.Count>0 || _postData.UserQuestionAnswerPairList.Count>0){
 				try {
 					WebserviceHelper.SyncUserExamData (_postData);
-					BusinessModel.SQL.ExecuteNonQuery (string.Format ("UPDATE UserQuestion SET DoSync=0 WHERE MainSystemID IN ({0})",
+					BusinessModel.SQL.ExecuteNonQuery (string.Format ("UPDATE tblUserQuestion SET DoSync=0 WHERE MainSystemID IN ({0})",
 					                                                  string.Join (",",_userQuestionToUpdateIDList)));
 				} catch (Exception ex) {
 					Console.WriteLine (ex.ToString ());
@@ -690,9 +690,9 @@ namespace OasisMobile.iOS
 			Console.WriteLine ("Pulling data from server for user: " + aUser.LoginName );
 			string _query = "";
 			if (aDoSyncSubmittedExam) {
-				_query = string.Format ("SELECT * FROM UserExam WHERE IsDownloaded=1 AND fkUserID={0}", aUser.UserID);
+				_query = string.Format ("SELECT * FROM tblUserExam WHERE IsDownloaded=1 AND fkUserID={0}", aUser.UserID);
 			} else {
-				_query = string.Format ("SELECT * FROM UserExam WHERE IsDownloaded=1 AND fkUserID={0} AND IsSubmitted=0", aUser.UserID);
+				_query = string.Format ("SELECT * FROM tblUserExam WHERE IsDownloaded=1 AND fkUserID={0} AND IsSubmitted=0", aUser.UserID);
 			}
 
 			List<BusinessModel.UserExam> _userExamToSyncList = BusinessModel.UserExam.GetUserExamsBySQL (_query);
@@ -711,7 +711,7 @@ namespace OasisMobile.iOS
 				}
 
 				JsonArray _remoteUserQuestionList = (JsonArray)JsonValue.Parse (_response);
-				List<BusinessModel.UserQuestion> _localUserQuestionList = BusinessModel.UserQuestion.GetUserQuestionsBySQL ("SELECT * FROM UserQuestion WHERE fkUserExamID=" + _userExam.UserExamID);
+				List<BusinessModel.UserQuestion> _localUserQuestionList = BusinessModel.UserQuestion.GetUserQuestionsBySQL ("SELECT * FROM tblUserQuestion WHERE fkUserExamID=" + _userExam.UserExamID);
 				List<string> _answerOptionUpdateQueryList = new List<String> ();
 				foreach (JsonValue _remoteUserQuestion in _remoteUserQuestionList) {
 					BusinessModel.UserQuestion _matchingLocalUserQuestion = (from x in _localUserQuestionList where x.MainSystemID == _remoteUserQuestion ["UserQuestionID"] select x).FirstOrDefault ();
@@ -732,8 +732,8 @@ namespace OasisMobile.iOS
 										}
 									}
 									if(_selectedAnswerOptionMainSystemID>0){
-										_answerOptionUpdateQueryList.Add ("UPDATE UserAnswerOption SET IsSelected=0 WHERE fkUserQuestionID=" + _matchingLocalUserQuestion.UserQuestionID); 
-										_answerOptionUpdateQueryList.Add ("UPDATE UserAnswerOption SET IsSelected=1 WHERE MainSystemID=" + _selectedAnswerOptionMainSystemID); 
+										_answerOptionUpdateQueryList.Add ("UPDATE tblUserAnswerOption SET IsSelected=0 WHERE fkUserQuestionID=" + _matchingLocalUserQuestion.UserQuestionID); 
+										_answerOptionUpdateQueryList.Add ("UPDATE tblUserAnswerOption SET IsSelected=1 WHERE MainSystemID=" + _selectedAnswerOptionMainSystemID); 
 									}else{
 										Console.WriteLine ("Error on updating remote question id: " +_matchingLocalUserQuestion.MainSystemID + ". AnswerDateTime exist but no answer is selected");
 									}
@@ -749,7 +749,7 @@ namespace OasisMobile.iOS
 							if (_matchingLocalUserQuestion.AnsweredDateTime != null) {
 								_matchingLocalUserQuestion.AnsweredDateTime = null;
 								//Since there are no answered date time, we should also unselect the answer
-								_answerOptionUpdateQueryList.Add ("UPDATE UserAnswerOption SET IsSelected=0 WHERE fkUserQuestionID=" + _matchingLocalUserQuestion.UserQuestionID);
+								_answerOptionUpdateQueryList.Add ("UPDATE tblUserAnswerOption SET IsSelected=0 WHERE fkUserQuestionID=" + _matchingLocalUserQuestion.UserQuestionID);
 							}
 
 						}

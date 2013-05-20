@@ -625,7 +625,7 @@ namespace OasisMobile.iOS
 			private void btnSubmitQuestionAnswer_Click (object sender, EventArgs e)
 			{
 			 	BusinessModel.UserAnswerOption _previousSelectedAnswer =  BusinessModel.UserAnswerOption.GetFirstUserAnswerOptionBySQL (string.Format (
-					"SELECT * FROM UserAnswerOption WHERE fkUserQuestionID={0} AND IsSelected=1",m_userQuestion.UserQuestionID));
+					"SELECT * FROM tblUserAnswerOption WHERE fkUserQuestionID={0} AND IsSelected=1",m_userQuestion.UserQuestionID));
 				BusinessModel.UserAnswerOptionDetail _selectedAnswerOption = 
 					(from x in m_questionAnswerOptions where x.IsSelected select x).FirstOrDefault ();
 				if (_selectedAnswerOption == null) {
@@ -647,20 +647,20 @@ namespace OasisMobile.iOS
 					List<string> _queriesToExecute = new List<string> ();
 
 					_queriesToExecute.Add (string.Format (
-						"UPDATE UserAnswerOption SET IsSelected=1 WHERE pkUserAnswerOptionID={0}", 
+						"UPDATE tblUserAnswerOption SET IsSelected=1 WHERE pkUserAnswerOptionID={0}", 
 						_selectedAnswerOption.UserAnswerOptionID));
 					_queriesToExecute.Add (string.Format (
-						"UPDATE UserAnswerOption SET IsSelected=0 " +
+						"UPDATE tblUserAnswerOption SET IsSelected=0 " +
 						"WHERE pkUserAnswerOptionID!={0} AND fkUserQuestionID={1}", 
 						_selectedAnswerOption.UserAnswerOptionID, _selectedAnswerOption.UserQuestionID));
 					_queriesToExecute.Add (string.Format (
-						"UPDATE UserQuestion SET HasAnswered=1, HasAnsweredCorrectly={0}, AnsweredDateTime='{1}', DoSync=1 " +
+						"UPDATE tblUserQuestion SET HasAnswered=1, HasAnsweredCorrectly={0}, AnsweredDateTime='{1}', DoSync=1 " +
 						"WHERE pkUserQuestionID={2}",_hasAnsweredCorrectly, DateTime.UtcNow ,_selectedAnswerOption.UserQuestionID));
 
 					BusinessModel.SQL.Execute (_queriesToExecute);
 					//Update the userquestion session too
 					AppSession.SelectedExamUserQuestionList = BusinessModel.UserQuestion.GetUserQuestionsBySQL (string.Format (
-						"SELECT * FROM UserQuestion " +
+						"SELECT * FROM tblUserQuestion " +
 						"WHERE fkUserExamID={0} ORDER BY Sequence", AppSession.SelectedUserExam.UserExamID));
 
 					if (AppSession.SelectedUserExam.IsLearningMode) {

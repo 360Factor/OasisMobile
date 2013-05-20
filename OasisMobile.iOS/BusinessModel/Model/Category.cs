@@ -8,6 +8,7 @@ using System.Linq;
 namespace OasisMobile.BusinessModel
 {
 
+    [Table("tblCategory")]
     public partial class Category
     {
         [PrimaryKey, AutoIncrement, Column("pkCategoryID")]
@@ -65,7 +66,7 @@ namespace OasisMobile.BusinessModel
     public static Category GetCategoryByCategoryID(int CategoryID)
     {
         lock(Repository.Locker) {
-            string _sql = string.Format("select * from Category where pkCategoryID = {0}", CategoryID);
+            string _sql = string.Format("select * from tblCategory where pkCategoryID = {0}", CategoryID);
             return GetFirstCategoryBySQL(_sql);
         }
     }
@@ -75,7 +76,7 @@ namespace OasisMobile.BusinessModel
         if (CategoryIDs == null || CategoryIDs.Count == 0)
             return null;
 
-        string _sql = string.Format("select * from Category where pkCategoryID in ({0})", string.Join(",", CategoryIDs.ToArray()));
+        string _sql = string.Format("select * from tblCategory where pkCategoryID in ({0})", string.Join(",", CategoryIDs.ToArray()));
 
         return GetCategorysBySQL(_sql);;
     }
@@ -122,7 +123,7 @@ namespace OasisMobile.BusinessModel
 
         public static Category GetCategoryByMainSystemID(int TargetMainSystemID)
         {
-            string _sql = "select * from Category where MainSystemID = " + TargetMainSystemID;
+            string _sql = "select * from tblCategory where MainSystemID = " + TargetMainSystemID;
             return GetFirstCategoryBySQL(_sql);
         }
     }

@@ -8,6 +8,7 @@ using System.Linq;
 namespace OasisMobile.BusinessModel
 {
 
+    [Table("tblUser")]
     public partial class User
     {
         [PrimaryKey, AutoIncrement, Column("pkUserID")]
@@ -68,7 +69,7 @@ namespace OasisMobile.BusinessModel
     public static User GetUserByUserID(int UserID)
     {
         lock(Repository.Locker) {
-            string _sql = string.Format("select * from User where pkUserID = {0}", UserID);
+            string _sql = string.Format("select * from tblUser where pkUserID = {0}", UserID);
             return GetFirstUserBySQL(_sql);
         }
     }
@@ -78,7 +79,7 @@ namespace OasisMobile.BusinessModel
         if (UserIDs == null || UserIDs.Count == 0)
             return null;
 
-        string _sql = string.Format("select * from User where pkUserID in ({0})", string.Join(",", UserIDs.ToArray()));
+        string _sql = string.Format("select * from tblUser where pkUserID in ({0})", string.Join(",", UserIDs.ToArray()));
 
         return GetUsersBySQL(_sql);;
     }
@@ -125,19 +126,19 @@ namespace OasisMobile.BusinessModel
 
         public static User GetUserByLoginName(string TargetLoginName)
         {
-            string _sql = "select * from User where LoginName = " + TargetLoginName;
+            string _sql = "select * from tblUser where LoginName = " + TargetLoginName;
             return GetFirstUserBySQL(_sql);
         }
 
         public static User GetUserByEmailAddress(string TargetEmailAddress)
         {
-            string _sql = "select * from User where EmailAddress = " + TargetEmailAddress;
+            string _sql = "select * from tblUser where EmailAddress = " + TargetEmailAddress;
             return GetFirstUserBySQL(_sql);
         }
 
         public static User GetUserByMainSystemID(int TargetMainSystemID)
         {
-            string _sql = "select * from User where MainSystemID = " + TargetMainSystemID;
+            string _sql = "select * from tblUser where MainSystemID = " + TargetMainSystemID;
             return GetFirstUserBySQL(_sql);
         }
     }

@@ -25,12 +25,12 @@ namespace OasisMobile.BusinessModel
 		}
 
 		public static List<UserAnswerOptionDetail> GetUserAnswerOptionDetailListByUserQuestionID(int aUserQuestionID){
-			string _query = string.Format ("SELECT UserAnswerOption.pkUserAnswerOptionID AS UserAnswerOptionID, " +
-			                "UserAnswerOption.fkAnswerOptionID AS AnswerOptionID, UserAnswerOption.fkUserQuestionID AS UserQuestionID, " +
-			                "UserAnswerOption.Sequence, UserAnswerOption.IsSelected, AnswerOption.IsCorrect, AnswerOption.AnswerText AS AnswerOptionText " +
-							"FROM UserAnswerOption INNER JOIN AnswerOption " +
-							"ON UserAnswerOption.fkAnswerOptionID = AnswerOption.pkAnswerOptionID " +
-							"WHERE fkUserQuestionID={0}",aUserQuestionID);
+			string _query = string.Format ("SELECT tblUserAnswerOption.pkUserAnswerOptionID AS UserAnswerOptionID, " +
+			                               "tblUserAnswerOption.fkAnswerOptionID AS AnswerOptionID, tblUserAnswerOption.fkUserQuestionID AS UserQuestionID, " +
+			                               "tblUserAnswerOption.Sequence, tblUserAnswerOption.IsSelected, tblAnswerOption.IsCorrect, tblAnswerOption.AnswerText AS AnswerOptionText " +
+			                               "FROM tblUserAnswerOption INNER JOIN tblAnswerOption " +
+			                               "ON tblUserAnswerOption.fkAnswerOptionID = tblAnswerOption.pkAnswerOptionID " +
+											"WHERE fkUserQuestionID={0}",aUserQuestionID);
 			return Repository.Instance.Query<UserAnswerOptionDetail>(_query);
 		}
 	}

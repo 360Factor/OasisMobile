@@ -7,6 +7,27 @@ using System.Text.RegularExpressions;
 
 namespace OasisMobile.BusinessModel
 {
+    public static class StringExtensions
+    {
+        public static string Replace(this string originalString, string oldValue, string newValue, StringComparison comparisonType)
+        {
+            int startIndex = 0;
+            while (true)
+            {
+                startIndex = originalString.IndexOf(oldValue, startIndex, comparisonType);
+                if (startIndex == -1)
+                    break;
+
+                originalString = originalString.Substring(0, startIndex) + newValue + originalString.Substring(startIndex + oldValue.Length);
+
+                startIndex += newValue.Length;
+            }
+
+            return originalString;
+        }
+
+    }
+    
     class SQL
     {
         #region Wrapper Class
@@ -63,7 +84,7 @@ namespace OasisMobile.BusinessModel
 
         public static List<int> ExecuteIntList(string query, params object[] args)
         {
-            query = Regex.Replace ( query," FROM ", " FROM IntObj FROM ",RegexOptions.IgnoreCase);
+            query = query.Replace(" from ", " as IntObj from ", StringComparison.CurrentCultureIgnoreCase);
 
             List<IntWrapper> _data = Repository.Instance.Query<IntWrapper>(query, args);
 
@@ -73,9 +94,9 @@ namespace OasisMobile.BusinessModel
         public static Dictionary<int, int> ExecuteIntIntDictionary(string query, params object[] args)
         {
             // we are converting something like: select a, b from c
-            query = query.Replace(",", " AS IntObj1,");
-			query = Regex.Replace (query," FROM "," AS IntObj2 FROM ",RegexOptions.IgnoreCase); 
-
+            query = query.Replace(",", " as IntObj1,");
+            query = query.Replace(" from ", " as IntObj2 from ", StringComparison.CurrentCultureIgnoreCase);
+            
             List<IntIntWrapper> _data = Repository.Instance.Query<IntIntWrapper>(query, args);
 
             return (from _d in _data select _d).ToDictionary(x => x.IntObj1, x => x.IntObj2);
@@ -84,8 +105,8 @@ namespace OasisMobile.BusinessModel
         public static Dictionary<string, string> ExecuteStringStringDictionary(string query, params object[] args)
         {
             // we are converting something like: select a, b from c
-            query = query.Replace(",", " AS StringObj1,");
-			query = Regex.Replace (query," FROM ", " AS StringObj2 FROM ", RegexOptions.IgnoreCase);
+            query = query.Replace(",", " as StringObj1,");
+            query = query.Replace(" from ", " as StringObj2 from ", StringComparison.CurrentCultureIgnoreCase);
 
             List<StringStringWrapper> _data = Repository.Instance.Query<StringStringWrapper>(query, args);
 
@@ -95,8 +116,8 @@ namespace OasisMobile.BusinessModel
         public static Dictionary<int, string> ExecuteIntStringDictionary(string query, params object[] args)
         {
             // we are converting something like: select a, b from c
-            query = query.Replace(",", " AS IntObj1,");
-			query = Regex.Replace (query," FROM ", " AS StringObj2 FROM ",RegexOptions.IgnoreCase);
+            query = query.Replace(",", " as IntObj1,");
+            query = query.Replace(" from ", " as StringObj2 from ", StringComparison.CurrentCultureIgnoreCase);
 
             List<IntStringWrapper> _data = Repository.Instance.Query<IntStringWrapper>(query, args);
 
@@ -106,8 +127,8 @@ namespace OasisMobile.BusinessModel
         public static Dictionary<string, int> ExecuteStringIntDictionary(string query, params object[] args)
         {
             // we are converting something like: select a, b from c
-            query = query.Replace(",", " AS StringObj1,");
-			query = Regex.Replace (query," FROM ", " AS IntObj2 FROM ",RegexOptions.IgnoreCase);
+            query = query.Replace(",", " as StringObj1,");
+            query = query.Replace(" from ", " as IntObj2 from ", StringComparison.CurrentCultureIgnoreCase);
 
             List<StringIntWrapper> _data = Repository.Instance.Query<StringIntWrapper>(query, args);
 
@@ -116,7 +137,7 @@ namespace OasisMobile.BusinessModel
 
         public static List<string> ExecuteStringList(string query, params object[] args)
         {
-			query = Regex.Replace (query," FROM ", " AS StringObj FROM ",RegexOptions.IgnoreCase);
+            query = query.Replace(" from ", " as StringObj from ", StringComparison.CurrentCultureIgnoreCase);
 
             List<StringWrapper> _data = Repository.Instance.Query<StringWrapper>(query, args);
 
@@ -147,14 +168,14 @@ namespace OasisMobile.BusinessModel
             List<Tuple<string, string>> _2tuples = new List<Tuple<string, string>>();
 
             //select a, b from c ==> select a as StringTuple1, b as StringTuple2 from c
-            Regex _regex = new Regex("SELECT (.+) FROM (.+)",RegexOptions.IgnoreCase);
+            Regex _regex = new Regex("select (.+) from (.+)", RegexOptions.IgnoreCase);
             Match _match = _regex.Match(query);
 
             if (_match.Success && _match.Groups.Count == 3)
             {
                 List<string> _returnTokens = new List<string>(_match.Groups[1].Value.Split(','));
                 string _afterFrom = _match.Groups[2].Value;
-                string _newQuery = string.Format("SELECT {0} AS StringTuple1, {1} AS StringTuple2 FROM {2}", _returnTokens[0], _returnTokens[1], _afterFrom);
+                string _newQuery = string.Format("select {0} as StringTuple1, {1} as StringTuple2 from {2}", _returnTokens[0], _returnTokens[1], _afterFrom);
 
                 List<TupleWrapper> _data = Repository.Instance.Query<TupleWrapper>(_newQuery);
 
@@ -176,7 +197,7 @@ namespace OasisMobile.BusinessModel
             List<Tuple<string, string, string>> _3tuples = new List<Tuple<string, string, string>>();
 
             //select a, b from c ==> select a as StringTuple1, b as StringTuple2 from c
-            Regex _regex = new Regex("SELECT (.+) FROM (.+)",RegexOptions.IgnoreCase);
+            Regex _regex = new Regex("select (.+) from (.+)", RegexOptions.IgnoreCase);
             Match _match = _regex.Match(query);
 
             if (_match.Success && _match.Groups.Count == 3)
@@ -184,7 +205,7 @@ namespace OasisMobile.BusinessModel
                 List<string> _returnTokens = new List<string>(_match.Groups[1].Value.Split(','));
                 string _afterFrom = _match.Groups[2].Value;
                 string _newQuery = 
-                    string.Format("SELECT {0} AS StringTuple1, {1} AS StringTuple2, {2} AS StringTuple3 FROM {3}", 
+                    string.Format("select {0} as StringTuple1, {1} as StringTuple2, {2} as StringTuple3 from {3}", 
                                     _returnTokens[0],
                                     _returnTokens[1],
                                     _returnTokens[2], 
@@ -210,14 +231,14 @@ namespace OasisMobile.BusinessModel
             List<Tuple<string, string, string, string>> _4tuples = new List<Tuple<string, string, string, string>>();
 
             //select a, b from c ==> select a as StringTuple1, b as StringTuple2 from c
-            Regex _regex = new Regex("SELECT (.+) FROM (.+)",RegexOptions.IgnoreCase);
+            Regex _regex = new Regex("select (.+) from (.+)", RegexOptions.IgnoreCase);
             Match _match = _regex.Match(query);
 
             if (_match.Success && _match.Groups.Count == 3)
             {
                 List<string> _returnTokens = new List<string>(_match.Groups[1].Value.Split(','));
                 string _afterFrom = _match.Groups[2].Value;
-                string _newQuery = string.Format("SELECT {0} AS StringTuple1, {1} AS StringTuple2, {2} AS StringTuple3, {3} AS StringTuple4 FROM {4}", 
+                string _newQuery = string.Format("select {0} as StringTuple1, {1} as StringTuple2, {2} as StringTuple3, {3} as StringTuple4 from {4}", 
                                     _returnTokens[0],
                                     _returnTokens[1],
                                     _returnTokens[2],
@@ -247,14 +268,14 @@ namespace OasisMobile.BusinessModel
             List<Tuple<string, string, string, string, string>> _5tuples = new List<Tuple<string, string, string, string, string>>();
 
             //select a, b from c ==> select a as StringTuple1, b as StringTuple2 from c
-            Regex _regex = new Regex("SELECT (.+) FROM (.+)",RegexOptions.IgnoreCase);
+            Regex _regex = new Regex("select (.+) from (.+)", RegexOptions.IgnoreCase);
             Match _match = _regex.Match(query);
 
             if (_match.Success && _match.Groups.Count == 3)
             {
                 List<string> _returnTokens = new List<string>(_match.Groups[1].Value.Split(','));
                 string _afterFrom = _match.Groups[2].Value;
-                string _newQuery = string.Format("SELECT {0} AS StringTuple1, {1} AS StringTuple2, {2} AS StringTuple3, {3} AS StringTuple4, {4} AS StringTuple5 FROM {5}", 
+                string _newQuery = string.Format("select {0} as StringTuple1, {1} as StringTuple2, {2} as StringTuple3, {3} as StringTuple4, {4} as StringTuple5 from {5}", 
                                                     _returnTokens[0],
                                                     _returnTokens[1],
                                                     _returnTokens[2],
@@ -286,14 +307,14 @@ namespace OasisMobile.BusinessModel
             List<Tuple<string, string, string, string, string, string>> _6tuples = new List<Tuple<string, string, string, string, string, string>>();
 
             //select a, b from c ==> select a as StringTuple1, b as StringTuple2 from c
-            Regex _regex = new Regex("SELECT (.+) FROM (.+)",RegexOptions.IgnoreCase);
+            Regex _regex = new Regex("select (.+) from (.+)", RegexOptions.IgnoreCase);
             Match _match = _regex.Match(query);
 
             if (_match.Success && _match.Groups.Count == 3)
             {
                 List<string> _returnTokens = new List<string>(_match.Groups[1].Value.Split(','));
                 string _afterFrom = _match.Groups[2].Value;
-                string _newQuery = string.Format("SELECT {0} AS StringTuple1, {1} AS StringTuple2, {2} AS StringTuple3, {3} AS StringTuple4, {4} AS StringTuple5, {5} AS StringTuple6 FROM {6}", 
+                string _newQuery = string.Format("select {0} as StringTuple1, {1} as StringTuple2, {2} as StringTuple3, {3} as StringTuple4, {4} as StringTuple5, {5} as StringTuple6 from {6}", 
                                                     _returnTokens[0],
                                                     _returnTokens[1],
                                                     _returnTokens[2],
@@ -327,14 +348,14 @@ namespace OasisMobile.BusinessModel
             List<Tuple<string, string, string, string, string, string, string>> _7tuples = new List<Tuple<string, string, string, string, string, string, string>>();
 
             //select a, b from c ==> select a as StringTuple1, b as StringTuple2 from c
-            Regex _regex = new Regex("SELECT (.+) FROM (.+)",RegexOptions.IgnoreCase);
+            Regex _regex = new Regex("select (.+) from (.+)", RegexOptions.IgnoreCase);
             Match _match = _regex.Match(query);
 
             if (_match.Success && _match.Groups.Count == 3)
             {
                 List<string> _returnTokens = new List<string>(_match.Groups[1].Value.Split(','));
                 string _afterFrom = _match.Groups[2].Value;
-                string _newQuery = string.Format("SELECT {0} AS StringTuple1, {1} AS StringTuple2, {2} AS StringTuple3, {3} AS StringTuple4, {4} AS StringTuple5, {5} AS StringTuple6, {6} AS StringTuple7 FROM {7}",
+                string _newQuery = string.Format("select {0} as StringTuple1, {1} as StringTuple2, {2} as StringTuple3, {3} as StringTuple4, {4} as StringTuple5, {5} as StringTuple6, {6} as StringTuple7 from {7}",
                                                     _returnTokens[0],
                                                     _returnTokens[1],
                                                     _returnTokens[2],

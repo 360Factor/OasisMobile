@@ -136,21 +136,6 @@
     <Compile Include="Utilities\AppSession.cs" />
     <Compile Include="Utilities\SyncManager.cs" />
     <Compile Include="BusinessModel\Constants\Enums.cs" />
-    <Compile Include="BusinessModel\Model\AnswerOption.cs" />
-    <Compile Include="BusinessModel\Model\Category.cs" />
-    <Compile Include="BusinessModel\Model\Exam.cs" />
-    <Compile Include="BusinessModel\Model\ExamAccess.cs" />
-    <Compile Include="BusinessModel\Model\ExamType.cs" />
-    <Compile Include="BusinessModel\Model\Image.cs" />
-    <Compile Include="BusinessModel\Model\Question.cs" />
-    <Compile Include="BusinessModel\Model\User.cs" />
-    <Compile Include="BusinessModel\Model\UserAnswerOption.cs" />
-    <Compile Include="BusinessModel\Model\UserExam.cs" />
-    <Compile Include="BusinessModel\Model\UserQuestion.cs" />
-    <Compile Include="BusinessModel\ORM\ConnectionString.cs" />
-    <Compile Include="BusinessModel\ORM\Repository.cs" />
-    <Compile Include="BusinessModel\ORM\SQL.cs" />
-    <Compile Include="BusinessModel\ORM\SQLite.cs" />
     <Compile Include="BusinessModel\Business\UserExam.cs" />
     <Compile Include="Screens\ExamDetailView.cs" />
     <Compile Include="Screens\ExamDetailView.designer.cs">
@@ -177,6 +162,21 @@
     <Compile Include="CustomCells\CustomTextFieldCell.cs" />
     <Compile Include="Screens\QuestionSplitView.cs" />
     <Compile Include="Screens\QuestionFlyoutSplitView.cs" />
+    <Compile Include="BusinessModel\Model\AnswerOption.cs" />
+    <Compile Include="BusinessModel\Model\Category.cs" />
+    <Compile Include="BusinessModel\Model\Exam.cs" />
+    <Compile Include="BusinessModel\Model\ExamAccess.cs" />
+    <Compile Include="BusinessModel\Model\ExamType.cs" />
+    <Compile Include="BusinessModel\Model\Image.cs" />
+    <Compile Include="BusinessModel\Model\Question.cs" />
+    <Compile Include="BusinessModel\Model\User.cs" />
+    <Compile Include="BusinessModel\Model\UserAnswerOption.cs" />
+    <Compile Include="BusinessModel\Model\UserExam.cs" />
+    <Compile Include="BusinessModel\Model\UserQuestion.cs" />
+    <Compile Include="BusinessModel\ORM\ConnectionString.cs" />
+    <Compile Include="BusinessModel\ORM\Repository.cs" />
+    <Compile Include="BusinessModel\ORM\SQL.cs" />
+    <Compile Include="BusinessModel\ORM\SQLite.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
   <ItemGroup>

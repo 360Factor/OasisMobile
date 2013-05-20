@@ -8,6 +8,7 @@ using System.Linq;
 namespace OasisMobile.BusinessModel
 {
 
+    [Table("tblUserAnswerOption")]
     public partial class UserAnswerOption
     {
         [PrimaryKey, AutoIncrement, Column("pkUserAnswerOptionID")]
@@ -67,7 +68,7 @@ namespace OasisMobile.BusinessModel
     public static UserAnswerOption GetUserAnswerOptionByUserAnswerOptionID(int UserAnswerOptionID)
     {
         lock(Repository.Locker) {
-            string _sql = string.Format("select * from UserAnswerOption where pkUserAnswerOptionID = {0}", UserAnswerOptionID);
+            string _sql = string.Format("select * from tblUserAnswerOption where pkUserAnswerOptionID = {0}", UserAnswerOptionID);
             return GetFirstUserAnswerOptionBySQL(_sql);
         }
     }
@@ -77,7 +78,7 @@ namespace OasisMobile.BusinessModel
         if (UserAnswerOptionIDs == null || UserAnswerOptionIDs.Count == 0)
             return null;
 
-        string _sql = string.Format("select * from UserAnswerOption where pkUserAnswerOptionID in ({0})", string.Join(",", UserAnswerOptionIDs.ToArray()));
+        string _sql = string.Format("select * from tblUserAnswerOption where pkUserAnswerOptionID in ({0})", string.Join(",", UserAnswerOptionIDs.ToArray()));
 
         return GetUserAnswerOptionsBySQL(_sql);;
     }
@@ -124,19 +125,19 @@ namespace OasisMobile.BusinessModel
 
     public static List<UserAnswerOption> GetUserAnswerOptionsByAnswerOptionID(int AnswerOptionID)
     {
-        string _sql = "select * from UserAnswerOption where fkAnswerOptionID = " + AnswerOptionID;
+        string _sql = "select * from tblUserAnswerOption where fkAnswerOptionID = " + AnswerOptionID;
         return GetUserAnswerOptionsBySQL(_sql);
     }
 
     public static List<UserAnswerOption> GetUserAnswerOptionsByUserQuestionID(int UserQuestionID)
     {
-        string _sql = "select * from UserAnswerOption where fkUserQuestionID = " + UserQuestionID;
+        string _sql = "select * from tblUserAnswerOption where fkUserQuestionID = " + UserQuestionID;
         return GetUserAnswerOptionsBySQL(_sql);
     }
 
         public static UserAnswerOption GetUserAnswerOptionByMainSystemID(int TargetMainSystemID)
         {
-            string _sql = "select * from UserAnswerOption where MainSystemID = " + TargetMainSystemID;
+            string _sql = "select * from tblUserAnswerOption where MainSystemID = " + TargetMainSystemID;
             return GetFirstUserAnswerOptionBySQL(_sql);
         }
     }
