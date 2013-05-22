@@ -17,7 +17,7 @@ namespace OasisMobile.iOS
 		// class-level declarations
 		public static UIWindow window;
 		//public static UINavigationController m_navController;
-		public static UIViewController m_loginViewController;
+		//public static UIViewController m_loginViewController;
 		public static OasisFlyoutController m_flyoutMenuController;
 		public static NSTimer m_syncTimer;
 		public static Task m_syncBackgroundTask;
@@ -38,11 +38,10 @@ namespace OasisMobile.iOS
 			m_flyoutMenuController = new OasisFlyoutController ();
 			window.RootViewController =  m_flyoutMenuController ;
 			window.MakeKeyAndVisible ();
-			m_loginViewController = new LoginView ();
-			m_loginViewController.ModalInPopover = false;
-			m_loginViewController.ModalTransitionStyle = UIModalTransitionStyle.FlipHorizontal;
-
-			m_flyoutMenuController.PresentViewController (m_loginViewController, false, null);
+			LoginView _loginViewController = new LoginView ();
+			_loginViewController.ModalInPopover = false;
+			_loginViewController.ModalTransitionStyle = UIModalTransitionStyle.FlipHorizontal;
+			m_flyoutMenuController.PresentViewController (_loginViewController, false, null);
 
 			StartSyncThread ();
 			return true;

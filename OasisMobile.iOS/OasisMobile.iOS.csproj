@@ -177,6 +177,14 @@
     <Compile Include="BusinessModel\ORM\Repository.cs" />
     <Compile Include="BusinessModel\ORM\SQL.cs" />
     <Compile Include="BusinessModel\ORM\SQLite.cs" />
+    <Compile Include="Screens\SettingsView.cs" />
+    <Compile Include="Screens\SettingsView.designer.cs">
+      <DependentUpon>SettingsView.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Screens\SupportView.cs" />
+    <Compile Include="Screens\SupportView.designer.cs">
+      <DependentUpon>SupportView.cs</DependentUpon>
+    </Compile>
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
   <ItemGroup>
@@ -194,6 +202,10 @@
     <InterfaceDefinition Include="Screens\GenerateNewExamView_iPhone.xib" />
     <InterfaceDefinition Include="Screens\GenerateNewExamView_iPad.xib" />
     <InterfaceDefinition Include="Screens\Question_iPhone.xib" />
+    <InterfaceDefinition Include="Screens\SettingsView_iPhone.xib" />
+    <InterfaceDefinition Include="Screens\SettingsView_iPad.xib" />
+    <InterfaceDefinition Include="Screens\SupportView_iPhone.xib" />
+    <InterfaceDefinition Include="Screens\SupportView_iPad.xib" />
   </ItemGroup>
   <ItemGroup>
     <XamarinComponentReference Include="flyoutnavigation">
@@ -217,8 +229,6 @@
     <BundleResource Include="Images\OasisLogo560px.png" />
     <BundleResource Include="Images\OasisBG.png" />
     <BundleResource Include="Images\Icon-Book.png" />
-    <BundleResource Include="Images\Icon-User.png" />
-    <BundleResource Include="Images\Icon-Experiment.png" />
     <BundleResource Include="Images\Background-Paper.jpg" />
     <BundleResource Include="Images\Icon-No.png" />
     <BundleResource Include="Images\Icon-Yes.png" />
@@ -230,5 +240,9 @@
     <BundleResource Include="Resources\Default-Portrait%402x.png" />
     <BundleResource Include="Images\Transparent.png" />
     <BundleResource Include="Images\Slideout.png" />
+    <BundleResource Include="Images\Icon-Beaker.png" />
+    <BundleResource Include="Images\Icon-Gear.png" />
+    <BundleResource Include="Images\Icon-Lifebuoy.png" />
+    <BundleResource Include="Images\Icon-User.png" />
   </ItemGroup>
 </Project>

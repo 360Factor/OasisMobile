@@ -13,6 +13,13 @@ namespace OasisMobile.iOS
 		public static List<BusinessModel.UserQuestion> SelectedExamUserQuestionList {get; set;}
 
 		//public static DateTime QuestionViewStartTimeStamp{ get; set; }
+
+		public static void ClearSession(){
+			LoggedInUser = null;
+			SelectedExam = null;
+			SelectedUserExam = null;
+			SelectedExamUserQuestionList = null;
+		}
 	}
 }
 

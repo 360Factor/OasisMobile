@@ -1,10 +1,9 @@
-
 using System;
 using System.Drawing;
-
 using MonoTouch.Foundation;
 using MonoTouch.UIKit;
 using BigTed;
+
 namespace OasisMobile.iOS
 {
 	public partial class LoginView : UIViewController
@@ -17,7 +16,7 @@ namespace OasisMobile.iOS
 			: base (UserInterfaceIdiomIsPhone ? "LoginView_iPhone" : "LoginView_iPad", null)
 		{
 		}
-		
+
 		public override void DidReceiveMemoryWarning ()
 		{
 			// Releases the view if it doesn't have a superview.
@@ -25,24 +24,39 @@ namespace OasisMobile.iOS
 			
 			// Release any cached data, images, etc that aren't in use.
 		}
-		
+
 		public override void ViewDidLoad ()
 		{
 			base.ViewDidLoad ();
-
-			UIImage loginImage = new UIImage("Images/OasisBG.png");
-			UIImageView loginBgView = new UIImageView(loginImage);
-			loginBgView.ContentMode=UIViewContentMode.ScaleAspectFill;
+			UIImage loginImage;
+			if (UserInterfaceIdiomIsPhone) {
+				loginImage = new UIImage (AppConfig.ImagePaths.iPhone.LoginBackgroundImage);
+			} else {
+				loginImage = new UIImage (AppConfig.ImagePaths.iPad.LoginBackgroundImage);
+			}
+			UIImageView loginBgView = new UIImageView (loginImage);
+			loginBgView.ContentMode = UIViewContentMode.ScaleAspectFill;
 			tblvLogin.BackgroundView = loginBgView;
 		}
 
 		public override void ViewDidLayoutSubviews ()
 		{
 			base.ViewDidLayoutSubviews ();
-			tblvLogin.Source = new LoginTableSource();
+			tblvLogin.Source = new LoginTableSource (this);
 		}
 
+		public override void ViewWillAppear (bool animated)
+		{
+			base.ViewWillAppear (animated);
+			UIApplication.SharedApplication.SetStatusBarStyle (UIStatusBarStyle.BlackOpaque, animated);
+		}
 
+		public override void ViewWillDisappear (bool animated)
+		{
+			base.ViewWillDisappear (animated);
+			UIApplication.SharedApplication.SetStatusBarStyle (UIStatusBarStyle.Default, animated);
+
+		}
 	}
 }
 

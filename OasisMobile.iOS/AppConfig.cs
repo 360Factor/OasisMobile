@@ -28,6 +28,21 @@ namespace OasisMobile.iOS
 			}
 		}
 
+		public static class ImagePaths
+		{
+			public const string ClientLogo = "Images/OasisLogo560px.png";
+
+			public static class iPhone
+			{
+				public const string LoginBackgroundImage="Images/OasisBG.jpg";
+			}
+
+			public static class iPad
+			{
+				public const string LoginBackgroundImage="Images/OasisBG.jpg";
+			}
+		}
+
 	}
 }
 

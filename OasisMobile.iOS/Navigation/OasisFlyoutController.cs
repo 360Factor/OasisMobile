@@ -14,14 +14,17 @@ namespace OasisMobile.iOS
 	public class OasisFlyoutController : FlyoutNavigationController
 	{
 		private UINavigationController m_examTab;
-		private UINavigationController m_accountTab;
+		private UINavigationController m_settingsTab;
+		private UINavigationController m_supportTab;
 		private UINavigationController m_aboutTab;
 		public OasisFlyoutController () : base()
 		{
 			m_examTab = new UINavigationController ();
 			m_examTab.PushViewController (new ExamListView (), false);
-			m_accountTab = new UINavigationController ();
-			m_accountTab.PushViewController (new AccountView (), false);
+			m_settingsTab = new UINavigationController ();
+			m_settingsTab.PushViewController (new SettingsView (), false);
+			m_supportTab = new UINavigationController ();
+			m_supportTab.PushViewController (new SupportView (), false);
 			m_aboutTab = new UINavigationController ();
 			m_aboutTab.PushViewController (new AboutView (), false);
 
@@ -38,25 +41,25 @@ namespace OasisMobile.iOS
 					{ 
 						BackgroundColor = UIColor.Clear, 
 						TextColor = UIColor.DarkGray,
-						Image = UIImage.FromBundle ("Images/Icon-User.png") 
+						Image = UIImage.FromBundle ("Images/Icon-Gear.png") 
 					},
 					new StyledStringElement ("Support")
 					{ 
 						BackgroundColor = UIColor.Clear, 
 						TextColor = UIColor.DarkGray,
-						Image = UIImage.FromBundle ("Images/Icon-Experiment.png")
+						Image = UIImage.FromBundle ("Images/Icon-Lifebuoy.png")
 					},
 					new StyledStringElement ("About")
 					{ 
 						BackgroundColor = UIColor.Clear, 
 						TextColor = UIColor.DarkGray,
-						Image = UIImage.FromBundle ("Images/Icon-Experiment.png")
+						Image = UIImage.FromBundle ("Images/Icon-Beaker.png")
 					}
 				}
 			};
 
 			ViewControllers = new UIViewController[] {
-				m_examTab, m_accountTab, m_aboutTab
+				m_examTab, m_settingsTab, m_supportTab, m_aboutTab
 			};
 
 			NavigationTableView.BackgroundView = new UIImageView (UIImage.FromBundle ("Images/Background-Paper.jpg"));

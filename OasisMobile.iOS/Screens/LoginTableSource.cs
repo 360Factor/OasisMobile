@@ -10,8 +10,10 @@ namespace OasisMobile.iOS
 {
 	public class LoginTableSource : UITableViewSource
 	{
-		public LoginTableSource ()
+		private UIViewController m_currentViewController;
+		public LoginTableSource (UIViewController aCurrentViewController)
 		{
+			m_currentViewController = aCurrentViewController;
 		}
 
 		private UITextField txtUserName;
@@ -49,7 +51,7 @@ namespace OasisMobile.iOS
 
 //					cell.ContentView.AddSubview (imgLogo);
 				}
-				UIImage loginLogoImage = new UIImage ("Images/OasisLogo560px.png");
+				UIImage loginLogoImage = new UIImage (AppConfig.ImagePaths.ClientLogo);
 				((CustomImageCell)cell).MaxImageDimension = loginLogoImage.Size.Width / 2; //We use retina image
 				cell.ImageView.Image = loginLogoImage;
 				break;
@@ -259,7 +261,7 @@ namespace OasisMobile.iOS
 					if (_loginSuccessful) {
 						//After login, we download the exam list and the user's exam before displaying the exam
 						BTProgressHUD.Dismiss ();
-						AppDelegate.m_loginViewController.DismissViewController (true, null);
+						m_currentViewController.DismissViewController (true, null);
 					} else {
 						BTProgressHUD.Dismiss ();
 						if(_serviceReachable){
