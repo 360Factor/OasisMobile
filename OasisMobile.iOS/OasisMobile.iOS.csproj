@@ -126,10 +126,6 @@
     <Compile Include="Screens\AboutView.designer.cs">
       <DependentUpon>AboutView.cs</DependentUpon>
     </Compile>
-    <Compile Include="Screens\AccountView.cs" />
-    <Compile Include="Screens\AccountView.designer.cs">
-      <DependentUpon>AccountView.cs</DependentUpon>
-    </Compile>
     <Compile Include="Navigation\FlyoutNavigationBaseViewController.cs" />
     <Compile Include="AppConfig.cs" />
     <Compile Include="Utilities\Reachability.cs" />
@@ -194,8 +190,6 @@
     <InterfaceDefinition Include="Screens\ExamListView_iPad.xib" />
     <InterfaceDefinition Include="Screens\AboutView_iPhone.xib" />
     <InterfaceDefinition Include="Screens\AboutView_iPad.xib" />
-    <InterfaceDefinition Include="Screens\AccountView_iPhone.xib" />
-    <InterfaceDefinition Include="Screens\AccountView_iPad.xib" />
     <InterfaceDefinition Include="Screens\ExamDetailView_iPhone.xib" />
     <InterfaceDefinition Include="Screens\ExamDetailView_iPad.xib" />
     <InterfaceDefinition Include="Screens\ExamQuestionList_iPhone.xib" />

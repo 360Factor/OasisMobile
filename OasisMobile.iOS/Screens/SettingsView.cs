@@ -5,7 +5,7 @@ using MonoTouch.UIKit;
 
 namespace OasisMobile.iOS
 {
-	public partial class SettingsView : UIViewController
+	public partial class SettingsView : FlyoutNavigationBaseViewController
 	{
 		static bool UserInterfaceIdiomIsPhone {
 			get { return UIDevice.CurrentDevice.UserInterfaceIdiom == UIUserInterfaceIdiom.Phone; }
@@ -43,6 +43,9 @@ namespace OasisMobile.iOS
 			//4.1 Logout
 
 			UIButton btnLogout;
+			UISwitch swPersistentLogin;
+			UISwitch swAutoAdvanceQuestion;
+			UISwitch swAutoSubmitResponse;
 
 			public enum SettingsViewSections
 			{
@@ -104,6 +107,12 @@ namespace OasisMobile.iOS
 						cell = new UITableViewCell (UITableViewCellStyle.Default, "cell");
 					}
 					cell.TextLabel.Text = "Keep Me Logged In";
+					if (swPersistentLogin == null) {
+						swPersistentLogin = new UISwitch ();
+						swPersistentLogin.ValueChanged += swPersistentLogin_ValueChanged;
+						swPersistentLogin.On = NSUserDefaults.StandardUserDefaults.BoolForKey ("PersistentLogin");
+					} 
+					cell.AccessoryView = swPersistentLogin;
 					return cell;
 				case (int)SettingsViewSections.QuestionSubmisionOptions:
 					cell = tableView.DequeueReusableCell ("cell");
@@ -112,8 +121,20 @@ namespace OasisMobile.iOS
 					}
 					if (indexPath.Row == 0) {
 						cell.TextLabel.Text = "Auto Advance Question";
+						if (swAutoAdvanceQuestion == null) {
+							swAutoAdvanceQuestion = new UISwitch ();
+							swAutoAdvanceQuestion.ValueChanged += swAutoAdvanceQuestion_ValueChanged;
+							swAutoAdvanceQuestion.On = NSUserDefaults.StandardUserDefaults.BoolForKey ("AutoAdvanceQuestion");
+						} 
+						cell.AccessoryView = swAutoAdvanceQuestion;
 					} else if (indexPath.Row == 1) {
 						cell.TextLabel.Text = "Auto Submit Response";
+						if (swAutoSubmitResponse == null) {
+							swAutoSubmitResponse = new UISwitch ();
+							swAutoSubmitResponse.ValueChanged += swAutoSubmitResponse_ValueChanged;
+							swAutoSubmitResponse.On = NSUserDefaults.StandardUserDefaults.BoolForKey ("AutoSubmitResponse");
+						} 
+						cell.AccessoryView = swAutoSubmitResponse;
 					}
 					return cell;
 				case (int)SettingsViewSections.LogoutButton:
@@ -159,6 +180,23 @@ namespace OasisMobile.iOS
 				} else {
 					return 44;
 				}
+			}
+
+			private void swPersistentLogin_ValueChanged (object sender, EventArgs e){
+				NSUserDefaults.StandardUserDefaults.SetBool (swPersistentLogin.On,"PersistentLogin");
+				NSUserDefaults.StandardUserDefaults.Synchronize ();
+			}
+
+			private void swAutoAdvanceQuestion_ValueChanged (object sender, EventArgs e){
+				NSUserDefaults.StandardUserDefaults.SetBool (swAutoAdvanceQuestion.On,"AutoAdvanceQuestion");
+				NSUserDefaults.StandardUserDefaults.Synchronize ();
+
+			}
+
+			private void swAutoSubmitResponse_ValueChanged (object sender, EventArgs e){
+				NSUserDefaults.StandardUserDefaults.SetBool (swAutoSubmitResponse.On,"AutoSubmitResponse");
+				NSUserDefaults.StandardUserDefaults.Synchronize ();
+
 			}
 
 			private void btnLogout_Clicked (object sender, EventArgs e)

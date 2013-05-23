@@ -28,6 +28,7 @@ namespace OasisMobile.iOS
 			m_aboutTab = new UINavigationController ();
 			m_aboutTab.PushViewController (new AboutView (), false);
 
+
 			// Create the navigation menu
 			NavigationRoot = new RootElement ("Navigation") {
 				new Section () {

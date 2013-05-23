@@ -5,7 +5,7 @@ using MonoTouch.UIKit;
 
 namespace OasisMobile.iOS
 {
-	public partial class SupportView : UIViewController
+	public partial class SupportView : FlyoutNavigationBaseViewController
 	{
 		static bool UserInterfaceIdiomIsPhone {
 			get { return UIDevice.CurrentDevice.UserInterfaceIdiom == UIUserInterfaceIdiom.Phone; }

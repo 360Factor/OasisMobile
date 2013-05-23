@@ -32,6 +32,11 @@ namespace OasisMobile.iOS
 		{
 			window = new UIWindow (UIScreen.MainScreen.Bounds);
 
+			var _settingValues = new Object [] { true, true, false };
+			var _settingKeys = new Object [] { "PersistentLogin", "AutoAdvanceQuestion", "AutoSubmitResponse" };
+			var _appDefaults = NSDictionary.FromObjectsAndKeys (_settingValues, _settingKeys);
+			NSUserDefaults _userSettings = NSUserDefaults.StandardUserDefaults;
+			_userSettings.RegisterDefaults (_appDefaults);
 			BusinessModel.ConnectionString.SetDBPath (GetDatabaseFilePath());
 			BusinessModel.Repository.Instance.InitializeDb ();
 
@@ -42,6 +47,8 @@ namespace OasisMobile.iOS
 			_loginViewController.ModalInPopover = false;
 			_loginViewController.ModalTransitionStyle = UIModalTransitionStyle.FlipHorizontal;
 			m_flyoutMenuController.PresentViewController (_loginViewController, false, null);
+
+
 
 			StartSyncThread ();
 			return true;

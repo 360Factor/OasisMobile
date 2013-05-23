@@ -5,6 +5,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "OasisMobile.iOS", "OasisMob
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "OasisMobile.Core", "OasisMobile.Core\OasisMobile.Core.csproj", "{9BE146B1-33E3-459A-9A8D-F04499C5BCE6}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AOSSMobile.iOS", "AOSSMobile.iOS\AOSSMobile.iOS.csproj", "{D49E8405-C88F-4B56-915E-59052867B7FE}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|iPhoneSimulator = Debug|iPhoneSimulator
@@ -39,8 +41,20 @@ Global
 		{9BE146B1-33E3-459A-9A8D-F04499C5BCE6}.Release|iPhone.Build.0 = Release|Any CPU
 		{9BE146B1-33E3-459A-9A8D-F04499C5BCE6}.Release|iPhoneSimulator.ActiveCfg = Release|Any CPU
 		{9BE146B1-33E3-459A-9A8D-F04499C5BCE6}.Release|iPhoneSimulator.Build.0 = Release|Any CPU
+		{D49E8405-C88F-4B56-915E-59052867B7FE}.Ad-Hoc|iPhone.ActiveCfg = Ad-Hoc|iPhone
+		{D49E8405-C88F-4B56-915E-59052867B7FE}.Ad-Hoc|iPhone.Build.0 = Ad-Hoc|iPhone
+		{D49E8405-C88F-4B56-915E-59052867B7FE}.AppStore|iPhone.ActiveCfg = AppStore|iPhone
+		{D49E8405-C88F-4B56-915E-59052867B7FE}.AppStore|iPhone.Build.0 = AppStore|iPhone
+		{D49E8405-C88F-4B56-915E-59052867B7FE}.Debug|iPhone.ActiveCfg = Debug|iPhone
+		{D49E8405-C88F-4B56-915E-59052867B7FE}.Debug|iPhone.Build.0 = Debug|iPhone
+		{D49E8405-C88F-4B56-915E-59052867B7FE}.Debug|iPhoneSimulator.ActiveCfg = Debug|iPhoneSimulator
+		{D49E8405-C88F-4B56-915E-59052867B7FE}.Debug|iPhoneSimulator.Build.0 = Debug|iPhoneSimulator
+		{D49E8405-C88F-4B56-915E-59052867B7FE}.Release|iPhone.ActiveCfg = Release|iPhone
+		{D49E8405-C88F-4B56-915E-59052867B7FE}.Release|iPhone.Build.0 = Release|iPhone
+		{D49E8405-C88F-4B56-915E-59052867B7FE}.Release|iPhoneSimulator.ActiveCfg = Release|iPhoneSimulator
+		{D49E8405-C88F-4B56-915E-59052867B7FE}.Release|iPhoneSimulator.Build.0 = Release|iPhoneSimulator
 	EndGlobalSection
 	GlobalSection(MonoDevelopProperties) = preSolution
-		StartupItem = OasisMobile.iOS\OasisMobile.iOS.csproj
+		StartupItem = AOSSMobile.iOS\AOSSMobile.iOS.csproj
 	EndGlobalSection
 EndGlobal
