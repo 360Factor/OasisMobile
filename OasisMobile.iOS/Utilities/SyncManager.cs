@@ -5,7 +5,6 @@ using System.Json;
 using System.Linq;
 using System.IO;
 using System.Text.RegularExpressions;
-
 namespace OasisMobile.iOS
 {
 	public static class SyncManager
@@ -260,6 +259,20 @@ namespace OasisMobile.iOS
 					_matchinglocalQuestion.LeadIn = _remoteQuestion ["LeadIn"];
 					_matchinglocalQuestion.Commentary = _remoteQuestion ["Commentary"];
 					_matchinglocalQuestion.Reference = _remoteQuestion ["Reference"];
+
+					//Clean up the HTML tags
+					//--------------------------
+
+					_matchinglocalQuestion.Stem = Regex.Replace (_matchinglocalQuestion.Stem, "<br\\s*\\/*>", "\n");
+					_matchinglocalQuestion.LeadIn = Regex.Replace (_matchinglocalQuestion.LeadIn, "<br\\s*\\/*>", "\n");
+					_matchinglocalQuestion.Commentary = Regex.Replace (_matchinglocalQuestion.Commentary, "<br\\s*\\/*>", "\n");
+					_matchinglocalQuestion.Reference = Regex.Replace (_matchinglocalQuestion.Reference, "<br\\s*\\/*>", "\n");
+
+					_matchinglocalQuestion.Stem = Regex.Replace (_matchinglocalQuestion.Stem, "<[^>]+>(.+)<\\/[^>]+>","$1");
+					_matchinglocalQuestion.LeadIn = Regex.Replace (_matchinglocalQuestion.LeadIn, "<[^>]+>(.+)<\\/[^>]+>","$1");
+					_matchinglocalQuestion.Commentary = Regex.Replace (_matchinglocalQuestion.Commentary, "<[^>]+>(.+)<\\/[^>]+>","$1");
+					_matchinglocalQuestion.Reference = Regex.Replace (_matchinglocalQuestion.Reference, "<[^>]+>(.+)<\\/[^>]+>","$1");
+
 					_matchinglocalQuestion.ExamID = aExam.ExamID;
 					if (_mainSystemIDToCategoryIDMap.ContainsKey (_remoteQuestion ["CategoryID"])) {
 						_matchinglocalQuestion.CategoryID = _mainSystemIDToCategoryIDMap [_remoteQuestion ["CategoryID"]];

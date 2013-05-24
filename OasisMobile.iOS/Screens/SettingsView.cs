@@ -208,8 +208,6 @@ namespace OasisMobile.iOS
 				_loginViewController.ModalInPopover = false;
 				_loginViewController.ModalTransitionStyle = UIModalTransitionStyle.FlipHorizontal;
 
-
-
 				AppDelegate.m_flyoutMenuController.PresentViewController (_loginViewController,true, null);
 			}
 		}

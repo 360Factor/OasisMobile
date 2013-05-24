@@ -181,6 +181,10 @@
     <Compile Include="Screens\SupportView.designer.cs">
       <DependentUpon>SupportView.cs</DependentUpon>
     </Compile>
+    <Compile Include="Screens\ViewImage.cs" />
+    <Compile Include="Screens\ViewImage.designer.cs">
+      <DependentUpon>ViewImage.cs</DependentUpon>
+    </Compile>
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
   <ItemGroup>
@@ -200,6 +204,8 @@
     <InterfaceDefinition Include="Screens\SettingsView_iPad.xib" />
     <InterfaceDefinition Include="Screens\SupportView_iPhone.xib" />
     <InterfaceDefinition Include="Screens\SupportView_iPad.xib" />
+    <InterfaceDefinition Include="Screens\ViewImage_iPhone.xib" />
+    <InterfaceDefinition Include="Screens\ViewImage_iPad.xib" />
   </ItemGroup>
   <ItemGroup>
     <XamarinComponentReference Include="flyoutnavigation">

@@ -262,6 +262,7 @@ namespace OasisMobile.iOS
 						//After login, we download the exam list and the user's exam before displaying the exam
 						BTProgressHUD.Dismiss ();
 						m_currentViewController.DismissViewController (true, null);
+						AppDelegate.m_flyoutMenuController.WillAnimateRotation (m_currentViewController.InterfaceOrientation, 0);
 					} else {
 						BTProgressHUD.Dismiss ();
 						if(_serviceReachable){

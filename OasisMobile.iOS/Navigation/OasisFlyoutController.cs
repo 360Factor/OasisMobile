@@ -36,25 +36,25 @@ namespace OasisMobile.iOS
 					{ 
 						BackgroundColor = UIColor.Clear, 
 						TextColor = UIColor.DarkGray, 
-						Image = UIImage.FromBundle ("Images/Icon-Book.png")
+						Image = new UIImage(UIImage.FromBundle ("Images/Icon-Book.png").CGImage,2,UIImageOrientation.Up)
 					},
 					new StyledStringElement ("Settings")    
 					{ 
 						BackgroundColor = UIColor.Clear, 
 						TextColor = UIColor.DarkGray,
-						Image = UIImage.FromBundle ("Images/Icon-Gear.png") 
+						Image = new UIImage(UIImage.FromBundle ("Images/Icon-Gear.png").CGImage,2,UIImageOrientation.Up)
 					},
 					new StyledStringElement ("Support")
 					{ 
 						BackgroundColor = UIColor.Clear, 
 						TextColor = UIColor.DarkGray,
-						Image = UIImage.FromBundle ("Images/Icon-Lifebuoy.png")
+						Image = new UIImage(UIImage.FromBundle ("Images/Icon-Lifebuoy.png").CGImage,2,UIImageOrientation.Up)
 					},
 					new StyledStringElement ("About")
 					{ 
 						BackgroundColor = UIColor.Clear, 
 						TextColor = UIColor.DarkGray,
-						Image = UIImage.FromBundle ("Images/Icon-Beaker.png")
+						Image = new UIImage(UIImage.FromBundle ("Images/Icon-Beaker.png").CGImage,2,UIImageOrientation.Up)
 					}
 				}
 			};
