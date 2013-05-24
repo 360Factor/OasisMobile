@@ -14,6 +14,7 @@ namespace OasisMobile.iOS
 		private UIScrollView svCurrentImageZoomView;
 		private UIScrollView svNextImageZoomView;
 		private UIScrollView svPreviousImageZoomView;
+		private UIBarButtonItem navBackButton = null;
 
 		static bool UserInterfaceIdiomIsPhone {
 			get { return UIDevice.CurrentDevice.UserInterfaceIdiom == UIUserInterfaceIdiom.Phone; }
@@ -25,7 +26,7 @@ namespace OasisMobile.iOS
 			m_questionImagesList = BusinessModel.Image.GetImagesBySQL ( string.Format (
 								    "SELECT tblImageToReturn.* FROM tblImage AS tblImageToReturn INNER JOIN tblImage AS tblOriginalImage " +
 								    "ON tblImageToReturn.fkQuestionID = tblOriginalImage.fkQuestionID " +
-									"WHERE tblOriginalImage.pkImageID={0}",aImageToDisplayID));
+									"WHERE tblOriginalImage.pkImageID={0} ORDER BY Title",aImageToDisplayID));
 			m_currentImageDisplayIndex = m_questionImagesList.FindIndex (x => x.ImageID==aImageToDisplayID);
 		}
 
@@ -40,15 +41,18 @@ namespace OasisMobile.iOS
 		public override void ViewDidLoad ()
 		{
 			base.ViewDidLoad ();
+			this.Title = "Figure " + m_questionImagesList [m_currentImageDisplayIndex].Title;
+			var navItem = new UINavigationItem (this.Title);
+			navBackButton = new UIBarButtonItem (UIBarButtonSystemItem.Rewind);
+			navBackButton.Clicked += navBackButton_Clicked;
+			navItem.LeftBarButtonItems = new UIBarButtonItem[] {navBackButton};
+			navBar.SetItems (new UINavigationItem[]{navItem},false);
 
 			RectangleF _scrollViewFrame = svImagePager.Frame;
 			svImagePager.ContentSize = new SizeF( _scrollViewFrame.Width * m_questionImagesList.Count, _scrollViewFrame.Height);
 			svImagePager.AutoresizingMask = UIViewAutoresizing.All;
 
-
-
-
-
+			DisplayCurrentImageInScrollView ();
 
 			svImagePager.Scrolled += svImagePager_Scrolled;
 			// Perform any additional setup after loading the view, typically from a nib.
@@ -56,36 +60,81 @@ namespace OasisMobile.iOS
 
 
 		public void DisplayCurrentImageInScrollView(){
+			foreach (UIView _subView in svImagePager.Subviews) {
+				//Clear all previous subviews
+				_subView.RemoveFromSuperview ();
+			}
+
 			//Load the current Image
 			//-------------------------
 			BusinessModel.Image _currentImageRecord = m_questionImagesList [m_currentImageDisplayIndex];
 			UIImage _currentImageDataToDisplay = UIImage.FromFile (_currentImageRecord.FilePath);
 
 			UIImageView _currentImageViewToDisplay = new UIImageView (_currentImageDataToDisplay);
-			_currentImageViewToDisplay.AutoresizingMask = UIViewAutoresizing.All;
 			_currentImageViewToDisplay.Frame = new RectangleF (0, 0, _currentImageDataToDisplay.Size.Width, _currentImageDataToDisplay.Size.Height);
 
 			RectangleF _currentImageScrollViewFrame = svImagePager.Frame;
 			_currentImageScrollViewFrame.X = _currentImageScrollViewFrame.Width * m_currentImageDisplayIndex;
+			_currentImageScrollViewFrame.Y = 0;
 			svCurrentImageZoomView= new UIScrollView (_currentImageScrollViewFrame);
+			svCurrentImageZoomView.AutoresizingMask = UIViewAutoresizing.All;
 
 			svCurrentImageZoomView.ContentSize = _currentImageDataToDisplay.Size;
 			svCurrentImageZoomView.AddSubview (_currentImageViewToDisplay);
 			svCurrentImageZoomView.ViewForZoomingInScrollView = GetZoomedView;
-			svCurrentImageZoomView.DidZoom += (object sender, EventArgs e) => {
-				CenterCurrentScrollViewImages ();
-			};
-
-			if (m_currentImageDisplayIndex) {
-
-			}
-			else{
-
-			}
-
+			svCurrentImageZoomView.DidZoom += ZoomView_DidZoom;
 			svImagePager.AddSubview (svCurrentImageZoomView);
 
-			svImagePager.SetContentOffset (new PointF(_currentImageScrollViewFrame.Width * m_currentImageDisplayIndex,0),
+			if (m_currentImageDisplayIndex > 0) {
+				//Load previous image
+				BusinessModel.Image _previousImageRecord = m_questionImagesList [m_currentImageDisplayIndex-1];
+				UIImage _previousImageDataToDisplay = UIImage.FromFile (_previousImageRecord.FilePath);
+
+				UIImageView _previousImageViewToDisplay = new UIImageView (_previousImageDataToDisplay);
+				_previousImageViewToDisplay.Frame = new RectangleF (0, 0, _previousImageDataToDisplay.Size.Width, _previousImageDataToDisplay.Size.Height);
+
+				RectangleF _previousImageScrollViewFrame = svImagePager.Frame;
+				_previousImageScrollViewFrame.X = _previousImageScrollViewFrame.Width * (m_currentImageDisplayIndex - 1);
+				_previousImageScrollViewFrame.Y = 0;
+				svPreviousImageZoomView= new UIScrollView (_previousImageScrollViewFrame);
+				svPreviousImageZoomView.AutoresizingMask = UIViewAutoresizing.All;
+
+				svPreviousImageZoomView.ContentSize = _previousImageDataToDisplay.Size;
+				svPreviousImageZoomView.AddSubview (_previousImageViewToDisplay);
+				svPreviousImageZoomView.ViewForZoomingInScrollView = GetZoomedView;
+				svPreviousImageZoomView.DidZoom += ZoomView_DidZoom;
+				svImagePager.AddSubview (svPreviousImageZoomView);
+			}
+			else{
+				svPreviousImageZoomView = null;
+			}
+
+			if (m_currentImageDisplayIndex < m_questionImagesList.Count-1) {
+				//Load next image
+				BusinessModel.Image _nextImageRecord = m_questionImagesList [m_currentImageDisplayIndex+1];
+				UIImage _nextImageDataToDisplay = UIImage.FromFile (_nextImageRecord.FilePath);
+
+				UIImageView _nextImageViewToDisplay = new UIImageView (_nextImageDataToDisplay);
+				_nextImageViewToDisplay.Frame = new RectangleF (0, 0, _nextImageDataToDisplay.Size.Width, _nextImageDataToDisplay.Size.Height);
+
+				RectangleF _nextImageScrollViewFrame = svImagePager.Frame;
+				_nextImageScrollViewFrame.X = _nextImageScrollViewFrame.Width * (m_currentImageDisplayIndex + 1);
+				_nextImageScrollViewFrame.Y = 0;
+				svNextImageZoomView= new UIScrollView (_nextImageScrollViewFrame);
+				svNextImageZoomView.AutoresizingMask = UIViewAutoresizing.All;
+
+				svNextImageZoomView.ContentSize = _nextImageDataToDisplay.Size;
+				svNextImageZoomView.AddSubview (_nextImageViewToDisplay);
+				svNextImageZoomView.ViewForZoomingInScrollView = GetZoomedView;
+				svNextImageZoomView.DidZoom += ZoomView_DidZoom;
+				svImagePager.AddSubview (svNextImageZoomView);
+			}
+			else{
+				svNextImageZoomView = null;
+			}
+		
+
+			svImagePager.SetContentOffset (new PointF(svImagePager.Frame.Width * m_currentImageDisplayIndex,0),
 			                               false);
 		}
 
@@ -96,6 +145,10 @@ namespace OasisMobile.iOS
 			RectangleF _scrollViewFrame = svImagePager.Frame;
 			svImagePager.ContentSize = new SizeF( _scrollViewFrame.Width * m_questionImagesList.Count, _scrollViewFrame.Height);
 			svImagePager.AutoresizingMask = UIViewAutoresizing.All;
+			svImagePager.SetContentOffset (new PointF(svImagePager.Frame.Width * m_currentImageDisplayIndex,0),
+			                               false);
+			SetZoomForAllScrollView ();
+			CenterAllScrollViewImages ();
 		}
 
 		public void svImagePager_Scrolled (object sender, EventArgs e){
@@ -103,54 +156,187 @@ namespace OasisMobile.iOS
 			if (_scrollViewDisplayIndex == m_currentImageDisplayIndex) {
 				return;
 			}
+
+			if (_scrollViewDisplayIndex == m_currentImageDisplayIndex + 1) {
+				//Set the next image as current one and load the next one
+				//-----------------------------------------------------
+
+				//Remove the previous image scrollview  from scrollview to save memory
+				if(svPreviousImageZoomView!=null){
+					svPreviousImageZoomView.RemoveFromSuperview ();
+				}
+				//Set the previous image scrollview to the current one and set the current image scroll view to use the next one
+				svPreviousImageZoomView = svCurrentImageZoomView;
+				svCurrentImageZoomView = svNextImageZoomView;
+
+				m_currentImageDisplayIndex ++;
+
+				if (m_currentImageDisplayIndex < m_questionImagesList.Count - 1) {
+					//Load the next image to the scrollview
+					BusinessModel.Image _nextImageRecord = m_questionImagesList [m_currentImageDisplayIndex+1];
+					UIImage _nextImageDataToDisplay = UIImage.FromFile (_nextImageRecord.FilePath);
+
+					UIImageView _nextImageViewToDisplay = new UIImageView (_nextImageDataToDisplay);
+					_nextImageViewToDisplay.Frame = new RectangleF (0, 0, _nextImageDataToDisplay.Size.Width, _nextImageDataToDisplay.Size.Height);
+
+					RectangleF _nextImageScrollViewFrame = svImagePager.Frame;
+					_nextImageScrollViewFrame.X = _nextImageScrollViewFrame.Width * (m_currentImageDisplayIndex +1);
+					_nextImageScrollViewFrame.Y = 0;
+					svNextImageZoomView= new UIScrollView (_nextImageScrollViewFrame);
+					svNextImageZoomView.AutoresizingMask = UIViewAutoresizing.All;
+
+					svNextImageZoomView.ContentSize = _nextImageDataToDisplay.Size;
+					svNextImageZoomView.AddSubview (_nextImageViewToDisplay);
+					svNextImageZoomView.ViewForZoomingInScrollView = GetZoomedView;
+					svNextImageZoomView.DidZoom += ZoomView_DidZoom;
+					svImagePager.AddSubview (svNextImageZoomView);
+				} else {
+					//There is no next image available
+					svNextImageZoomView = null;
+				}
+
+			}else if(_scrollViewDisplayIndex == m_currentImageDisplayIndex - 1){
+				//Set the previous image as current one and load the one before the previous image
+				//-----------------------------------------------------
+
+				//Remove the next image scrollview  from scrollview to save memory
+				if(svNextImageZoomView!=null){
+					svNextImageZoomView.RemoveFromSuperview ();
+				}
+				//Set the next image scrollview to the current one and set the current image scroll view to use the previous one
+				svNextImageZoomView = svCurrentImageZoomView;
+				svCurrentImageZoomView = svPreviousImageZoomView;
+
+				m_currentImageDisplayIndex --;
+
+				if (m_currentImageDisplayIndex > 0) {
+					//Load previous image
+					BusinessModel.Image _previousImageRecord = m_questionImagesList [m_currentImageDisplayIndex-1];
+					UIImage _previousImageDataToDisplay = UIImage.FromFile (_previousImageRecord.FilePath);
+
+					UIImageView _previousImageViewToDisplay = new UIImageView (_previousImageDataToDisplay);
+					_previousImageViewToDisplay.Frame = new RectangleF (0, 0, _previousImageDataToDisplay.Size.Width, _previousImageDataToDisplay.Size.Height);
+
+					RectangleF _previousImageScrollViewFrame = svImagePager.Frame;
+					_previousImageScrollViewFrame.X = _previousImageScrollViewFrame.Width * (m_currentImageDisplayIndex - 1);
+					_previousImageScrollViewFrame.Y = 0;
+					svPreviousImageZoomView= new UIScrollView (_previousImageScrollViewFrame);
+					svPreviousImageZoomView.AutoresizingMask = UIViewAutoresizing.All;
+
+					svPreviousImageZoomView.ContentSize = _previousImageDataToDisplay.Size;
+					svPreviousImageZoomView.AddSubview (_previousImageViewToDisplay);
+					svPreviousImageZoomView.ViewForZoomingInScrollView = GetZoomedView;
+					svPreviousImageZoomView.DidZoom += ZoomView_DidZoom;
+					svImagePager.AddSubview (svPreviousImageZoomView);
+				}
+				else{
+					svPreviousImageZoomView = null;
+				}
+			}
+			else {
+				throw new Exception ("Scroll view index should only return the image before or after the current image");
+			}
+
+			this.Title = "Figure " + m_questionImagesList [m_currentImageDisplayIndex].Title;
+			navBar.TopItem.Title = this.Title;
 		}
 
 		public UIView GetZoomedView (UIScrollView aZoomedScrollView){
 			return aZoomedScrollView.Subviews[0];
 		}
 
+		public void ZoomView_DidZoom(object sender, EventArgs e){
+			UIScrollView _zoomedScrollView = (UIScrollView)sender;
+
+			SizeF _scrollViewBound = _zoomedScrollView.Bounds.Size;
+			UIImageView _childImageView = (UIImageView) _zoomedScrollView.Subviews [0];
+			RectangleF _contentsFrame = _childImageView.Frame;
+			if (_contentsFrame.Width < _scrollViewBound.Width) {
+				_contentsFrame.X = (_scrollViewBound.Width - _contentsFrame.Width) / (float)2;
+			} else {
+				_contentsFrame.X = 0;
+			}
+
+			if (_contentsFrame.Height < _scrollViewBound.Height) {
+				_contentsFrame.Y = (_scrollViewBound.Height - _contentsFrame.Height) / (float)2;
+			} else {
+				_contentsFrame.Y = 0;
+			}
+
+			_childImageView.Frame = _contentsFrame;
+		}
+
 		public override void ViewWillAppear (bool animated)
 		{
 			base.ViewWillAppear (animated);
-			SetDefaultZoomForAllScrollView ();
-			CenterAllScrollViewImages ();
+//			SetZoomForAllScrollView ();
+//			CenterAllScrollViewImages ();
+		}
 
+		private void navBackButton_Clicked(object sender, EventArgs e){
+			this.DismissViewController (true, null);
 		}
 
 		private void SetZoomForPreviousScrollView(){
 			if (svPreviousImageZoomView != null) {
-				float _widthScale = svPreviousImageZoomView.Frame.Width / svPreviousImageZoomView.ContentSize.Width;
-				float _heightScale = svPreviousImageZoomView.Frame.Height / svPreviousImageZoomView.ContentSize.Height;
+				float _minimumScaleBeforeUpdate = svPreviousImageZoomView.MinimumZoomScale;
+				float _zoomScaleBeforeUpdate = svPreviousImageZoomView.ZoomScale;
+				RectangleF _imageViewFrame = svPreviousImageZoomView.Subviews [0].Frame;
+				float _widthScale = svPreviousImageZoomView.Frame.Width / _imageViewFrame.Width;
+				float _heightScale = svPreviousImageZoomView.Frame.Height / _imageViewFrame.Height;
 				float _minScale = Math.Min (_widthScale, _heightScale);
 				svPreviousImageZoomView.MinimumZoomScale = _minScale;
 				svPreviousImageZoomView.MaximumZoomScale = 1;
-				svPreviousImageZoomView.ZoomScale = _minScale;
+
+				if(_minimumScaleBeforeUpdate == _zoomScaleBeforeUpdate){
+					//This is needed so that if the image minimum scale gets smaller to display the full image, we still see the full image instead of the semi zoomed in one
+					svPreviousImageZoomView.ZoomScale = _minScale;
+				}
+
+			
 			}
 		}
 
 		private void SetZoomForCurrentScrollView(){
 			if (svCurrentImageZoomView != null) {
-				float _widthScale = svCurrentImageZoomView.Frame.Width / svCurrentImageZoomView.ContentSize.Width;
-				float _heightScale = svCurrentImageZoomView.Frame.Height / svCurrentImageZoomView.ContentSize.Height;
+				float _minimumScaleBeforeUpdate = svCurrentImageZoomView.MinimumZoomScale;
+				float _zoomScaleBeforeUpdate = svCurrentImageZoomView.ZoomScale;
+				RectangleF _imageViewFrame = svCurrentImageZoomView.Subviews [0].Frame;
+				float _widthScale = svCurrentImageZoomView.Frame.Width / _imageViewFrame.Width;
+				float _heightScale = svCurrentImageZoomView.Frame.Height / _imageViewFrame.Height;
 				float _minScale = Math.Min (_widthScale, _heightScale);
 				svCurrentImageZoomView.MinimumZoomScale = _minScale;
 				svCurrentImageZoomView.MaximumZoomScale = 1;
-				svCurrentImageZoomView.ZoomScale = _minScale;
+
+				if(_minimumScaleBeforeUpdate == _zoomScaleBeforeUpdate){
+					//This is needed so that if the image minimum scale gets smaller to display the full image, we still see the full image instead of the semi zoomed in one
+					svCurrentImageZoomView.ZoomScale = _minScale;
+				}
+		
+			
 			}
 		}
 
 		private void SetZoomForNextScrollView(){
 			if (svNextImageZoomView != null) {
-				float _widthScale = svNextImageZoomView.Frame.Width / svNextImageZoomView.ContentSize.Width;
-				float _heightScale = svNextImageZoomView.Frame.Height / svNextImageZoomView.ContentSize.Height;
+				float _minimumScaleBeforeUpdate = svNextImageZoomView.MinimumZoomScale;
+				float _zoomScaleBeforeUpdate = svNextImageZoomView.ZoomScale;
+				RectangleF _imageViewFrame = svNextImageZoomView.Subviews [0].Frame;
+				float _widthScale = svNextImageZoomView.Frame.Width / _imageViewFrame.Width;
+				float _heightScale = svNextImageZoomView.Frame.Height / _imageViewFrame.Height;
 				float _minScale = Math.Min (_widthScale, _heightScale);
 				svNextImageZoomView.MinimumZoomScale = _minScale;
 				svNextImageZoomView.MaximumZoomScale = 1;
-				svNextImageZoomView.ZoomScale = _minScale;
+			
+				if(_minimumScaleBeforeUpdate == _zoomScaleBeforeUpdate){
+					//This is needed so that if the image minimum scale gets smaller to display the full image, we still see the full image instead of the semi zoomed in one
+					svNextImageZoomView.ZoomScale = _minScale;
+				}
+			
 			}
 		}
 
-		private void SetDefaultZoomForAllScrollView(){
+		private void SetZoomForAllScrollView(){
 			SetZoomForCurrentScrollView ();
 			SetZoomForPreviousScrollView ();
 			SetZoomForNextScrollView ();

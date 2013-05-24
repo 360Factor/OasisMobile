@@ -416,6 +416,14 @@ namespace OasisMobile.iOS
 							}
 							UIImage _imageAtRow = UIImage.FromFile (m_questionImages [indexPath.Row - 1].FilePath);
 							cell.ImageView.Image = _imageAtRow;
+
+							cell.ImageView.GestureRecognizers = new UIGestureRecognizer[] { };
+							cell.ImageView.UserInteractionEnabled = true;
+							UITapGestureRecognizer _tapGesture = new UITapGestureRecognizer ();
+							_tapGesture.AddTarget (() =>{
+								HandleImageTapGesture(_tapGesture, m_questionImages [indexPath.Row - 1].ImageID);
+							});
+							cell.ImageView.AddGestureRecognizer (_tapGesture);
 						}
 						break;
 					case (int)UnsubmittedQuestionViewSections.QuestionAnswerOptions:

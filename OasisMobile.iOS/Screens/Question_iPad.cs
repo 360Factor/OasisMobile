@@ -435,6 +435,14 @@ namespace OasisMobile.iOS
 							}
 							UIImage _imageAtRow = UIImage.FromFile (m_questionImages [indexPath.Row - 1].FilePath);
 							cell.ImageView.Image = _imageAtRow;
+
+							cell.ImageView.GestureRecognizers = new UIGestureRecognizer[] { };
+							cell.ImageView.UserInteractionEnabled = true;
+							UITapGestureRecognizer _tapGesture = new UITapGestureRecognizer ();
+							_tapGesture.AddTarget (() =>{
+								HandleImageTapGesture(_tapGesture, m_questionImages [indexPath.Row - 1].ImageID);
+							});
+							cell.ImageView.AddGestureRecognizer (_tapGesture);
 						}
 						break;
 						case (int)SubmittedQuestionViewSections.QuestionAnswerOptions:
@@ -514,6 +522,14 @@ namespace OasisMobile.iOS
 							}
 							UIImage _imageAtRow = UIImage.FromFile (m_questionImages [indexPath.Row - 1].FilePath);
 							cell.ImageView.Image = _imageAtRow;
+
+							cell.ImageView.GestureRecognizers = new UIGestureRecognizer[] { };
+							cell.ImageView.UserInteractionEnabled = true;
+							UITapGestureRecognizer _tapGesture = new UITapGestureRecognizer ();
+							_tapGesture.AddTarget (() =>{
+								HandleImageTapGesture(_tapGesture, m_questionImages [indexPath.Row - 1].ImageID);
+							});
+							cell.ImageView.AddGestureRecognizer (_tapGesture);
 						}
 						break;
 						case (int)UnsubmittedQuestionViewSections.QuestionAnswerOptions:
@@ -725,6 +741,13 @@ namespace OasisMobile.iOS
 					}
 				}
 
+			}
+
+			public void HandleImageTapGesture(UITapGestureRecognizer aRecognizer, int aImageID){
+				if(aRecognizer.State == UIGestureRecognizerState.Recognized){
+					ViewImage _viewImageController = new ViewImage (aImageID);
+					m_currentViewController.PresentViewController (_viewImageController, true, null);
+				}
 			}
 
 			private void btnSubmitQuestionAnswer_Click (object sender, EventArgs e)

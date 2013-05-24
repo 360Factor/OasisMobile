@@ -263,6 +263,12 @@ namespace OasisMobile.iOS
 					//Clean up the HTML tags
 					//--------------------------
 
+					//Replace 2 or more line break to 2 line breaks
+					_matchinglocalQuestion.Stem = Regex.Replace (_matchinglocalQuestion.Stem, "(<br\\s*\\/*>\\s*){2,}", "<br /><br />");
+					_matchinglocalQuestion.LeadIn = Regex.Replace (_matchinglocalQuestion.LeadIn, "(<br\\s*\\/*>\\s*){2,}", "<br /><br />");
+					_matchinglocalQuestion.Commentary = Regex.Replace (_matchinglocalQuestion.Commentary, "(<br\\s*\\/*>\\s*){2,}", "<br /><br />");
+					_matchinglocalQuestion.Reference = Regex.Replace (_matchinglocalQuestion.Reference, "(<br\\s*\\/*>\\s*){2,}", "<br /><br />");
+
 					_matchinglocalQuestion.Stem = Regex.Replace (_matchinglocalQuestion.Stem, "<br\\s*\\/*>", "\n");
 					_matchinglocalQuestion.LeadIn = Regex.Replace (_matchinglocalQuestion.LeadIn, "<br\\s*\\/*>", "\n");
 					_matchinglocalQuestion.Commentary = Regex.Replace (_matchinglocalQuestion.Commentary, "<br\\s*\\/*>", "\n");

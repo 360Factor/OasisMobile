@@ -20,6 +20,16 @@ namespace OasisMobile.iOS
 					"SELECT * FROM tblUserQuestion " +
 					"WHERE fkUserExamID={0} ORDER BY Sequence", AppSession.SelectedUserExam.UserExamID));
 			}
+
+			m_examQuestionListView = new ExamQuestionList_iPad (0);
+			m_examQuestionListView.QuestionSelected += QuestionSelected;
+			m_questionView = new Question_iPad (AppSession.SelectedExamUserQuestionList[0]);
+			m_questionView.QuestionUpdated+= QuestionUpdated;
+			m_questionView.ViewedQuestionChanged+= QuestionView_ViewedQuestionChanged;
+			ViewControllers = new UIViewController[] {
+				m_examQuestionListView, m_questionView
+			};
+
 			this.ShouldHideViewController = delegate(UISplitViewController svc, UIViewController viewController, UIInterfaceOrientation inOrientation) {
 				return inOrientation == UIInterfaceOrientation.Portrait
 				|| inOrientation == UIInterfaceOrientation.PortraitUpsideDown;
@@ -35,22 +45,14 @@ namespace OasisMobile.iOS
 				m_questionView.Popover = null;
 			};
 
-
-			m_examQuestionListView = new ExamQuestionList_iPad (0);
-			m_examQuestionListView.QuestionSelected += QuestionSelected;
-			m_questionView = new Question_iPad (AppSession.SelectedExamUserQuestionList[0]);
-			m_questionView.QuestionUpdated+= QuestionUpdated;
-			m_questionView.ViewedQuestionChanged+= QuestionView_ViewedQuestionChanged;
-			ViewControllers = new UIViewController[] {
-				m_examQuestionListView, m_questionView
-			};
-
 		}
 
 
 		public override void ViewDidLoad ()
 		{
 			base.ViewDidLoad ();
+
+
 			this.WillRotate (this.InterfaceOrientation, 0);
 		}
 

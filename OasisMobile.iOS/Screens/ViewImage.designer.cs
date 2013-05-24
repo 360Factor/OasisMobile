@@ -12,10 +12,18 @@ namespace OasisMobile.iOS
 	partial class ViewImage
 	{
 		[Outlet]
+		MonoTouch.UIKit.UINavigationBar navBar { get; set; }
+
+		[Outlet]
 		MonoTouch.UIKit.UIScrollView svImagePager { get; set; }
 		
 		void ReleaseDesignerOutlets ()
 		{
+			if (navBar != null) {
+				navBar.Dispose ();
+				navBar = null;
+			}
+
 			if (svImagePager != null) {
 				svImagePager.Dispose ();
 				svImagePager = null;
