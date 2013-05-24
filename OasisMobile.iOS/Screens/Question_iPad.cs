@@ -108,15 +108,6 @@ namespace OasisMobile.iOS
 			//navBar.TopItem.Title = this.Title;
 			var navItem = new UINavigationItem (this.Title);
 			navBackButton = new UIBarButtonItem (UIBarButtonSystemItem.Rewind);
-//			navBackButton.Clicked += (object sender, EventArgs e) => {
-//				UIView.Transition (AppDelegate.window,
-//				                   0.5,
-//				                   UIViewAnimationOptions.TransitionFlipFromLeft,
-//				                   () => {
-//					AppDelegate.window.RootViewController = AppDelegate.m_flyoutMenuController;
-//					AppDelegate.m_flyoutMenuController.WillAnimateRotation (this.InterfaceOrientation, 0);
-//				},null);
-//			};
 			navBackButton.Clicked += navBackButton_Clicked;
 			navItem.LeftBarButtonItems = new UIBarButtonItem[] {navBackButton};
 			navBar.SetItems (new UINavigationItem[]{navItem},false);
@@ -148,8 +139,7 @@ namespace OasisMobile.iOS
 			RectangleF _scrollViewContentFrame = svQuestionPager.Frame;
 			_scrollViewContentFrame.Width = _scrollViewContentFrame.Width * m_totalQuestionInExam;
 			svQuestionPager.ContentSize = _scrollViewContentFrame.Size;
-
-			Console.WriteLine ("Content Size = " + svQuestionPager.ContentSize.ToString());
+			svQuestionPager.SetContentOffset (new PointF(svQuestionPager.Frame.Width * m_currentQuestionToDisplayIndex,0),false);
 		}
 
 		private void DisplayCurrentQuestionInScrollView(){
@@ -208,6 +198,7 @@ namespace OasisMobile.iOS
 
 			//Set the current scroll position
 			svQuestionPager.SetContentOffset (_currentQuestionLocation,false);
+			Console.WriteLine ("Offset Content Set");
 		}
 
 		/// <summary>

@@ -68,6 +68,19 @@ namespace OasisMobile.iOS
 
 		}
 
+		public override void ViewWillAppear (bool animated)
+		{
+			base.ViewWillAppear (animated);
+
+			if ((this.InterfaceOrientation == UIInterfaceOrientation.LandscapeLeft ||
+				this.InterfaceOrientation == UIInterfaceOrientation.LandscapeRight) && !this.IsOpen) {
+				ShowMenu ();
+			} else if ((this.InterfaceOrientation == UIInterfaceOrientation.Portrait || 
+			           this.InterfaceOrientation == UIInterfaceOrientation.PortraitUpsideDown) && this.IsOpen) {
+				HideMenu ();
+			}
+		}
+
 	}
 
 }
