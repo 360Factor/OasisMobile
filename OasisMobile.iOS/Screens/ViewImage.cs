@@ -15,6 +15,7 @@ namespace OasisMobile.iOS
 		private UIScrollView svNextImageZoomView;
 		private UIScrollView svPreviousImageZoomView;
 		private UIBarButtonItem navBackButton = null;
+		private UIColor m_imageBackgroundColor = UIColor.FromRGB (100, 100, 100);
 
 		static bool UserInterfaceIdiomIsPhone {
 			get { return UIDevice.CurrentDevice.UserInterfaceIdiom == UIUserInterfaceIdiom.Phone; }
@@ -79,6 +80,7 @@ namespace OasisMobile.iOS
 			svCurrentImageZoomView= new UIScrollView (_currentImageScrollViewFrame);
 			svCurrentImageZoomView.AutoresizingMask = UIViewAutoresizing.All;
 
+			svCurrentImageZoomView.BackgroundColor = m_imageBackgroundColor;
 			svCurrentImageZoomView.ContentSize = _currentImageDataToDisplay.Size;
 			svCurrentImageZoomView.AddSubview (_currentImageViewToDisplay);
 			svCurrentImageZoomView.ViewForZoomingInScrollView = GetZoomedView;
@@ -99,6 +101,7 @@ namespace OasisMobile.iOS
 				svPreviousImageZoomView= new UIScrollView (_previousImageScrollViewFrame);
 				svPreviousImageZoomView.AutoresizingMask = UIViewAutoresizing.All;
 
+				svPreviousImageZoomView.BackgroundColor = m_imageBackgroundColor;
 				svPreviousImageZoomView.ContentSize = _previousImageDataToDisplay.Size;
 				svPreviousImageZoomView.AddSubview (_previousImageViewToDisplay);
 				svPreviousImageZoomView.ViewForZoomingInScrollView = GetZoomedView;
@@ -123,6 +126,7 @@ namespace OasisMobile.iOS
 				svNextImageZoomView= new UIScrollView (_nextImageScrollViewFrame);
 				svNextImageZoomView.AutoresizingMask = UIViewAutoresizing.All;
 
+				svNextImageZoomView.BackgroundColor = m_imageBackgroundColor;
 				svNextImageZoomView.ContentSize = _nextImageDataToDisplay.Size;
 				svNextImageZoomView.AddSubview (_nextImageViewToDisplay);
 				svNextImageZoomView.ViewForZoomingInScrollView = GetZoomedView;
@@ -185,6 +189,7 @@ namespace OasisMobile.iOS
 					svNextImageZoomView= new UIScrollView (_nextImageScrollViewFrame);
 					svNextImageZoomView.AutoresizingMask = UIViewAutoresizing.All;
 
+					svNextImageZoomView.BackgroundColor = m_imageBackgroundColor;
 					svNextImageZoomView.ContentSize = _nextImageDataToDisplay.Size;
 					svNextImageZoomView.AddSubview (_nextImageViewToDisplay);
 					svNextImageZoomView.ViewForZoomingInScrollView = GetZoomedView;
@@ -223,6 +228,7 @@ namespace OasisMobile.iOS
 					svPreviousImageZoomView= new UIScrollView (_previousImageScrollViewFrame);
 					svPreviousImageZoomView.AutoresizingMask = UIViewAutoresizing.All;
 
+					svPreviousImageZoomView.BackgroundColor = m_imageBackgroundColor;
 					svPreviousImageZoomView.ContentSize = _previousImageDataToDisplay.Size;
 					svPreviousImageZoomView.AddSubview (_previousImageViewToDisplay);
 					svPreviousImageZoomView.ViewForZoomingInScrollView = GetZoomedView;
@@ -285,8 +291,21 @@ namespace OasisMobile.iOS
 				float _widthScale = svPreviousImageZoomView.Frame.Width / _imageViewFrame.Width;
 				float _heightScale = svPreviousImageZoomView.Frame.Height / _imageViewFrame.Height;
 				float _minScale = Math.Min (_widthScale, _heightScale);
+				if (_minScale > 1) {
+					_minScale = 1;
+				}
 				svPreviousImageZoomView.MinimumZoomScale = _minScale;
-				svPreviousImageZoomView.MaximumZoomScale = 1;
+				float _targetMaxZoomScale = _minScale * 8;
+				if (_targetMaxZoomScale < 1) {
+					//If the target maximum zoom is still not the regular image scale, we put the maxs to 1
+					svPreviousImageZoomView.MaximumZoomScale = 1;
+				} else if (_targetMaxZoomScale > 4) {
+					//If the target zoom scale, is larger than 4, we will set it to 4 so that the image dont look too blurry
+					svPreviousImageZoomView.MaximumZoomScale = 4;
+				} else {
+					//Otherwise, just use the target max zoom
+					svPreviousImageZoomView.MaximumZoomScale = _targetMaxZoomScale;
+				}
 
 				if(_minimumScaleBeforeUpdate == _zoomScaleBeforeUpdate){
 					//This is needed so that if the image minimum scale gets smaller to display the full image, we still see the full image instead of the semi zoomed in one
@@ -305,8 +324,21 @@ namespace OasisMobile.iOS
 				float _widthScale = svCurrentImageZoomView.Frame.Width / _imageViewFrame.Width;
 				float _heightScale = svCurrentImageZoomView.Frame.Height / _imageViewFrame.Height;
 				float _minScale = Math.Min (_widthScale, _heightScale);
+				if (_minScale > 1) {
+					_minScale = 1;
+				}
 				svCurrentImageZoomView.MinimumZoomScale = _minScale;
-				svCurrentImageZoomView.MaximumZoomScale = 1;
+				float _targetMaxZoomScale = _minScale * 8;
+				if (_targetMaxZoomScale < 1) {
+					//If the target maximum zoom is still not the regular image scale, we put the maxs to 1
+					svCurrentImageZoomView.MaximumZoomScale = 1;
+				} else if (_targetMaxZoomScale > 4) {
+					//If the target zoom scale, is larger than 4, we will set it to 4 so that the image dont look too blurry
+					svCurrentImageZoomView.MaximumZoomScale = 4;
+				} else {
+					//Otherwise, just use the target max zoom
+					svCurrentImageZoomView.MaximumZoomScale = _targetMaxZoomScale;
+				}
 
 				if(_minimumScaleBeforeUpdate == _zoomScaleBeforeUpdate){
 					//This is needed so that if the image minimum scale gets smaller to display the full image, we still see the full image instead of the semi zoomed in one
@@ -325,8 +357,21 @@ namespace OasisMobile.iOS
 				float _widthScale = svNextImageZoomView.Frame.Width / _imageViewFrame.Width;
 				float _heightScale = svNextImageZoomView.Frame.Height / _imageViewFrame.Height;
 				float _minScale = Math.Min (_widthScale, _heightScale);
+				if (_minScale > 1) {
+					_minScale = 1;
+				}
 				svNextImageZoomView.MinimumZoomScale = _minScale;
-				svNextImageZoomView.MaximumZoomScale = 1;
+				float _targetMaxZoomScale = _minScale * 8;
+				if (_targetMaxZoomScale < 1) {
+					//If the target maximum zoom is still not the regular image scale, we put the maxs to 1
+					svNextImageZoomView.MaximumZoomScale = 1;
+				} else if (_targetMaxZoomScale > 4) {
+					//If the target zoom scale, is larger than 4, we will set it to 4 so that the image dont look too blurry
+					svNextImageZoomView.MaximumZoomScale = 4;
+				} else {
+					//Otherwise, just use the target max zoom
+					svNextImageZoomView.MaximumZoomScale = _targetMaxZoomScale;
+				}
 			
 				if(_minimumScaleBeforeUpdate == _zoomScaleBeforeUpdate){
 					//This is needed so that if the image minimum scale gets smaller to display the full image, we still see the full image instead of the semi zoomed in one
