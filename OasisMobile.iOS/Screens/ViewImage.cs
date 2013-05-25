@@ -24,7 +24,7 @@ namespace OasisMobile.iOS
 		public ViewImage (int aImageToDisplayID)
 			: base (UserInterfaceIdiomIsPhone ? "ViewImage_iPhone" : "ViewImage_iPad", null)
 		{
-			m_questionImagesList = BusinessModel.Image.GetImagesBySQL ( string.Format (
+			m_questionImagesList = BusinessModel.Image.GetImagesBySQL (string.Format (
 								    "SELECT tblImageToReturn.* FROM tblImage AS tblImageToReturn INNER JOIN tblImage AS tblOriginalImage " +
 								    "ON tblImageToReturn.fkQuestionID = tblOriginalImage.fkQuestionID " +
 									"WHERE tblOriginalImage.pkImageID={0} ORDER BY Title",aImageToDisplayID));
@@ -43,14 +43,15 @@ namespace OasisMobile.iOS
 		{
 			base.ViewDidLoad ();
 			this.Title = "Figure " + m_questionImagesList [m_currentImageDisplayIndex].Title;
+			svImagePager.BackgroundColor = m_imageBackgroundColor;
 			var navItem = new UINavigationItem (this.Title);
 			navBackButton = new UIBarButtonItem (UIBarButtonSystemItem.Rewind);
 			navBackButton.Clicked += navBackButton_Clicked;
-			navItem.LeftBarButtonItems = new UIBarButtonItem[] {navBackButton};
-			navBar.SetItems (new UINavigationItem[]{navItem},false);
+			navItem.LeftBarButtonItems = new UIBarButtonItem[] { navBackButton };
+			navBar.SetItems (new UINavigationItem[]{navItem}, false);
 
 			RectangleF _scrollViewFrame = svImagePager.Frame;
-			svImagePager.ContentSize = new SizeF( _scrollViewFrame.Width * m_questionImagesList.Count, _scrollViewFrame.Height);
+			svImagePager.ContentSize = new SizeF (_scrollViewFrame.Width * m_questionImagesList.Count, _scrollViewFrame.Height);
 			svImagePager.AutoresizingMask = UIViewAutoresizing.All;
 
 			DisplayCurrentImageInScrollView ();
@@ -59,8 +60,8 @@ namespace OasisMobile.iOS
 			// Perform any additional setup after loading the view, typically from a nib.
 		}
 
-
-		public void DisplayCurrentImageInScrollView(){
+		public void DisplayCurrentImageInScrollView ()
+		{
 			foreach (UIView _subView in svImagePager.Subviews) {
 				//Clear all previous subviews
 				_subView.RemoveFromSuperview ();
@@ -73,11 +74,13 @@ namespace OasisMobile.iOS
 
 			UIImageView _currentImageViewToDisplay = new UIImageView (_currentImageDataToDisplay);
 			_currentImageViewToDisplay.Frame = new RectangleF (0, 0, _currentImageDataToDisplay.Size.Width, _currentImageDataToDisplay.Size.Height);
+			_currentImageViewToDisplay.UserInteractionEnabled = true;
+			AttachImageViewTapGestureRecognizer (_currentImageViewToDisplay);
 
 			RectangleF _currentImageScrollViewFrame = svImagePager.Frame;
 			_currentImageScrollViewFrame.X = _currentImageScrollViewFrame.Width * m_currentImageDisplayIndex;
 			_currentImageScrollViewFrame.Y = 0;
-			svCurrentImageZoomView= new UIScrollView (_currentImageScrollViewFrame);
+			svCurrentImageZoomView = new UIScrollView (_currentImageScrollViewFrame);
 			svCurrentImageZoomView.AutoresizingMask = UIViewAutoresizing.All;
 
 			svCurrentImageZoomView.BackgroundColor = m_imageBackgroundColor;
@@ -94,11 +97,13 @@ namespace OasisMobile.iOS
 
 				UIImageView _previousImageViewToDisplay = new UIImageView (_previousImageDataToDisplay);
 				_previousImageViewToDisplay.Frame = new RectangleF (0, 0, _previousImageDataToDisplay.Size.Width, _previousImageDataToDisplay.Size.Height);
+				_previousImageViewToDisplay.UserInteractionEnabled = true;
+				AttachImageViewTapGestureRecognizer (_previousImageViewToDisplay);
 
 				RectangleF _previousImageScrollViewFrame = svImagePager.Frame;
 				_previousImageScrollViewFrame.X = _previousImageScrollViewFrame.Width * (m_currentImageDisplayIndex - 1);
 				_previousImageScrollViewFrame.Y = 0;
-				svPreviousImageZoomView= new UIScrollView (_previousImageScrollViewFrame);
+				svPreviousImageZoomView = new UIScrollView (_previousImageScrollViewFrame);
 				svPreviousImageZoomView.AutoresizingMask = UIViewAutoresizing.All;
 
 				svPreviousImageZoomView.BackgroundColor = m_imageBackgroundColor;
@@ -107,23 +112,24 @@ namespace OasisMobile.iOS
 				svPreviousImageZoomView.ViewForZoomingInScrollView = GetZoomedView;
 				svPreviousImageZoomView.DidZoom += ZoomView_DidZoom;
 				svImagePager.AddSubview (svPreviousImageZoomView);
-			}
-			else{
+			} else {
 				svPreviousImageZoomView = null;
 			}
 
-			if (m_currentImageDisplayIndex < m_questionImagesList.Count-1) {
+			if (m_currentImageDisplayIndex < m_questionImagesList.Count - 1) {
 				//Load next image
 				BusinessModel.Image _nextImageRecord = m_questionImagesList [m_currentImageDisplayIndex+1];
 				UIImage _nextImageDataToDisplay = UIImage.FromFile (_nextImageRecord.FilePath);
 
 				UIImageView _nextImageViewToDisplay = new UIImageView (_nextImageDataToDisplay);
 				_nextImageViewToDisplay.Frame = new RectangleF (0, 0, _nextImageDataToDisplay.Size.Width, _nextImageDataToDisplay.Size.Height);
+				_nextImageViewToDisplay.UserInteractionEnabled = true;
+				AttachImageViewTapGestureRecognizer (_nextImageViewToDisplay);
 
 				RectangleF _nextImageScrollViewFrame = svImagePager.Frame;
 				_nextImageScrollViewFrame.X = _nextImageScrollViewFrame.Width * (m_currentImageDisplayIndex + 1);
 				_nextImageScrollViewFrame.Y = 0;
-				svNextImageZoomView= new UIScrollView (_nextImageScrollViewFrame);
+				svNextImageZoomView = new UIScrollView (_nextImageScrollViewFrame);
 				svNextImageZoomView.AutoresizingMask = UIViewAutoresizing.All;
 
 				svNextImageZoomView.BackgroundColor = m_imageBackgroundColor;
@@ -132,8 +138,7 @@ namespace OasisMobile.iOS
 				svNextImageZoomView.ViewForZoomingInScrollView = GetZoomedView;
 				svNextImageZoomView.DidZoom += ZoomView_DidZoom;
 				svImagePager.AddSubview (svNextImageZoomView);
-			}
-			else{
+			} else {
 				svNextImageZoomView = null;
 			}
 		
@@ -147,7 +152,7 @@ namespace OasisMobile.iOS
 			base.ViewDidLayoutSubviews ();
 
 			RectangleF _scrollViewFrame = svImagePager.Frame;
-			svImagePager.ContentSize = new SizeF( _scrollViewFrame.Width * m_questionImagesList.Count, _scrollViewFrame.Height);
+			svImagePager.ContentSize = new SizeF (_scrollViewFrame.Width * m_questionImagesList.Count, _scrollViewFrame.Height);
 			svImagePager.AutoresizingMask = UIViewAutoresizing.All;
 			svImagePager.SetContentOffset (new PointF(svImagePager.Frame.Width * m_currentImageDisplayIndex,0),
 			                               false);
@@ -155,8 +160,9 @@ namespace OasisMobile.iOS
 			CenterAllScrollViewImages ();
 		}
 
-		public void svImagePager_Scrolled (object sender, EventArgs e){
-			int _scrollViewDisplayIndex = (int) Math.Floor ((svImagePager.ContentOffset.X +svImagePager.Frame.Width/2) /svImagePager.Frame.Width);
+		public void svImagePager_Scrolled (object sender, EventArgs e)
+		{
+			int _scrollViewDisplayIndex = (int)Math.Floor ((svImagePager.ContentOffset.X +svImagePager.Frame.Width/2) /svImagePager.Frame.Width);
 			if (_scrollViewDisplayIndex == m_currentImageDisplayIndex) {
 				return;
 			}
@@ -166,7 +172,7 @@ namespace OasisMobile.iOS
 				//-----------------------------------------------------
 
 				//Remove the previous image scrollview  from scrollview to save memory
-				if(svPreviousImageZoomView!=null){
+				if (svPreviousImageZoomView != null) {
 					svPreviousImageZoomView.RemoveFromSuperview ();
 				}
 				//Set the previous image scrollview to the current one and set the current image scroll view to use the next one
@@ -182,11 +188,13 @@ namespace OasisMobile.iOS
 
 					UIImageView _nextImageViewToDisplay = new UIImageView (_nextImageDataToDisplay);
 					_nextImageViewToDisplay.Frame = new RectangleF (0, 0, _nextImageDataToDisplay.Size.Width, _nextImageDataToDisplay.Size.Height);
+					_nextImageViewToDisplay.UserInteractionEnabled = true;
+					AttachImageViewTapGestureRecognizer (_nextImageViewToDisplay);
 
 					RectangleF _nextImageScrollViewFrame = svImagePager.Frame;
-					_nextImageScrollViewFrame.X = _nextImageScrollViewFrame.Width * (m_currentImageDisplayIndex +1);
+					_nextImageScrollViewFrame.X = _nextImageScrollViewFrame.Width * (m_currentImageDisplayIndex + 1);
 					_nextImageScrollViewFrame.Y = 0;
-					svNextImageZoomView= new UIScrollView (_nextImageScrollViewFrame);
+					svNextImageZoomView = new UIScrollView (_nextImageScrollViewFrame);
 					svNextImageZoomView.AutoresizingMask = UIViewAutoresizing.All;
 
 					svNextImageZoomView.BackgroundColor = m_imageBackgroundColor;
@@ -200,12 +208,12 @@ namespace OasisMobile.iOS
 					svNextImageZoomView = null;
 				}
 
-			}else if(_scrollViewDisplayIndex == m_currentImageDisplayIndex - 1){
+			} else if (_scrollViewDisplayIndex == m_currentImageDisplayIndex - 1) {
 				//Set the previous image as current one and load the one before the previous image
 				//-----------------------------------------------------
 
 				//Remove the next image scrollview  from scrollview to save memory
-				if(svNextImageZoomView!=null){
+				if (svNextImageZoomView != null) {
 					svNextImageZoomView.RemoveFromSuperview ();
 				}
 				//Set the next image scrollview to the current one and set the current image scroll view to use the previous one
@@ -221,11 +229,13 @@ namespace OasisMobile.iOS
 
 					UIImageView _previousImageViewToDisplay = new UIImageView (_previousImageDataToDisplay);
 					_previousImageViewToDisplay.Frame = new RectangleF (0, 0, _previousImageDataToDisplay.Size.Width, _previousImageDataToDisplay.Size.Height);
+					_previousImageViewToDisplay.UserInteractionEnabled = true;
+					AttachImageViewTapGestureRecognizer (_previousImageViewToDisplay);
 
 					RectangleF _previousImageScrollViewFrame = svImagePager.Frame;
 					_previousImageScrollViewFrame.X = _previousImageScrollViewFrame.Width * (m_currentImageDisplayIndex - 1);
 					_previousImageScrollViewFrame.Y = 0;
-					svPreviousImageZoomView= new UIScrollView (_previousImageScrollViewFrame);
+					svPreviousImageZoomView = new UIScrollView (_previousImageScrollViewFrame);
 					svPreviousImageZoomView.AutoresizingMask = UIViewAutoresizing.All;
 
 					svPreviousImageZoomView.BackgroundColor = m_imageBackgroundColor;
@@ -234,12 +244,10 @@ namespace OasisMobile.iOS
 					svPreviousImageZoomView.ViewForZoomingInScrollView = GetZoomedView;
 					svPreviousImageZoomView.DidZoom += ZoomView_DidZoom;
 					svImagePager.AddSubview (svPreviousImageZoomView);
-				}
-				else{
+				} else {
 					svPreviousImageZoomView = null;
 				}
-			}
-			else {
+			} else {
 				throw new Exception ("Scroll view index should only return the image before or after the current image");
 			}
 
@@ -247,15 +255,17 @@ namespace OasisMobile.iOS
 			navBar.TopItem.Title = this.Title;
 		}
 
-		public UIView GetZoomedView (UIScrollView aZoomedScrollView){
-			return aZoomedScrollView.Subviews[0];
+		public UIView GetZoomedView (UIScrollView aZoomedScrollView)
+		{
+			return aZoomedScrollView.Subviews [0];
 		}
 
-		public void ZoomView_DidZoom(object sender, EventArgs e){
+		public void ZoomView_DidZoom (object sender, EventArgs e)
+		{
 			UIScrollView _zoomedScrollView = (UIScrollView)sender;
 
 			SizeF _scrollViewBound = _zoomedScrollView.Bounds.Size;
-			UIImageView _childImageView = (UIImageView) _zoomedScrollView.Subviews [0];
+			UIImageView _childImageView = (UIImageView)_zoomedScrollView.Subviews [0];
 			RectangleF _contentsFrame = _childImageView.Frame;
 			if (_contentsFrame.Width < _scrollViewBound.Width) {
 				_contentsFrame.X = (_scrollViewBound.Width - _contentsFrame.Width) / (float)2;
@@ -279,11 +289,28 @@ namespace OasisMobile.iOS
 //			CenterAllScrollViewImages ();
 		}
 
-		private void navBackButton_Clicked(object sender, EventArgs e){
+		private void navBackButton_Clicked (object sender, EventArgs e)
+		{
 			this.DismissViewController (true, null);
 		}
 
-		private void SetZoomForPreviousScrollView(){
+		private void AttachImageViewTapGestureRecognizer(UIImageView aImageViewToAttach){
+			UITapGestureRecognizer _tapGesture = new UITapGestureRecognizer ();
+			_tapGesture.AddTarget (() =>{
+				HandleImageTapGesture (_tapGesture);
+			});
+			aImageViewToAttach.AddGestureRecognizer (_tapGesture);
+		}
+
+		private void HandleImageTapGesture (UITapGestureRecognizer aTapGestureObj)
+		{
+			if (aTapGestureObj.State == UIGestureRecognizerState.Recognized) {
+				this.DismissViewController (true, null);
+			}
+		}
+
+		private void SetZoomForPreviousScrollView ()
+		{
 			if (svPreviousImageZoomView != null) {
 				float _minimumScaleBeforeUpdate = svPreviousImageZoomView.MinimumZoomScale;
 				float _zoomScaleBeforeUpdate = svPreviousImageZoomView.ZoomScale;
@@ -299,15 +326,15 @@ namespace OasisMobile.iOS
 				if (_targetMaxZoomScale < 1) {
 					//If the target maximum zoom is still not the regular image scale, we put the maxs to 1
 					svPreviousImageZoomView.MaximumZoomScale = 1;
-				} else if (_targetMaxZoomScale > 4) {
-					//If the target zoom scale, is larger than 4, we will set it to 4 so that the image dont look too blurry
-					svPreviousImageZoomView.MaximumZoomScale = 4;
+				} else if (_targetMaxZoomScale > 3) {
+					//If the target zoom scale, is larger than 3, we will set it to 3 so that the image dont look too blurry
+					svPreviousImageZoomView.MaximumZoomScale = 3;
 				} else {
 					//Otherwise, just use the target max zoom
 					svPreviousImageZoomView.MaximumZoomScale = _targetMaxZoomScale;
 				}
 
-				if(_minimumScaleBeforeUpdate == _zoomScaleBeforeUpdate){
+				if (_minimumScaleBeforeUpdate == _zoomScaleBeforeUpdate) {
 					//This is needed so that if the image minimum scale gets smaller to display the full image, we still see the full image instead of the semi zoomed in one
 					svPreviousImageZoomView.ZoomScale = _minScale;
 				}
@@ -316,7 +343,8 @@ namespace OasisMobile.iOS
 			}
 		}
 
-		private void SetZoomForCurrentScrollView(){
+		private void SetZoomForCurrentScrollView ()
+		{
 			if (svCurrentImageZoomView != null) {
 				float _minimumScaleBeforeUpdate = svCurrentImageZoomView.MinimumZoomScale;
 				float _zoomScaleBeforeUpdate = svCurrentImageZoomView.ZoomScale;
@@ -332,15 +360,15 @@ namespace OasisMobile.iOS
 				if (_targetMaxZoomScale < 1) {
 					//If the target maximum zoom is still not the regular image scale, we put the maxs to 1
 					svCurrentImageZoomView.MaximumZoomScale = 1;
-				} else if (_targetMaxZoomScale > 4) {
-					//If the target zoom scale, is larger than 4, we will set it to 4 so that the image dont look too blurry
-					svCurrentImageZoomView.MaximumZoomScale = 4;
+				} else if (_targetMaxZoomScale > 3) {
+					//If the target zoom scale, is larger than 3, we will set it to 3 so that the image dont look too blurry
+					svCurrentImageZoomView.MaximumZoomScale = 3;
 				} else {
 					//Otherwise, just use the target max zoom
 					svCurrentImageZoomView.MaximumZoomScale = _targetMaxZoomScale;
 				}
 
-				if(_minimumScaleBeforeUpdate == _zoomScaleBeforeUpdate){
+				if (_minimumScaleBeforeUpdate == _zoomScaleBeforeUpdate) {
 					//This is needed so that if the image minimum scale gets smaller to display the full image, we still see the full image instead of the semi zoomed in one
 					svCurrentImageZoomView.ZoomScale = _minScale;
 				}
@@ -349,7 +377,8 @@ namespace OasisMobile.iOS
 			}
 		}
 
-		private void SetZoomForNextScrollView(){
+		private void SetZoomForNextScrollView ()
+		{
 			if (svNextImageZoomView != null) {
 				float _minimumScaleBeforeUpdate = svNextImageZoomView.MinimumZoomScale;
 				float _zoomScaleBeforeUpdate = svNextImageZoomView.ZoomScale;
@@ -365,15 +394,15 @@ namespace OasisMobile.iOS
 				if (_targetMaxZoomScale < 1) {
 					//If the target maximum zoom is still not the regular image scale, we put the maxs to 1
 					svNextImageZoomView.MaximumZoomScale = 1;
-				} else if (_targetMaxZoomScale > 4) {
-					//If the target zoom scale, is larger than 4, we will set it to 4 so that the image dont look too blurry
-					svNextImageZoomView.MaximumZoomScale = 4;
+				} else if (_targetMaxZoomScale > 3) {
+					//If the target zoom scale, is larger than 3, we will set it to 3 so that the image dont look too blurry
+					svNextImageZoomView.MaximumZoomScale = 3;
 				} else {
 					//Otherwise, just use the target max zoom
 					svNextImageZoomView.MaximumZoomScale = _targetMaxZoomScale;
 				}
 			
-				if(_minimumScaleBeforeUpdate == _zoomScaleBeforeUpdate){
+				if (_minimumScaleBeforeUpdate == _zoomScaleBeforeUpdate) {
 					//This is needed so that if the image minimum scale gets smaller to display the full image, we still see the full image instead of the semi zoomed in one
 					svNextImageZoomView.ZoomScale = _minScale;
 				}
@@ -381,16 +410,18 @@ namespace OasisMobile.iOS
 			}
 		}
 
-		private void SetZoomForAllScrollView(){
+		private void SetZoomForAllScrollView ()
+		{
 			SetZoomForCurrentScrollView ();
 			SetZoomForPreviousScrollView ();
 			SetZoomForNextScrollView ();
 		}
 
-		private void CenterPreviousScrollViewImages(){
+		private void CenterPreviousScrollViewImages ()
+		{
 			if (svPreviousImageZoomView != null) {
 				SizeF _scrollViewBound = svPreviousImageZoomView.Bounds.Size;
-				UIImageView _childImageView = (UIImageView) svPreviousImageZoomView.Subviews [0];
+				UIImageView _childImageView = (UIImageView)svPreviousImageZoomView.Subviews [0];
 				RectangleF _contentsFrame = _childImageView.Frame;
 				if (_contentsFrame.Width < _scrollViewBound.Width) {
 					_contentsFrame.X = (_scrollViewBound.Width - _contentsFrame.Width) / (float)2;
@@ -408,10 +439,11 @@ namespace OasisMobile.iOS
 			}
 		}
 
-		private void CenterCurrentScrollViewImages(){
+		private void CenterCurrentScrollViewImages ()
+		{
 			if (svCurrentImageZoomView != null) {
 				SizeF _scrollViewBound = svCurrentImageZoomView.Bounds.Size;
-				UIImageView _childImageView = (UIImageView) svCurrentImageZoomView.Subviews [0];
+				UIImageView _childImageView = (UIImageView)svCurrentImageZoomView.Subviews [0];
 				RectangleF _contentsFrame = _childImageView.Frame;
 				if (_contentsFrame.Width < _scrollViewBound.Width) {
 					_contentsFrame.X = (_scrollViewBound.Width - _contentsFrame.Width) / (float)2;
@@ -429,10 +461,11 @@ namespace OasisMobile.iOS
 			}
 		}
 
-		private void CenterNextScrollViewImages(){
+		private void CenterNextScrollViewImages ()
+		{
 			if (svNextImageZoomView != null) {
 				SizeF _scrollViewBound = svNextImageZoomView.Bounds.Size;
-				UIImageView _childImageView = (UIImageView) svNextImageZoomView.Subviews [0];
+				UIImageView _childImageView = (UIImageView)svNextImageZoomView.Subviews [0];
 				RectangleF _contentsFrame = _childImageView.Frame;
 				if (_contentsFrame.Width < _scrollViewBound.Width) {
 					_contentsFrame.X = (_scrollViewBound.Width - _contentsFrame.Width) / (float)2;
@@ -450,12 +483,12 @@ namespace OasisMobile.iOS
 			}
 		}
 
-		private void CenterAllScrollViewImages(){
+		private void CenterAllScrollViewImages ()
+		{
 			CenterCurrentScrollViewImages ();
 			CenterPreviousScrollViewImages ();
 			CenterNextScrollViewImages ();
 		}
-
 	}
 }
 
