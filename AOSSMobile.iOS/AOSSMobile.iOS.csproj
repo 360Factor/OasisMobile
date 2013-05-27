@@ -272,6 +272,20 @@
       <Link>Screens\ViewImage.designer.cs</Link>
       <DependentUpon>ViewImage.cs</DependentUpon>
     </Compile>
+    <Compile Include="..\OasisMobile.iOS\Screens\ExamDisclosureView.cs">
+      <Link>Screens\ExamDisclosureView.cs</Link>
+    </Compile>
+    <Compile Include="..\OasisMobile.iOS\Screens\ExamDisclosureView.designer.cs">
+      <Link>Screens\ExamDisclosureView.designer.cs</Link>
+      <DependentUpon>ExamDisclosureView.cs</DependentUpon>
+    </Compile>
+    <Compile Include="..\OasisMobile.iOS\Screens\ExamPrivacyPolicyView.cs">
+      <Link>Screens\ExamPrivacyPolicyView.cs</Link>
+    </Compile>
+    <Compile Include="..\OasisMobile.iOS\Screens\ExamPrivacyPolicyView.designer.cs">
+      <Link>Screens\ExamPrivacyPolicyView.designer.cs</Link>
+      <DependentUpon>ExamPrivacyPolicyView.cs</DependentUpon>
+    </Compile>
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
   <ItemGroup>
@@ -287,7 +301,6 @@
     <BundleResource Include="Images\Icon-QuestionMark.png" />
     <BundleResource Include="Images\Icon-User.png" />
     <BundleResource Include="Images\Icon-Yes.png" />
-    <BundleResource Include="Images\OasisBG.png" />
     <BundleResource Include="Images\OasisLogo560px.png" />
     <BundleResource Include="Images\Slideout.png" />
     <BundleResource Include="Images\Transparent.png" />
@@ -297,6 +310,9 @@
     <BundleResource Include="Resources\Icon-72%402x.png" />
     <BundleResource Include="Resources\Icon-Small-50%402x.png" />
     <BundleResource Include="Resources\Icon%402x.png" />
+    <BundleResource Include="Images\AOSSM_BG-iPad.png" />
+    <BundleResource Include="Images\AOSSM_BG-iPhone568h.png" />
+    <BundleResource Include="Images\AOSSM_BG-iPhone.png" />
   </ItemGroup>
   <ItemGroup>
     <ITunesArtwork Include="iTunesArtwork%402x" />
@@ -372,6 +388,18 @@
     </InterfaceDefinition>
     <InterfaceDefinition Include="..\OasisMobile.iOS\Screens\ViewImage_iPhone.xib">
       <Link>Screens\ViewImage_iPhone.xib</Link>
+    </InterfaceDefinition>
+    <InterfaceDefinition Include="..\OasisMobile.iOS\Screens\ExamDisclosureView_iPad.xib">
+      <Link>Screens\ExamDisclosureView_iPad.xib</Link>
+    </InterfaceDefinition>
+    <InterfaceDefinition Include="..\OasisMobile.iOS\Screens\ExamDisclosureView_iPhone.xib">
+      <Link>Screens\ExamDisclosureView_iPhone.xib</Link>
+    </InterfaceDefinition>
+    <InterfaceDefinition Include="..\OasisMobile.iOS\Screens\ExamPrivacyPolicyView_iPad.xib">
+      <Link>Screens\ExamPrivacyPolicyView_iPad.xib</Link>
+    </InterfaceDefinition>
+    <InterfaceDefinition Include="..\OasisMobile.iOS\Screens\ExamPrivacyPolicyView_iPhone.xib">
+      <Link>Screens\ExamPrivacyPolicyView_iPhone.xib</Link>
     </InterfaceDefinition>
   </ItemGroup>
 </Project>

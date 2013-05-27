@@ -95,9 +95,9 @@ namespace OasisMobile.iOS
 					if (cell == null) {
 						cell = new UITableViewCell (UITableViewCellStyle.Default, "userInfoCell");
 					}
-					cell.TextLabel.Font = UIFont.SystemFontOfSize (26);
+					cell.TextLabel.Font = UIFont.SystemFontOfSize (24);
 					cell.ImageView.Image = UIImage.FromBundle ("Images/Icon-User.png");
-					cell.TextLabel.Text = AppSession.LoggedInUser.LoginName;
+					cell.TextLabel.Text = AppSession.LoggedInUser.UserName;
 					cell.TextLabel.BackgroundColor = UIColor.Clear;
 
 					return cell;

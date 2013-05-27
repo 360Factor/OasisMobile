@@ -42,6 +42,24 @@ namespace OasisMobile.iOS
 					_examToSave.Price = _remoteExam ["Price"];
 					_examToSave.PrivacyPolicy = _remoteExam ["PrivacyPolicy"];
 					_examToSave.Disclosure = _remoteExam ["Disclosure"];
+
+
+					//Trim the exam's disclosure and privacy policy
+					//------------------------------------------------
+
+					//Replace 2 or more line break to 2 line breaks
+					_examToSave.PrivacyPolicy = Regex.Replace (_examToSave.PrivacyPolicy, "(<br\\s*\\/*>\\s*){2,}", "<br /><br />");
+					_examToSave.Disclosure = Regex.Replace (_examToSave.Disclosure, "(<br\\s*\\/*>\\s*){2,}", "<br /><br />");
+
+					_examToSave.PrivacyPolicy = Regex.Replace (_examToSave.PrivacyPolicy, "<br\\s*\\/*>", "\n");
+					_examToSave.Disclosure = Regex.Replace (_examToSave.Disclosure, "<br\\s*\\/*>", "\n");
+
+					_examToSave.PrivacyPolicy = Regex.Replace (_examToSave.PrivacyPolicy, "<div[^>]*>(.+)</\\s*div>", "$1\n");
+					_examToSave.Disclosure = Regex.Replace (_examToSave.Disclosure, "<div[^>]*>(.+)</\\s*div>", "$1\n");
+
+					_examToSave.PrivacyPolicy = Regex.Replace (_examToSave.PrivacyPolicy, "<[^>]+>(.+)<\\/[^>]+>","$1");
+					_examToSave.Disclosure = Regex.Replace (_examToSave.Disclosure, "<[^>]+>(.+)<\\/[^>]+>","$1");
+
 				}
 			}
 
@@ -101,21 +119,25 @@ namespace OasisMobile.iOS
 						//Only populate user exam that maps to a published/ retired exams, exams that are not published are not good
 						BusinessModel.UserExam _userExamToSave = 
 							(from x in _localUserExamList where x.MainSystemID == _remoteUserExam ["UserExamMapID"] select x).FirstOrDefault ();
-						if (_userExamToSave == null) {
-							_userExamToSave = new BusinessModel.UserExam ();
-							_userExamToSave.MainSystemID = _remoteUserExam ["UserExamMapID"];
-							_userExamToSave.DoSync = false;
-							_userExamToSave.IsDownloaded = false;
-							_userExamToSave.IsCompleted = false;
-							_localUserExamList.Add (_userExamToSave);
+						if(!_userExamToSave.DoSync){
+							//Only update if the exam is not marked as needing push to server
+							if (_userExamToSave == null) {
+								_userExamToSave = new BusinessModel.UserExam ();
+								_userExamToSave.MainSystemID = _remoteUserExam ["UserExamMapID"];
+								_userExamToSave.DoSync = false;
+								_userExamToSave.IsDownloaded = false;
+								_userExamToSave.IsCompleted = false;
+								_localUserExamList.Add (_userExamToSave);
+							}
+							_userExamToSave.ExamID = _mainSystemExamIDToLocalExamIDMap [_remoteUserExam ["ExamID"]];
+							_userExamToSave.UserID = aUser.UserID;
+							_userExamToSave.IsSubmitted = _remoteUserExam ["IsSubmitted"];
+							_userExamToSave.IsLearningMode = _remoteUserExam ["IsInteractiveMode"];
+							_userExamToSave.HasReadPrivacyPolicy = _remoteUserExam ["HasReadPrivacyPolicy"];
+							_userExamToSave.HasReadDisclosure = _remoteUserExam ["HasReadDisclosure"];
+							_userExamToSave.SecondsSpent = _remoteUserExam ["SecondsSpent"];
 						}
-						_userExamToSave.ExamID = _mainSystemExamIDToLocalExamIDMap [_remoteUserExam ["ExamID"]];
-						_userExamToSave.UserID = aUser.UserID;
-						_userExamToSave.IsSubmitted = _remoteUserExam ["IsSubmitted"];
-						_userExamToSave.IsLearningMode = _remoteUserExam ["IsInteractiveMode"];
-						_userExamToSave.HasReadPrivacyPolicy = _remoteUserExam ["HasReadPrivacyPolicy"];
-						_userExamToSave.HasReadDisclosure = _remoteUserExam ["HasReadDisclosure"];
-						_userExamToSave.SecondsSpent = _remoteUserExam ["SecondsSpent"];
+					
 					
 					}
 					_remoteUserExamIDList.Add (_remoteUserExam["UserExamMapID"]);
@@ -677,7 +699,16 @@ namespace OasisMobile.iOS
 			Console.WriteLine ("Pushing data to server");
 			WebserviceHelper.SyncUserExamPostData _postData = new WebserviceHelper.SyncUserExamPostData ();
 			_postData.UserExamList = new List<WebserviceHelper.SyncUserExamPostData.UserExamSyncData> ();
-			string _query = "SELECT tblUserQuestion.AnsweredDateTime, tblUserQuestion.SecondsSpent, " +
+			string _query = "";
+			_query = "SELECT tblUserExam.MainSystemID, tblUserExam.HasReadDisclosure, tblUserExam.HasReadPrivacyPolicy FROM tblUserExam " +
+					"WHERE DoSync=1";
+			_postData.UserExamList = BusinessModel.Repository.Instance.Query<WebserviceHelper.SyncUserExamPostData.UserExamSyncData> (_query);
+			if (_postData.UserExamList == null) {
+				_postData.UserExamList = new List<WebserviceHelper.SyncUserExamPostData.UserExamSyncData> ();
+			}
+			List<int> _userExamToUpdateIDList = (from x in _postData.UserExamList select x.MainSystemID).ToList ();
+
+			_query = "SELECT tblUserQuestion.AnsweredDateTime, tblUserQuestion.SecondsSpent, " +
 				"tblUserQuestion.MainSystemID AS UserQuestionMainSystemID, " +
 				"tblUserAnswerOption.MainSystemID AS SelectedAnswerOptionMainSystemID " +
 				"FROM tblUserQuestion LEFT JOIN tblUserAnswerOption " +
@@ -694,6 +725,8 @@ namespace OasisMobile.iOS
 					WebserviceHelper.SyncUserExamData (_postData);
 					BusinessModel.SQL.ExecuteNonQuery (string.Format ("UPDATE tblUserQuestion SET DoSync=0 WHERE MainSystemID IN ({0})",
 					                                                  string.Join (",",_userQuestionToUpdateIDList)));
+					BusinessModel.SQL.ExecuteNonQuery (string.Format ("UPDATE tblUserExam SET DoSync=0 WHERE MainSystemID IN ({0})",
+					                                                  string.Join (",",_userExamToUpdateIDList)));
 				} catch (Exception ex) {
 					Console.WriteLine (ex.ToString ());
 					return false;

@@ -37,7 +37,10 @@ namespace OasisMobile.iOS
 
 			foreach(UIViewController _viewController in _originalNavigationStack){
 				//Eliminate the 
-				if(_viewController.GetType () != typeof(GenerateNewExamView)){
+				Type _viewType = _viewController.GetType ();
+				if(_viewType != typeof(GenerateNewExamView) && 
+				   _viewType != typeof(ExamDisclosureView) && 
+				   _viewType != typeof(ExamPrivacyPolicyView)){
 					_updatedNavigationStack.Add (_viewController);
 				}
 			}

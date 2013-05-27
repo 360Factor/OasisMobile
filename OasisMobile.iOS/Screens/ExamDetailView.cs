@@ -306,21 +306,30 @@ namespace OasisMobile.iOS
 			private void btnStartContinueExam_Clicked (object sender, EventArgs e)
 			{
 				if (AppSession.SelectedUserExam != null && AppSession.SelectedUserExam.IsDownloaded) {
-					//Navigate straight to the exam
-					if (UserInterfaceIdiomIsPhone) {
-						m_currentViewController.NavigationController.PushViewController (new ExamQuestionList_iPhone (), true);
-					} else {
-						QuestionSplitView _questionSplitView = new QuestionSplitView ();
-						AppDelegate.window.RootViewController = _questionSplitView;
-					
-						UIView.Transition (AppDelegate.window,
-						                   0.5,
-						                   UIViewAnimationOptions.TransitionFlipFromRight,
-						                   () => {
+					if(!AppSession.SelectedUserExam.HasReadDisclosure){
+						ExamDisclosureView _disclosureView = new ExamDisclosureView();
+						m_currentViewController.NavigationController.PushViewController (_disclosureView,true);
+					}else if(!AppSession.SelectedUserExam.HasReadPrivacyPolicy){
+						ExamPrivacyPolicyView _privacyPolicyView = new ExamPrivacyPolicyView();
+						m_currentViewController.NavigationController.PushViewController (_privacyPolicyView,true);
+					}else{
+						//Navigate straight to the exam
+						if (UserInterfaceIdiomIsPhone) {
+							m_currentViewController.NavigationController.PushViewController (new ExamQuestionList_iPhone (), true);
+						} else {
+							QuestionSplitView _questionSplitView = new QuestionSplitView ();
 							AppDelegate.window.RootViewController = _questionSplitView;
-							_questionSplitView.WillAnimateRotation (m_currentViewController.InterfaceOrientation, 0);
-						}, null);
+
+							UIView.Transition (AppDelegate.window,
+							                   0.5,
+							                   UIViewAnimationOptions.TransitionFlipFromRight,
+							                   () => {
+								AppDelegate.window.RootViewController = _questionSplitView;
+								_questionSplitView.WillAnimateRotation (m_currentViewController.InterfaceOrientation, 0);
+							}, null);
+						}
 					}
+
 				
 				} else {
 					bool _isDownloadSuccessful = false;
@@ -357,19 +366,28 @@ namespace OasisMobile.iOS
 						BTProgressHUD.Dismiss ();
 						UIApplication.SharedApplication.IdleTimerDisabled = false;
 						if (_isDownloadSuccessful) {
-							if(UserInterfaceIdiomIsPhone){
-								m_currentViewController.NavigationController.PushViewController (new ExamQuestionList_iPhone (), true);
+							if(!AppSession.SelectedUserExam.HasReadDisclosure){
+								ExamDisclosureView _disclosureView = new ExamDisclosureView();
+								m_currentViewController.NavigationController.PushViewController (_disclosureView,true);
+							}else if(!AppSession.SelectedUserExam.HasReadPrivacyPolicy){
+								ExamPrivacyPolicyView _privacyPolicyView = new ExamPrivacyPolicyView();
+								m_currentViewController.NavigationController.PushViewController (_privacyPolicyView,true);
 							}else{
-								QuestionSplitView _questionSplitView = new QuestionSplitView();
-								AppDelegate.window.RootViewController = _questionSplitView;
-								UIView.Transition (AppDelegate.window,
-								                   0.5,
-								                   UIViewAnimationOptions.TransitionFlipFromRight,
-								                   () => {
-														AppDelegate.window.RootViewController = _questionSplitView;
-														_questionSplitView.WillAnimateRotation (m_currentViewController.InterfaceOrientation, 0);
-													},null);
+								if(UserInterfaceIdiomIsPhone){
+									m_currentViewController.NavigationController.PushViewController (new ExamQuestionList_iPhone (), true);
+								}else{
+									QuestionSplitView _questionSplitView = new QuestionSplitView();
+									AppDelegate.window.RootViewController = _questionSplitView;
+									UIView.Transition (AppDelegate.window,
+									                   0.5,
+									                   UIViewAnimationOptions.TransitionFlipFromRight,
+									                   () => {
+										AppDelegate.window.RootViewController = _questionSplitView;
+										_questionSplitView.WillAnimateRotation (m_currentViewController.InterfaceOrientation, 0);
+									},null);
+								}
 							}
+
 						} else {
 							UIAlertView _alert = new UIAlertView ("Download Failed", "We could not download your exam right now. Please try again later", null, "Ok", null);
 							_alert.Show ();

@@ -185,6 +185,14 @@
     <Compile Include="Screens\ViewImage.designer.cs">
       <DependentUpon>ViewImage.cs</DependentUpon>
     </Compile>
+    <Compile Include="Screens\ExamDisclosureView.cs" />
+    <Compile Include="Screens\ExamDisclosureView.designer.cs">
+      <DependentUpon>ExamDisclosureView.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Screens\ExamPrivacyPolicyView.cs" />
+    <Compile Include="Screens\ExamPrivacyPolicyView.designer.cs">
+      <DependentUpon>ExamPrivacyPolicyView.cs</DependentUpon>
+    </Compile>
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
   <ItemGroup>
@@ -200,12 +208,10 @@
     <InterfaceDefinition Include="Screens\GenerateNewExamView_iPhone.xib" />
     <InterfaceDefinition Include="Screens\GenerateNewExamView_iPad.xib" />
     <InterfaceDefinition Include="Screens\Question_iPhone.xib" />
-    <InterfaceDefinition Include="Screens\SettingsView_iPhone.xib" />
-    <InterfaceDefinition Include="Screens\SettingsView_iPad.xib" />
-    <InterfaceDefinition Include="Screens\SupportView_iPhone.xib" />
-    <InterfaceDefinition Include="Screens\SupportView_iPad.xib" />
-    <InterfaceDefinition Include="Screens\ViewImage_iPhone.xib" />
-    <InterfaceDefinition Include="Screens\ViewImage_iPad.xib" />
+    <InterfaceDefinition Include="Screens\ExamPrivacyPolicyView_iPhone.xib" />
+    <InterfaceDefinition Include="Screens\ExamPrivacyPolicyView_iPad.xib" />
+    <InterfaceDefinition Include="Screens\ExamDisclosureView_iPad.xib" />
+    <InterfaceDefinition Include="Screens\ExamDisclosureView_iPhone.xib" />
   </ItemGroup>
   <ItemGroup>
     <XamarinComponentReference Include="flyoutnavigation">

@@ -43,17 +43,22 @@ namespace OasisMobile.iOS
 			UITableViewCell cell;
 			switch (indexPath.Section) {
 			case 0:
-				cell = tableView.DequeueReusableCell ("logoCell");
-				if (cell == null) {
-					cell = new CustomImageCell ("logoCell");
-//					imgLogo = new UIImageView (loginLogoImage);
-//					imgLogo.Frame = new System.Drawing.RectangleF (tableView.Frame.Width/ 2 - 140, 10, 280, 90); 
+//				cell = tableView.DequeueReusableCell ("logoCell");
+//				if (cell == null) {
+//					cell = new CustomImageCell ("logoCell");
+////					imgLogo = new UIImageView (loginLogoImage);
+////					imgLogo.Frame = new System.Drawing.RectangleF (tableView.Frame.Width/ 2 - 140, 10, 280, 90); 
+//
+////					cell.ContentView.AddSubview (imgLogo);
+//				}
+//				UIImage loginLogoImage = new UIImage (AppConfig.ImagePaths.ClientLogo);
+//				((CustomImageCell)cell).MaxImageDimension = loginLogoImage.Size.Width / 2; //We use retina image
+//				cell.ImageView.Image = loginLogoImage;
 
-//					cell.ContentView.AddSubview (imgLogo);
+				cell = tableView.DequeueReusableCell ("spacerCell");
+				if(cell == null){
+					cell = new UITableViewCell (UITableViewCellStyle.Default, "spacerCell");
 				}
-				UIImage loginLogoImage = new UIImage (AppConfig.ImagePaths.ClientLogo);
-				((CustomImageCell)cell).MaxImageDimension = loginLogoImage.Size.Width / 2; //We use retina image
-				cell.ImageView.Image = loginLogoImage;
 				break;
 			case 1:
 				cell = tableView.DequeueReusableCell ("inputCell");
@@ -179,7 +184,8 @@ namespace OasisMobile.iOS
 			// NOTE: Don't call the base implementation on a Model class
 			// see http://docs.xamarin.com/ios/tutorials/Events%2c_Protocols_and_Delegates 
 			if (indexPath.Section == 0) {
-				return 100; 
+//				return 100; 
+				return 50;
 			} else {
 				return 44;
 			}
@@ -236,6 +242,7 @@ namespace OasisMobile.iOS
 							_loggedInUser.Save ();
 							_loginSuccessful = true;
 							AppSession.LoggedInUser = _loggedInUser;
+							SyncManager.PushAllDoSyncData();
 							int _examCount = BusinessModel.SQL.ExecuteScalar<int> ("SELECT COUNT(*) FROM tblExam", new object[]{});
 							if(_examCount==0){
 								//Only sync if there is not exam for now

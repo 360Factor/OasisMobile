@@ -128,6 +128,23 @@ namespace OasisMobile.iOS
 			DisplayCurrentQuestionInScrollView ();
 
 			svQuestionPager.Scrolled += svQuestionPager_Scrolled;
+
+			UINavigationController _examNavController = (UINavigationController) AppDelegate.m_flyoutMenuController.ViewControllers [0];
+		
+			UIViewController[] _originalNavigationStack = 	_examNavController.ViewControllers;
+			List<UIViewController> _updatedNavigationStack = new List<UIViewController>();
+
+			foreach(UIViewController _viewController in _originalNavigationStack){
+				//Eliminate the 
+				Type _viewType = _viewController.GetType ();
+				if(_viewType != typeof(GenerateNewExamView) && 
+				   _viewType != typeof(ExamDisclosureView) && 
+				   _viewType != typeof(ExamPrivacyPolicyView)){
+					_updatedNavigationStack.Add (_viewController);
+				}
+			}
+			_examNavController.ViewControllers = _updatedNavigationStack.ToArray();
+
 		}
 
 		public override void ViewDidLayoutSubviews ()

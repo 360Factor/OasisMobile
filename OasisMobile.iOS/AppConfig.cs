@@ -35,6 +35,7 @@ namespace OasisMobile.iOS
 			public static class iPhone
 			{
 				public const string LoginBackgroundImage="Images/OasisBG.png";
+				public const string LoginBackgroundImage_568h="Images/OasisBG.png";
 			}
 
 			public static class iPad

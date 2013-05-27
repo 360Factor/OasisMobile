@@ -28,9 +28,16 @@ namespace OasisMobile.iOS
 		public override void ViewDidLoad ()
 		{
 			base.ViewDidLoad ();
+	
 			UIImage loginImage;
+
 			if (UserInterfaceIdiomIsPhone) {
-				loginImage = new UIImage (AppConfig.ImagePaths.iPhone.LoginBackgroundImage);
+				if (AppDelegate.window.Frame.Height == 568) {
+					loginImage = new UIImage (AppConfig.ImagePaths.iPhone.LoginBackgroundImage_568h);
+				} else {
+					loginImage = new UIImage (AppConfig.ImagePaths.iPhone.LoginBackgroundImage);
+				}
+
 			} else {
 				loginImage = new UIImage (AppConfig.ImagePaths.iPad.LoginBackgroundImage);
 			}
@@ -49,6 +56,7 @@ namespace OasisMobile.iOS
 		{
 			base.ViewWillAppear (animated);
 			UIApplication.SharedApplication.SetStatusBarStyle (UIStatusBarStyle.BlackOpaque, animated);
+
 		}
 
 		public override void ViewWillDisappear (bool animated)
