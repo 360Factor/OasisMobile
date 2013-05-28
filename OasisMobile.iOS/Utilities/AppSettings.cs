@@ -42,7 +42,12 @@ namespace OasisMobile.iOS
 				return NSUserDefaults.StandardUserDefaults.StringForKey ("LoggedInLoginName");
 			} 
 			set{
-				NSUserDefaults.StandardUserDefaults.SetString (value,"LoggedInLoginName");
+				if (value != null) {
+					NSUserDefaults.StandardUserDefaults.SetString (value,"LoggedInLoginName");
+				} else {
+					NSUserDefaults.StandardUserDefaults.SetString ("","LoggedInLoginName");
+				}
+
 				NSUserDefaults.StandardUserDefaults.Synchronize ();
 			}
 		}
