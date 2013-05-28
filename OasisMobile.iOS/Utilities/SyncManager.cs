@@ -129,7 +129,7 @@ namespace OasisMobile.iOS
 							_userExamToSave.IsCompleted = false;
 							_localUserExamList.Add (_userExamToSave);
 						}
-
+						//TODO Krisna to confirm if this change was correct
 						if(!_userExamToSave.DoSync){
 							
 							_userExamToSave.ExamID = _mainSystemExamIDToLocalExamIDMap [_remoteUserExam ["ExamID"]];
