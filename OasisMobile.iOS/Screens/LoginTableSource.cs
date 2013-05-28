@@ -66,6 +66,11 @@ namespace OasisMobile.iOS
 //				cell = tableView.DequeueReusableCell ("cell");
 //				if (cell == null) {
 //					cell = new UITableViewCell (UITableViewCellStyle.Default, "cell");
+//					cell.AutoresizingMask = UIViewAutoresizing.None;
+//					RectangleF _cellFrame = cell.Frame;
+//					_cellFrame.X = (_cellFrame.X + (_cellFrame.X + _cellFrame.Width)) / 2 - 100;
+//					_cellFrame.Width = 200;
+//					cell.Frame = _cellFrame;
 //				}
 //
 				cell = tableView.DequeueReusableCell ("inputCell");
@@ -192,8 +197,13 @@ namespace OasisMobile.iOS
 			// NOTE: Don't call the base implementation on a Model class
 			// see http://docs.xamarin.com/ios/tutorials/Events%2c_Protocols_and_Delegates 
 			if (indexPath.Section == 0) {
-//				return 100; 
-				return 50;
+//				return 100;
+				if(UIDevice.CurrentDevice.UserInterfaceIdiom == UIUserInterfaceIdiom.Pad){
+					return 200;
+				}
+				else{
+					return 75;
+				}
 			} else {
 				return 44;
 			}

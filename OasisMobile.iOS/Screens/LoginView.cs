@@ -40,7 +40,11 @@ namespace OasisMobile.iOS
 				}
 
 			} else {
-				loginImage = new UIImage (AppConfig.ImagePaths.iPad.LoginBackgroundImage);
+				if (InterfaceOrientation == UIInterfaceOrientation.LandscapeLeft || InterfaceOrientation == UIInterfaceOrientation.LandscapeRight) {
+					loginImage = UIImage.FromBundle (AppConfig.ImagePaths.iPad.LoginBackgroundImage_Landscape);
+				} else {
+					loginImage = UIImage.FromBundle (AppConfig.ImagePaths.iPad.LoginBackgroundImage_Potrait);
+				}
 			}
 			UIImageView loginBgView = new UIImageView (loginImage);
 			loginBgView.ContentMode = UIViewContentMode.ScaleAspectFill;
@@ -65,6 +69,21 @@ namespace OasisMobile.iOS
 			base.ViewWillDisappear (animated);
 			UIApplication.SharedApplication.SetStatusBarStyle (UIStatusBarStyle.Default, animated);
 
+		}
+
+		public override void WillRotate (UIInterfaceOrientation toInterfaceOrientation, double duration)
+		{
+			base.WillRotate (toInterfaceOrientation, duration);
+
+			UIImage loginImage;
+			if (toInterfaceOrientation == UIInterfaceOrientation.LandscapeLeft || toInterfaceOrientation == UIInterfaceOrientation.LandscapeRight) {
+				loginImage = UIImage.FromBundle (AppConfig.ImagePaths.iPad.LoginBackgroundImage_Landscape);
+			} else {
+				loginImage = UIImage.FromBundle (AppConfig.ImagePaths.iPad.LoginBackgroundImage_Potrait);
+			}
+			UIImageView loginBgView = new UIImageView (loginImage);
+			loginBgView.ContentMode = UIViewContentMode.ScaleAspectFill;
+			tblvLogin.BackgroundView = loginBgView;
 		}
 	}
 }

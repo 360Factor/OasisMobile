@@ -323,6 +323,8 @@
     <BundleResource Include="Images\AOSSM_BG-iPad.png" />
     <BundleResource Include="Images\AOSSM_BG-iPhone568h.png" />
     <BundleResource Include="Images\AOSSM_BG-iPhone.png" />
+    <BundleResource Include="Images\AOSSM_BG-iPad-Landscape.png" />
+    <BundleResource Include="Resources\Default-Landscape%402x.png" />
   </ItemGroup>
   <ItemGroup>
     <ITunesArtwork Include="iTunesArtwork%402x" />

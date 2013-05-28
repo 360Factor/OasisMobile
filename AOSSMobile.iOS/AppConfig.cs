@@ -40,7 +40,8 @@ namespace OasisMobile.iOS
 
 			public static class iPad
 			{
-				public const string LoginBackgroundImage="Images/AOSSM_BG-iPad.png";
+				public const string LoginBackgroundImage_Potrait="Images/AOSSM_BG-iPad.png";
+				public const string LoginBackgroundImage_Landscape="Images/AOSSM_BG-iPad-Landscape.png";
 			}
 		}
 
