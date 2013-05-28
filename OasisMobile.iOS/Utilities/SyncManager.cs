@@ -119,16 +119,19 @@ namespace OasisMobile.iOS
 						//Only populate user exam that maps to a published/ retired exams, exams that are not published are not good
 						BusinessModel.UserExam _userExamToSave = 
 							(from x in _localUserExamList where x.MainSystemID == _remoteUserExam ["UserExamMapID"] select x).FirstOrDefault ();
+
+						//Only update if the exam is not marked as needing push to server
+						if (_userExamToSave == null) {
+							_userExamToSave = new BusinessModel.UserExam ();
+							_userExamToSave.MainSystemID = _remoteUserExam ["UserExamMapID"];
+							_userExamToSave.DoSync = false;
+							_userExamToSave.IsDownloaded = false;
+							_userExamToSave.IsCompleted = false;
+							_localUserExamList.Add (_userExamToSave);
+						}
+
 						if(!_userExamToSave.DoSync){
-							//Only update if the exam is not marked as needing push to server
-							if (_userExamToSave == null) {
-								_userExamToSave = new BusinessModel.UserExam ();
-								_userExamToSave.MainSystemID = _remoteUserExam ["UserExamMapID"];
-								_userExamToSave.DoSync = false;
-								_userExamToSave.IsDownloaded = false;
-								_userExamToSave.IsCompleted = false;
-								_localUserExamList.Add (_userExamToSave);
-							}
+							
 							_userExamToSave.ExamID = _mainSystemExamIDToLocalExamIDMap [_remoteUserExam ["ExamID"]];
 							_userExamToSave.UserID = aUser.UserID;
 							_userExamToSave.IsSubmitted = _remoteUserExam ["IsSubmitted"];
@@ -137,12 +140,10 @@ namespace OasisMobile.iOS
 							_userExamToSave.HasReadDisclosure = _remoteUserExam ["HasReadDisclosure"];
 							_userExamToSave.SecondsSpent = _remoteUserExam ["SecondsSpent"];
 						}
-					
-					
 					}
 					_remoteUserExamIDList.Add (_remoteUserExam["UserExamMapID"]);
-
 				}
+
 				//Save all changes in one transaction
 				BusinessModel.UserExam.SaveAll (_localUserExamList);
 
