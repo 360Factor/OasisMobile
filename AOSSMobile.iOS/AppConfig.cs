@@ -31,6 +31,7 @@ namespace OasisMobile.iOS
 		public static class ImagePaths
 		{
 			public const string ClientLogo = "Images/OasisLogo560px.png";
+			public const string FlyoutNavBackgroundImage = "Images/Background-Blueprint.jpg";
 
 			public static class iPhone
 			{

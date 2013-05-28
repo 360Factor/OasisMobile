@@ -40,25 +40,25 @@ namespace OasisMobile.iOS
 					new StyledStringElement ("My Exams")      
 					{ 
 						BackgroundColor = UIColor.Clear, 
-						TextColor = UIColor.DarkGray, 
+						TextColor = UIColor.FromRGB (45,45,45), 
 						Image = new UIImage(UIImage.FromBundle ("Images/Icon-Book.png").CGImage,2,UIImageOrientation.Up)
 					},
 					new StyledStringElement ("Settings")    
 					{ 
 						BackgroundColor = UIColor.Clear, 
-						TextColor = UIColor.DarkGray,
+						TextColor = UIColor.FromRGB (45,45,45),
 						Image = new UIImage(UIImage.FromBundle ("Images/Icon-Gear.png").CGImage,2,UIImageOrientation.Up)
 					},
 					new StyledStringElement ("Support")
 					{ 
 						BackgroundColor = UIColor.Clear, 
-						TextColor = UIColor.DarkGray,
+						TextColor = UIColor.FromRGB (45,45,45),
 						Image = new UIImage(UIImage.FromBundle ("Images/Icon-Lifebuoy.png").CGImage,2,UIImageOrientation.Up)
 					},
 					new StyledStringElement ("About")
 					{ 
 						BackgroundColor = UIColor.Clear, 
-						TextColor = UIColor.DarkGray,
+						TextColor = UIColor.FromRGB (45,45,45),
 						Image = new UIImage(UIImage.FromBundle ("Images/Icon-Beaker.png").CGImage,2,UIImageOrientation.Up)
 					}
 				}
@@ -68,7 +68,7 @@ namespace OasisMobile.iOS
 				m_examTab, m_settingsTab, m_supportTab, m_aboutTab
 			};
 
-			NavigationTableView.BackgroundView = new UIImageView (UIImage.FromBundle ("Images/Background-Paper.jpg"));
+			NavigationTableView.BackgroundView = new UIImageView (UIImage.FromBundle (AppConfig.ImagePaths.FlyoutNavBackgroundImage));
 			NavigationTableView.SeparatorColor = UIColor.DarkGray;
 
 		}
