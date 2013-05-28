@@ -292,6 +292,10 @@
       <Link>Screens\ExamPrivacyPolicyView.designer.cs</Link>
       <DependentUpon>ExamPrivacyPolicyView.cs</DependentUpon>
     </Compile>
+    <Compile Include="..\OasisMobile.iOS\Utilities\AppSettings.cs">
+      <Link>Utilities\AppSettings.cs</Link>
+    </Compile>
+    <Compile Include="CustomCells\CustomNarrowCell.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
   <ItemGroup>
@@ -393,17 +397,17 @@
   </ItemGroup>
   <ItemGroup>
     <XamarinComponentReference Include="btprogresshud">
-      <InstallationInProgress>True</InstallationInProgress>
+      <InstallationInProgress>False</InstallationInProgress>
       <Version>1.3</Version>
       <Visible>False</Visible>
     </XamarinComponentReference>
     <XamarinComponentReference Include="flyoutnavigation">
-      <InstallationInProgress>True</InstallationInProgress>
+      <InstallationInProgress>False</InstallationInProgress>
       <Version>1.1</Version>
       <Visible>False</Visible>
     </XamarinComponentReference>
     <XamarinComponentReference Include="json.net">
-      <InstallationInProgress>True</InstallationInProgress>
+      <InstallationInProgress>False</InstallationInProgress>
       <Version>4.5.11</Version>
       <Visible>False</Visible>
     </XamarinComponentReference>

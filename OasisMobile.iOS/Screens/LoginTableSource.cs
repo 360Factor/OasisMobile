@@ -5,6 +5,7 @@ using MonoTouch.Foundation;
 using BigTed;
 using System.Threading.Tasks;
 using System.Net;
+using System.Drawing;
 
 namespace OasisMobile.iOS
 {
@@ -14,6 +15,7 @@ namespace OasisMobile.iOS
 		public LoginTableSource (UIViewController aCurrentViewController)
 		{
 			m_currentViewController = aCurrentViewController;
+
 		}
 
 		private UITextField txtUserName;
@@ -61,11 +63,17 @@ namespace OasisMobile.iOS
 				}
 				break;
 			case 1:
+//				cell = tableView.DequeueReusableCell ("cell");
+//				if (cell == null) {
+//					cell = new UITableViewCell (UITableViewCellStyle.Default, "cell");
+//				}
+//
 				cell = tableView.DequeueReusableCell ("inputCell");
 				if (cell == null) {
 					cell = new CustomTextFieldCell ( "inputCell");
 					cell.SelectionStyle = UITableViewCellSelectionStyle.None;
 				}
+
 				var inputCell = (CustomTextFieldCell)cell;
 				if(UIDevice.CurrentDevice.UserInterfaceIdiom== UIUserInterfaceIdiom.Pad){
 					inputCell.InputTextWidthPct = 75;
@@ -270,6 +278,10 @@ namespace OasisMobile.iOS
 						BTProgressHUD.Dismiss ();
 						m_currentViewController.DismissViewController (true, null);
 						AppDelegate.m_flyoutMenuController.WillAnimateRotation (m_currentViewController.InterfaceOrientation, 0);
+						if(AppSettings.PersistentLogin){
+							//If the settings are in persistent login, we will put the just logged in person login into the settings
+							AppSettings.LoggedInLoginName = AppSession.LoggedInUser.LoginName;
+						}
 					} else {
 						BTProgressHUD.Dismiss ();
 						if(_serviceReachable){

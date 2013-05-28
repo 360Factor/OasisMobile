@@ -44,8 +44,11 @@ namespace OasisMobile.iOS
 					_examToSave.Disclosure = _remoteExam ["Disclosure"];
 
 
-					//Trim the exam's disclosure and privacy policy
+					//Trim out html from the exam's disclosure and privacy policy
 					//------------------------------------------------
+
+					_examToSave.PrivacyPolicy = System.Web.HttpUtility.HtmlDecode (_examToSave.PrivacyPolicy);
+					_examToSave.Disclosure = System.Web.HttpUtility.HtmlDecode (_examToSave.Disclosure);
 
 					//Replace 2 or more line break to 2 line breaks
 					_examToSave.PrivacyPolicy = Regex.Replace (_examToSave.PrivacyPolicy, "(<br\\s*\\/*>\\s*){2,}", "<br /><br />");
@@ -57,8 +60,11 @@ namespace OasisMobile.iOS
 					_examToSave.PrivacyPolicy = Regex.Replace (_examToSave.PrivacyPolicy, "<div[^>]*>(.+)</\\s*div>", "$1\n");
 					_examToSave.Disclosure = Regex.Replace (_examToSave.Disclosure, "<div[^>]*>(.+)</\\s*div>", "$1\n");
 
-					_examToSave.PrivacyPolicy = Regex.Replace (_examToSave.PrivacyPolicy, "<[^>]+>(.+)<\\/[^>]+>","$1");
-					_examToSave.Disclosure = Regex.Replace (_examToSave.Disclosure, "<[^>]+>(.+)<\\/[^>]+>","$1");
+					_examToSave.PrivacyPolicy = Regex.Replace (_examToSave.PrivacyPolicy, "<[^>]+>([^<]+)<\\/[^>]+>","$1");
+					_examToSave.Disclosure = Regex.Replace (_examToSave.Disclosure, "<[^>]+>([^<]+)<\\/[^>]+>","$1");
+
+					_examToSave.PrivacyPolicy = Regex.Replace (_examToSave.PrivacyPolicy, "<[^>]+(\\/)?>","");
+					_examToSave.Disclosure = Regex.Replace (_examToSave.Disclosure, "<[^>]+(\\/)?>","");
 
 				}
 			}
@@ -86,6 +92,25 @@ namespace OasisMobile.iOS
 					_examToSave.Price = _remoteExam ["Price"];
 					_examToSave.PrivacyPolicy = _remoteExam ["PrivacyPolicy"];
 					_examToSave.Disclosure = _remoteExam ["Disclosure"];
+
+					//Trim out html from the exam's disclosure and privacy policy
+					//------------------------------------------------
+
+					_examToSave.PrivacyPolicy = System.Web.HttpUtility.HtmlDecode (_examToSave.PrivacyPolicy);
+					_examToSave.Disclosure = System.Web.HttpUtility.HtmlDecode (_examToSave.Disclosure);
+
+					//Replace 2 or more line break to 2 line breaks
+					_examToSave.PrivacyPolicy = Regex.Replace (_examToSave.PrivacyPolicy, "(<br\\s*\\/*>\\s*){2,}", "<br /><br />");
+					_examToSave.Disclosure = Regex.Replace (_examToSave.Disclosure, "(<br\\s*\\/*>\\s*){2,}", "<br /><br />");
+
+					_examToSave.PrivacyPolicy = Regex.Replace (_examToSave.PrivacyPolicy, "<br\\s*\\/*>", "\n");
+					_examToSave.Disclosure = Regex.Replace (_examToSave.Disclosure, "<br\\s*\\/*>", "\n");
+
+					_examToSave.PrivacyPolicy = Regex.Replace (_examToSave.PrivacyPolicy, "<div[^>]*>(.+)</\\s*div>", "$1\n");
+					_examToSave.Disclosure = Regex.Replace (_examToSave.Disclosure, "<div[^>]*>(.+)</\\s*div>", "$1\n");
+
+					_examToSave.PrivacyPolicy = Regex.Replace (_examToSave.PrivacyPolicy, "<[^>]+(\\/)?>","");
+					_examToSave.Disclosure = Regex.Replace (_examToSave.Disclosure, "<[^>]+(\\/)?>","");
 				}
 			}
 
@@ -129,7 +154,6 @@ namespace OasisMobile.iOS
 							_userExamToSave.IsCompleted = false;
 							_localUserExamList.Add (_userExamToSave);
 						}
-						//TODO Krisna to confirm if this change was correct
 						if(!_userExamToSave.DoSync){
 							
 							_userExamToSave.ExamID = _mainSystemExamIDToLocalExamIDMap [_remoteUserExam ["ExamID"]];
@@ -292,15 +316,22 @@ namespace OasisMobile.iOS
 					_matchinglocalQuestion.Commentary = Regex.Replace (_matchinglocalQuestion.Commentary, "(<br\\s*\\/*>\\s*){2,}", "<br /><br />");
 					_matchinglocalQuestion.Reference = Regex.Replace (_matchinglocalQuestion.Reference, "(<br\\s*\\/*>\\s*){2,}", "<br /><br />");
 
+					//Trim the line break at the end
+					_matchinglocalQuestion.Stem = Regex.Replace (_matchinglocalQuestion.Stem, "(<br\\s*\\/*>)+\\Z", "");
+					_matchinglocalQuestion.LeadIn = Regex.Replace (_matchinglocalQuestion.LeadIn,"(<br\\s*\\/*>)+\\Z", "");
+					_matchinglocalQuestion.Commentary = Regex.Replace (_matchinglocalQuestion.Commentary,"(<br\\s*\\/*>)+\\Z", "");
+					_matchinglocalQuestion.Reference = Regex.Replace (_matchinglocalQuestion.Reference, "(<br\\s*\\/*>)+\\Z", "");
+
 					_matchinglocalQuestion.Stem = Regex.Replace (_matchinglocalQuestion.Stem, "<br\\s*\\/*>", "\n");
 					_matchinglocalQuestion.LeadIn = Regex.Replace (_matchinglocalQuestion.LeadIn, "<br\\s*\\/*>", "\n");
 					_matchinglocalQuestion.Commentary = Regex.Replace (_matchinglocalQuestion.Commentary, "<br\\s*\\/*>", "\n");
 					_matchinglocalQuestion.Reference = Regex.Replace (_matchinglocalQuestion.Reference, "<br\\s*\\/*>", "\n");
 
-					_matchinglocalQuestion.Stem = Regex.Replace (_matchinglocalQuestion.Stem, "<[^>]+>(.+)<\\/[^>]+>","$1");
-					_matchinglocalQuestion.LeadIn = Regex.Replace (_matchinglocalQuestion.LeadIn, "<[^>]+>(.+)<\\/[^>]+>","$1");
-					_matchinglocalQuestion.Commentary = Regex.Replace (_matchinglocalQuestion.Commentary, "<[^>]+>(.+)<\\/[^>]+>","$1");
-					_matchinglocalQuestion.Reference = Regex.Replace (_matchinglocalQuestion.Reference, "<[^>]+>(.+)<\\/[^>]+>","$1");
+					_matchinglocalQuestion.Stem = Regex.Replace (_matchinglocalQuestion.Stem, "<[^>]+>([^<]+)<\\/[^>]+>","$1");
+					_matchinglocalQuestion.LeadIn = Regex.Replace (_matchinglocalQuestion.LeadIn, "<[^>]+>([^<]+)<\\/[^>]+>","$1");
+					_matchinglocalQuestion.Commentary = Regex.Replace (_matchinglocalQuestion.Commentary, "<[^>]+>([^<]+)<\\/[^>]+>","$1");
+					_matchinglocalQuestion.Reference = Regex.Replace (_matchinglocalQuestion.Reference, "<[^>]+>([^<]+)<\\/[^>]+>","$1");
+
 
 					_matchinglocalQuestion.ExamID = aExam.ExamID;
 					if (_mainSystemIDToCategoryIDMap.ContainsKey (_remoteQuestion ["CategoryID"])) {

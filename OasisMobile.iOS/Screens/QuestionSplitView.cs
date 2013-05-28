@@ -82,6 +82,32 @@ namespace OasisMobile.iOS
 			m_examQuestionListView.MarkQuestionAsSelected (e.CurrentUserQuestionIndex);
 		}
 
+		public void PresentAsRootViewWithAnimation(){
+			UIViewAnimationOptions _transitionStyle = UIViewAnimationOptions.TransitionFlipFromRight;
+			switch (AppDelegate.window.RootViewController.InterfaceOrientation) {
+			case UIInterfaceOrientation.LandscapeLeft:
+				_transitionStyle = UIViewAnimationOptions.TransitionFlipFromBottom;
+				break;
+			case UIInterfaceOrientation.LandscapeRight:
+				_transitionStyle = UIViewAnimationOptions.TransitionFlipFromTop;
+				break;
+			case UIInterfaceOrientation.Portrait:
+				_transitionStyle = UIViewAnimationOptions.TransitionFlipFromRight;
+				break;
+			case UIInterfaceOrientation.PortraitUpsideDown:
+				_transitionStyle = UIViewAnimationOptions.TransitionFlipFromLeft;
+				break;
+			}
+			AppDelegate.window.RootViewController = this;
+			UIView.Transition (AppDelegate.window,
+			                   0.5,
+			                   _transitionStyle,
+			                   () => {
+				AppDelegate.window.RootViewController = this;
+				this.WillAnimateRotation (AppDelegate.m_flyoutMenuController.InterfaceOrientation, 0);
+			}, null);
+		}
+
 	}
 }
 

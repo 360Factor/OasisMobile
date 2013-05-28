@@ -86,9 +86,24 @@ namespace OasisMobile.iOS
 		}
 
 		private void navBackButton_Clicked(object sender, EventArgs e){
+		UIViewAnimationOptions _transitionStyle = UIViewAnimationOptions.TransitionFlipFromRight;
+			switch (AppDelegate.window.RootViewController.InterfaceOrientation) {
+				case UIInterfaceOrientation.LandscapeLeft:
+				_transitionStyle = UIViewAnimationOptions.TransitionFlipFromBottom;
+				break;
+				case UIInterfaceOrientation.LandscapeRight:
+				_transitionStyle = UIViewAnimationOptions.TransitionFlipFromTop;
+				break;
+				case UIInterfaceOrientation.Portrait:
+				_transitionStyle = UIViewAnimationOptions.TransitionFlipFromRight;
+				break;
+				case UIInterfaceOrientation.PortraitUpsideDown:
+				_transitionStyle = UIViewAnimationOptions.TransitionFlipFromLeft;
+				break;
+			}
 			UIView.Transition (AppDelegate.window,
 			                   0.5,
-			                   UIViewAnimationOptions.TransitionFlipFromLeft,
+			                   _transitionStyle,
 			                   () => {
 				AppDelegate.window.RootViewController = AppDelegate.m_flyoutMenuController;
 				AppDelegate.m_flyoutMenuController.WillAnimateRotation (this.InterfaceOrientation, 0);
@@ -129,13 +144,13 @@ namespace OasisMobile.iOS
 
 			svQuestionPager.Scrolled += svQuestionPager_Scrolled;
 
-			UINavigationController _examNavController = (UINavigationController) AppDelegate.m_flyoutMenuController.ViewControllers [0];
+			UINavigationController _examNavController = AppDelegate.m_flyoutMenuController.ExamTab;
 		
-			UIViewController[] _originalNavigationStack = 	_examNavController.ViewControllers;
+			UIViewController[] _originalNavigationStack = _examNavController.ViewControllers;
 			List<UIViewController> _updatedNavigationStack = new List<UIViewController>();
 
 			foreach(UIViewController _viewController in _originalNavigationStack){
-				//Eliminate the 
+				//Eliminate the generate new exam, exam disclosure, and exam privacy policy from the view
 				Type _viewType = _viewController.GetType ();
 				if(_viewType != typeof(GenerateNewExamView) && 
 				   _viewType != typeof(ExamDisclosureView) && 
@@ -624,15 +639,35 @@ namespace OasisMobile.iOS
 				} else {
 					if (indexPath.Section == (int)UnsubmittedQuestionViewSections.QuestionAnswerOptions) {
 						//Update the source global variable so we can pull the answer data later on
+						BusinessModel.UserAnswerOptionDetail _selectedAnswerOptionObj = null;
 						for (int i=0; i<m_questionAnswerOptions.Count; i++) {
 							BusinessModel.UserAnswerOptionDetail _answerOptionObj = m_questionAnswerOptions [i];
 							if (i == indexPath.Row) {
 								_answerOptionObj.IsSelected = true;
+								_selectedAnswerOptionObj = _answerOptionObj;
 							} else {
-								tableView.CellAt (NSIndexPath.FromRowSection (i,(int)UnsubmittedQuestionViewSections.QuestionAnswerOptions)).Selected=false;
+								UITableViewCell _cellAtRow = tableView.CellAt (NSIndexPath.FromRowSection (i,(int)UnsubmittedQuestionViewSections.QuestionAnswerOptions));
+								if(_cellAtRow != null){
+									_cellAtRow.Selected = false;
+								}
 								_answerOptionObj.IsSelected = false;
 							}
 						}
+
+						if (AppSession.SelectedUserExam.IsLearningMode && AppSettings.AutoSubmitResponse) {
+							SubmitUserAnswer (_selectedAnswerOptionObj);
+							//For learning mode, we update the interface to show the answer
+							m_currentViewController.ReloadCurrentQuestion ();
+							m_currentViewController.QuestionUpdated (btnSubmitQuestionAnswer, null); 
+						}else if(!AppSession.SelectedUserExam.IsLearningMode && AppSettings.AutoAdvanceQuestion){
+							SubmitUserAnswer (_selectedAnswerOptionObj);
+							//For examination mode, we go to the next answer
+							if (m_currentViewController.CurrentQuestionToDisplayIndex < m_currentViewController.TotalQuestionInExam - 1) {
+								m_currentViewController.GoToNextQuestion ();
+							}
+							m_currentViewController.QuestionUpdated (btnSubmitQuestionAnswer, null); 
+						}
+
 
 					} else {
 						tableView.DeselectRow (indexPath, false);
@@ -782,31 +817,7 @@ namespace OasisMobile.iOS
 
 				if (_previousSelectedAnswer == null || _selectedAnswerOption.UserAnswerOptionID == _previousSelectedAnswer.UserAnswerOptionID) {
 					//Only update the database if the answer has changed
-					int _hasAnsweredCorrectly;
-					if (_selectedAnswerOption.IsCorrect) {
-						_hasAnsweredCorrectly = 1;
-					} else {
-						_hasAnsweredCorrectly = 0;
-					}
-
-					List<string> _queriesToExecute = new List<string> ();
-
-					_queriesToExecute.Add (string.Format (
-						"UPDATE tblUserAnswerOption SET IsSelected=1 WHERE pkUserAnswerOptionID={0}", 
-						_selectedAnswerOption.UserAnswerOptionID));
-					_queriesToExecute.Add (string.Format (
-						"UPDATE tblUserAnswerOption SET IsSelected=0 " +
-						"WHERE pkUserAnswerOptionID!={0} AND fkUserQuestionID={1}", 
-						_selectedAnswerOption.UserAnswerOptionID, _selectedAnswerOption.UserQuestionID));
-					_queriesToExecute.Add (string.Format (
-						"UPDATE tblUserQuestion SET HasAnswered=1, HasAnsweredCorrectly={0}, AnsweredDateTime='{1}', DoSync=1 " +
-						"WHERE pkUserQuestionID={2}",_hasAnsweredCorrectly, DateTime.UtcNow ,_selectedAnswerOption.UserQuestionID));
-
-					BusinessModel.SQL.Execute (_queriesToExecute);
-					//Update the userquestion session too
-					AppSession.SelectedExamUserQuestionList = BusinessModel.UserQuestion.GetUserQuestionsBySQL (string.Format (
-						"SELECT * FROM tblUserQuestion " +
-						"WHERE fkUserExamID={0} ORDER BY Sequence", AppSession.SelectedUserExam.UserExamID));
+					SubmitUserAnswer (_selectedAnswerOption);
 
 					if (AppSession.SelectedUserExam.IsLearningMode) {
 						//For learning mode, we update the interface to show the answer
@@ -832,6 +843,35 @@ namespace OasisMobile.iOS
 
 				}
 
+
+			}
+
+			private void SubmitUserAnswer(BusinessModel.UserAnswerOptionDetail aSelectedAnswerOption){
+				int _hasAnsweredCorrectly;
+				if (aSelectedAnswerOption.IsCorrect) {
+					_hasAnsweredCorrectly = 1;
+				} else {
+					_hasAnsweredCorrectly = 0;
+				}
+
+				List<string> _queriesToExecute = new List<string> ();
+
+				_queriesToExecute.Add (string.Format (
+					"UPDATE tblUserAnswerOption SET IsSelected=1 WHERE pkUserAnswerOptionID={0}", 
+					aSelectedAnswerOption.UserAnswerOptionID));
+				_queriesToExecute.Add (string.Format (
+					"UPDATE tblUserAnswerOption SET IsSelected=0 " +
+					"WHERE pkUserAnswerOptionID!={0} AND fkUserQuestionID={1}", 
+					aSelectedAnswerOption.UserAnswerOptionID, aSelectedAnswerOption.UserQuestionID));
+				_queriesToExecute.Add (string.Format (
+					"UPDATE tblUserQuestion SET HasAnswered=1, HasAnsweredCorrectly={0}, AnsweredDateTime='{1}', DoSync=1 " +
+					"WHERE pkUserQuestionID={2}",_hasAnsweredCorrectly, DateTime.UtcNow ,aSelectedAnswerOption.UserQuestionID));
+
+				BusinessModel.SQL.Execute (_queriesToExecute);
+				//Update the userquestion session too
+				AppSession.SelectedExamUserQuestionList = BusinessModel.UserQuestion.GetUserQuestionsBySQL (string.Format (
+					"SELECT * FROM tblUserQuestion " +
+					"WHERE fkUserExamID={0} ORDER BY Sequence", AppSession.SelectedUserExam.UserExamID));
 
 			}
 		}

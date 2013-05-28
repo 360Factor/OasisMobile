@@ -13,6 +13,11 @@ namespace OasisMobile.iOS
 {
 	public class OasisFlyoutController : FlyoutNavigationController
 	{
+		public UINavigationController ExamTab{
+			get{
+				return m_examTab;
+			}
+		}
 		private UINavigationController m_examTab;
 		private UINavigationController m_settingsTab;
 		private UINavigationController m_supportTab;

@@ -61,7 +61,7 @@ namespace OasisMobile.iOS
 						cell = new UITableViewCell (UITableViewCellStyle.Default, "cell");
 					}
 
-					cell.TextLabel.Font = UIFont.SystemFontOfSize (14);
+					cell.TextLabel.Font = UIFont.SystemFontOfSize (13);
 					cell.TextLabel.Lines = 0;
 					cell.TextLabel.LineBreakMode = UILineBreakMode.WordWrap;
 					cell.TextLabel.Text = AppSession.SelectedExam.Disclosure;
@@ -113,6 +113,15 @@ namespace OasisMobile.iOS
 			
 			}
 
+			public override void WillDisplay (UITableView tableView, UITableViewCell cell, NSIndexPath indexPath)
+			{
+				// NOTE: Don't call the base implementation on a Model class
+				// see http://docs.xamarin.com/ios/tutorials/Events%2c_Protocols_and_Delegates 
+				if (indexPath.Section == 0) {
+					cell.SelectionStyle = UITableViewCellSelectionStyle.None;
+				}
+			}
+
 			private void btnAcceptAndContinue_Click (object sender, EventArgs e)
 			{
 				AppSession.SelectedUserExam.HasReadDisclosure = true;
@@ -123,15 +132,8 @@ namespace OasisMobile.iOS
 						m_currentViewController.NavigationController.PushViewController (new ExamQuestionList_iPhone (), true);
 					} else {
 						QuestionSplitView _questionSplitView = new QuestionSplitView ();
-						AppDelegate.window.RootViewController = _questionSplitView;
-
-						UIView.Transition (AppDelegate.window,
-						                   0.5,
-						                   UIViewAnimationOptions.TransitionFlipFromRight,
-						                   () => {
-							AppDelegate.window.RootViewController = _questionSplitView;
-							_questionSplitView.WillAnimateRotation (m_currentViewController.InterfaceOrientation, 0);
-						}, null);
+					
+						_questionSplitView.PresentAsRootViewWithAnimation ();
 					}
 				} else {
 					var _privacyPolicyView = new ExamPrivacyPolicyView ();

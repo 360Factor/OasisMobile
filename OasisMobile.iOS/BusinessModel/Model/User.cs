@@ -126,7 +126,7 @@ namespace OasisMobile.BusinessModel
 
         public static User GetUserByLoginName(string TargetLoginName)
         {
-            string _sql = "select * from tblUser where LoginName = " + TargetLoginName;
+			string _sql = string.Format( "select * from tblUser where LoginName = '{0}'", TargetLoginName);
             return GetFirstUserBySQL(_sql);
         }
 

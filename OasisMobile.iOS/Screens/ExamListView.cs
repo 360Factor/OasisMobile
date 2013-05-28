@@ -39,6 +39,12 @@ namespace OasisMobile.iOS
 		public override void ViewWillAppear (bool animated)
 		{
 			base.ViewWillAppear (animated);
+			LoadExamList ();
+			AppSession.SelectedExam = null;
+			AppSession.SelectedUserExam = null;
+		}
+
+		public void LoadExamList(){
 			if (AppSession.LoggedInUser != null) {
 				if (tblvExamList.Source == null) {
 					tblvExamList.Source = new ExamListTableSource (this);
@@ -46,12 +52,8 @@ namespace OasisMobile.iOS
 					tblvExamList.Source = new ExamListTableSource (this);
 					tblvExamList.ReloadData ();
 				}
-				AppSession.SelectedExam = null;
-				AppSession.SelectedUserExam = null;
-
 			}
 		}
-
 
 		public class ExamListTableSource : UITableViewSource
 		{

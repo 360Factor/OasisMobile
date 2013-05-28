@@ -239,7 +239,23 @@ namespace OasisMobile.iOS
 				}).ContinueWith (task1 => {
 					BTProgressHUD.Dismiss ();
 					if (_isDownloadSuccessful) {
-						m_currentViewController.NavigationController.PushViewController (new ExamQuestionList_iPhone (), true);
+						if(!AppSession.SelectedUserExam.HasReadDisclosure){
+							//Show Disclosure
+							ExamDisclosureView _disclosureView = new ExamDisclosureView();
+							m_currentViewController.NavigationController.PushViewController (_disclosureView,true);
+						}else if(!AppSession.SelectedUserExam.HasReadPrivacyPolicy){
+							//Show Privacy Policy
+							ExamPrivacyPolicyView _privacyPolicyView = new ExamPrivacyPolicyView();
+							m_currentViewController.NavigationController.PushViewController (_privacyPolicyView,true);
+						}else{
+							//Navigate straight to the exam
+							if (UserInterfaceIdiomIsPhone) {
+								m_currentViewController.NavigationController.PushViewController (new ExamQuestionList_iPhone (), true);
+							} else {
+								QuestionSplitView _questionSplitView = new QuestionSplitView ();
+								_questionSplitView.PresentAsRootViewWithAnimation ();
+							}
+						}
 					} else {
 						UIAlertView _alert = new UIAlertView ("Download Failed", "We could not download your exam right now. Please try again later", null, "Ok", null);
 						_alert.Show ();
@@ -278,7 +294,23 @@ namespace OasisMobile.iOS
 				}).ContinueWith (task1 => {
 					BTProgressHUD.Dismiss ();
 					if (_isDownloadSuccessful) {
-						m_currentViewController.NavigationController.PushViewController (new ExamQuestionList_iPhone (), true);
+						if(!AppSession.SelectedUserExam.HasReadDisclosure){
+							//Show Disclosure
+							ExamDisclosureView _disclosureView = new ExamDisclosureView();
+							m_currentViewController.NavigationController.PushViewController (_disclosureView,true);
+						}else if(!AppSession.SelectedUserExam.HasReadPrivacyPolicy){
+							//Show Privacy Policy
+							ExamPrivacyPolicyView _privacyPolicyView = new ExamPrivacyPolicyView();
+							m_currentViewController.NavigationController.PushViewController (_privacyPolicyView,true);
+						}else{
+							//Navigate straight to the exam
+							if (UserInterfaceIdiomIsPhone) {
+								m_currentViewController.NavigationController.PushViewController (new ExamQuestionList_iPhone (), true);
+							} else {
+								QuestionSplitView _questionSplitView = new QuestionSplitView ();
+								_questionSplitView.PresentAsRootViewWithAnimation ();
+							}
+						}
 					} else {
 						UIAlertView _alert = new UIAlertView ("Download Failed", "We could not download your exam right now. Please try again later", null, "Ok", null);
 						_alert.Show ();

@@ -110,7 +110,7 @@ namespace OasisMobile.iOS
 					if (swPersistentLogin == null) {
 						swPersistentLogin = new UISwitch ();
 						swPersistentLogin.ValueChanged += swPersistentLogin_ValueChanged;
-						swPersistentLogin.On = NSUserDefaults.StandardUserDefaults.BoolForKey ("PersistentLogin");
+						swPersistentLogin.On = AppSettings.PersistentLogin;
 					} 
 					cell.AccessoryView = swPersistentLogin;
 					return cell;
@@ -124,7 +124,7 @@ namespace OasisMobile.iOS
 						if (swAutoAdvanceQuestion == null) {
 							swAutoAdvanceQuestion = new UISwitch ();
 							swAutoAdvanceQuestion.ValueChanged += swAutoAdvanceQuestion_ValueChanged;
-							swAutoAdvanceQuestion.On = NSUserDefaults.StandardUserDefaults.BoolForKey ("AutoAdvanceQuestion");
+							swAutoAdvanceQuestion.On = AppSettings.AutoAdvanceQuestion;
 						} 
 						cell.AccessoryView = swAutoAdvanceQuestion;
 					} else if (indexPath.Row == 1) {
@@ -132,7 +132,7 @@ namespace OasisMobile.iOS
 						if (swAutoSubmitResponse == null) {
 							swAutoSubmitResponse = new UISwitch ();
 							swAutoSubmitResponse.ValueChanged += swAutoSubmitResponse_ValueChanged;
-							swAutoSubmitResponse.On = NSUserDefaults.StandardUserDefaults.BoolForKey ("AutoSubmitResponse");
+							swAutoSubmitResponse.On = AppSettings.AutoSubmitResponse;
 						} 
 						cell.AccessoryView = swAutoSubmitResponse;
 					}
@@ -183,25 +183,27 @@ namespace OasisMobile.iOS
 			}
 
 			private void swPersistentLogin_ValueChanged (object sender, EventArgs e){
-				NSUserDefaults.StandardUserDefaults.SetBool (swPersistentLogin.On,"PersistentLogin");
-				NSUserDefaults.StandardUserDefaults.Synchronize ();
+				if (swPersistentLogin.On) {
+					AppSettings.PersistentLogin = true;
+					AppSettings.LoggedInLoginName = AppSession.LoggedInUser.LoginName;
+				} else {
+					AppSettings.PersistentLogin = false;
+					AppSettings.LoggedInLoginName = null;
+				}
 			}
 
 			private void swAutoAdvanceQuestion_ValueChanged (object sender, EventArgs e){
-				NSUserDefaults.StandardUserDefaults.SetBool (swAutoAdvanceQuestion.On,"AutoAdvanceQuestion");
-				NSUserDefaults.StandardUserDefaults.Synchronize ();
-
+				AppSettings.AutoAdvanceQuestion = swAutoAdvanceQuestion.On;
 			}
 
 			private void swAutoSubmitResponse_ValueChanged (object sender, EventArgs e){
-				NSUserDefaults.StandardUserDefaults.SetBool (swAutoSubmitResponse.On,"AutoSubmitResponse");
-				NSUserDefaults.StandardUserDefaults.Synchronize ();
-
+				AppSettings.AutoSubmitResponse = swAutoSubmitResponse.On;
 			}
 
 			private void btnLogout_Clicked (object sender, EventArgs e)
 			{
 				AppSession.ClearSession ();
+				AppSettings.LoggedInLoginName = "";
 				m_currentViewController.NavigationController.PopToRootViewController (false);
 				AppDelegate.m_flyoutMenuController.SelectedIndex = 0;
 				LoginView _loginViewController = new LoginView ();

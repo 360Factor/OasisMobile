@@ -5,6 +5,8 @@ using System.IO;
 using MonoTouch.Foundation;
 using MonoTouch.UIKit;
 using System.Threading.Tasks;
+using BigTed;
+using System.Net;
 
 namespace OasisMobile.iOS
 {
@@ -32,25 +34,89 @@ namespace OasisMobile.iOS
 		{
 			window = new UIWindow (UIScreen.MainScreen.Bounds);
 
-			var _settingValues = new Object [] { true, true, false };
-			var _settingKeys = new Object [] { "PersistentLogin", "AutoAdvanceQuestion", "AutoSubmitResponse" };
-			var _appDefaults = NSDictionary.FromObjectsAndKeys (_settingValues, _settingKeys);
-			NSUserDefaults _userSettings = NSUserDefaults.StandardUserDefaults;
-			_userSettings.RegisterDefaults (_appDefaults);
+			AppSettings.SetDefaultSettingsValue ();
+		
 			BusinessModel.ConnectionString.SetDBPath (GetDatabaseFilePath());
 			BusinessModel.Repository.Instance.InitializeDb ();
 
-			m_flyoutMenuController = new OasisFlyoutController ();
-			window.RootViewController =  m_flyoutMenuController ;
-			window.MakeKeyAndVisible ();
-			LoginView _loginViewController = new LoginView ();
-			_loginViewController.ModalInPopover = false;
-			_loginViewController.ModalTransitionStyle = UIModalTransitionStyle.FlipHorizontal;
-			m_flyoutMenuController.PresentViewController (_loginViewController, false, null);
 
 
+			if (AppSettings.PersistentLogin && AppSettings.LoggedInLoginName != null && AppSettings.LoggedInLoginName != "") {
+				BusinessModel.User _loggedInUser = BusinessModel.User.GetUserByLoginName (AppSettings.LoggedInLoginName);
+				AppSession.LoggedInUser = _loggedInUser;
+				m_flyoutMenuController = new OasisFlyoutController ();
+				window.RootViewController =  m_flyoutMenuController;
+				window.MakeKeyAndVisible ();
+				BTProgressHUD.Show ("Synching Account");
+				bool _dataUpdateSuccessful = false;
+				Task.Factory.StartNew (() => {
+					string responseString ="";
+					try{
+						WebClient service = new WebClient ();
+						service.Headers.Add (HttpRequestHeader.Accept, "application/json");
+						string serviceURL = AppConfig.BaseWebserviceURL +
+							"UserByLoginName/" + 
+								System.Web.HttpUtility.UrlEncode (AppSettings.LoggedInLoginName);
+						responseString = service.DownloadString (serviceURL);
 
-			StartSyncThread ();
+						if (responseString != null && responseString != "") {
+							var _jsonUser = System.Json.JsonValue.Parse (responseString);
+
+							_loggedInUser = BusinessModel.User.GetUserByMainSystemID (_jsonUser ["UserID"]);
+							if (_loggedInUser == null) {
+								_loggedInUser = new BusinessModel.User ();
+								_loggedInUser.MainSystemID = _jsonUser ["UserID"];
+							}
+							_loggedInUser.LoginName = _jsonUser ["LoginName"];
+							_loggedInUser.UserName = _jsonUser ["UserName"];
+							_loggedInUser.Password = _jsonUser ["Password"];
+							_loggedInUser.EmailAddress = _jsonUser ["UserEmail"];
+							_loggedInUser.LastLoginDate = DateTime.Now;
+							_loggedInUser.Save ();
+							AppSession.LoggedInUser = _loggedInUser;
+							SyncManager.PushAllDoSyncData();
+							SyncManager.SyncUserExamDataFromServer (AppSession.LoggedInUser);
+							SyncManager.SyncUserExamAccess (AppSession.LoggedInUser);
+							_dataUpdateSuccessful = true;
+						}else{
+							//The user is not found, so we present login view
+							AppSettings.LoggedInLoginName=null;
+							InvokeOnMainThread (() =>{
+								LoginView _loginViewController = new LoginView ();
+								_loginViewController.ModalInPopover = false;
+								_loginViewController.ModalTransitionStyle = UIModalTransitionStyle.FlipHorizontal;
+								m_flyoutMenuController.PresentViewController (_loginViewController, false, null);
+							});
+						}
+
+					}
+					catch(Exception ex){
+						Console.WriteLine (ex.ToString ());
+					}
+
+
+				}).ContinueWith (task1 => {
+					BTProgressHUD.Dismiss ();
+					if(_dataUpdateSuccessful){
+						UIViewController _currentDisplayedController = m_flyoutMenuController.ExamTab.VisibleViewController;
+						if(_currentDisplayedController.GetType () == typeof(ExamListView)){
+							((ExamListView)_currentDisplayedController).LoadExamList();
+						}
+					}
+					StartSyncThread ();
+				}, TaskScheduler.FromCurrentSynchronizationContext ());
+			} else {
+				m_flyoutMenuController = new OasisFlyoutController ();
+				window.RootViewController =  m_flyoutMenuController;
+				window.MakeKeyAndVisible ();
+				LoginView _loginViewController = new LoginView ();
+				_loginViewController.ModalInPopover = false;
+				_loginViewController.ModalTransitionStyle = UIModalTransitionStyle.FlipHorizontal;
+				m_flyoutMenuController.PresentViewController (_loginViewController, false, null);
+				StartSyncThread ();
+			}
+
+
 			return true;
 		}
 
