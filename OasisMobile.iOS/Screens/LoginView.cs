@@ -33,6 +33,7 @@ namespace OasisMobile.iOS
 
 			if (UserInterfaceIdiomIsPhone) {
 				if (AppDelegate.window.Frame.Height == 568) {
+					//for iphone 5 and above
 					loginImage = new UIImage (AppConfig.ImagePaths.iPhone.LoginBackgroundImage_568h);
 				} else {
 					loginImage = new UIImage (AppConfig.ImagePaths.iPhone.LoginBackgroundImage);
