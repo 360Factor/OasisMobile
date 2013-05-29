@@ -25,6 +25,7 @@
 		<string>Icon-72@2x</string>
 		<string>Icon-Small-50@2x</string>
 		<string>Icon@2x</string>
+		<string>Icon-Small@2x</string>
 	</array>
 	<key>CFBundleDisplayName</key>
 	<string>AOSSM SAE</string>
