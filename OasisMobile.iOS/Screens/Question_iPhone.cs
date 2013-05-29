@@ -561,7 +561,9 @@ namespace OasisMobile.iOS
 							} 
 						}
 					case (int) SubmittedQuestionViewSections.QuestionAnswerOptions:
-						return tableView.StringSize (m_questionAnswerOptions [indexPath.Row].AnswerOptionText, UIFont.SystemFontOfSize (14), _bounds, UILineBreakMode.WordWrap).Height + 20; // add 20 px as padding
+						return tableView.StringSize ((Char)(Convert.ToInt32 ('A') + indexPath.Row) + ". " +
+						                             m_questionAnswerOptions [indexPath.Row].AnswerOptionText, 
+						                             UIFont.SystemFontOfSize (14), _bounds, UILineBreakMode.WordWrap).Height + 20; // add 20 px as padding
 					case (int) SubmittedQuestionViewSections.QuestionCommentary:
 						return tableView.StringSize (m_question.Commentary, UIFont.SystemFontOfSize (14), _bounds, UILineBreakMode.WordWrap).Height + 20; 
 					case (int) SubmittedQuestionViewSections.QuestionReferences:
@@ -586,7 +588,9 @@ namespace OasisMobile.iOS
 
 						}
 					case (int) UnsubmittedQuestionViewSections.QuestionAnswerOptions:
-						return tableView.StringSize (m_questionAnswerOptions [indexPath.Row].AnswerOptionText, UIFont.SystemFontOfSize (14), _bounds, UILineBreakMode.WordWrap).Height + 20; // add 20 px as padding
+						return tableView.StringSize ((Char)(Convert.ToInt32 ('A') + indexPath.Row) + ". " +
+						                             m_questionAnswerOptions [indexPath.Row].AnswerOptionText, 
+						                             UIFont.SystemFontOfSize (14), _bounds, UILineBreakMode.WordWrap).Height + 20; // add 20 px as padding
 					case (int) UnsubmittedQuestionViewSections.SubmitAnswerButton:
 						return 44;
 					}

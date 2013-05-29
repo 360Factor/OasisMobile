@@ -381,6 +381,8 @@ namespace OasisMobile.iOS
 					}
 					_matchingLocalAnswerOption.QuestionID = _mainSystemIDToQuestionIDMap [_remoteAnswerOption ["QuestionID"]];
 					_matchingLocalAnswerOption.AnswerText = _remoteAnswerOption ["Text"];
+					_matchingLocalAnswerOption.AnswerText = Regex.Replace (_matchingLocalAnswerOption.AnswerText, "<[^>]+(\\/)?>","");
+					_matchingLocalAnswerOption.AnswerText = _matchingLocalAnswerOption.AnswerText.Trim ();
 					_matchingLocalAnswerOption.IsCorrect = _remoteAnswerOption ["IsCorrect"];
 				}
 				BusinessModel.AnswerOption.SaveAll (_localAnswerOptionList);

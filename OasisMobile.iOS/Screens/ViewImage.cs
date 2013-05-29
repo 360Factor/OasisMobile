@@ -203,6 +203,8 @@ namespace OasisMobile.iOS
 					svNextImageZoomView.ViewForZoomingInScrollView = GetZoomedView;
 					svNextImageZoomView.DidZoom += ZoomView_DidZoom;
 					svImagePager.AddSubview (svNextImageZoomView);
+					CenterNextScrollViewImages ();
+					SetZoomForNextScrollView ();
 				} else {
 					//There is no next image available
 					svNextImageZoomView = null;
@@ -244,6 +246,8 @@ namespace OasisMobile.iOS
 					svPreviousImageZoomView.ViewForZoomingInScrollView = GetZoomedView;
 					svPreviousImageZoomView.DidZoom += ZoomView_DidZoom;
 					svImagePager.AddSubview (svPreviousImageZoomView);
+					CenterPreviousScrollViewImages ();
+					SetZoomForPreviousScrollView ();
 				} else {
 					svPreviousImageZoomView = null;
 				}
