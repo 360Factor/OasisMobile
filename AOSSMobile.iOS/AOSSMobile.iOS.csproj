@@ -327,6 +327,7 @@
     <BundleResource Include="Images\AOSSM_BG-iPad.png" />
     <BundleResource Include="Images\AOSSM_BG-iPhone.png" />
     <BundleResource Include="Images\AOSSM_BG-iPhone568h.png" />
+    <BundleResource Include="Images\Background-Blue.jpg" />
   </ItemGroup>
   <ItemGroup>
     <ITunesArtwork Include="iTunesArtwork%402x" />

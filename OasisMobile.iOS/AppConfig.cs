@@ -1,4 +1,5 @@
 using System;
+using MonoTouch.UIKit;
 
 namespace OasisMobile.iOS
 {
@@ -31,7 +32,6 @@ namespace OasisMobile.iOS
 		public static class ImagePaths
 		{
 			public const string ClientLogo = "Images/OasisLogo560px.png";
-			public const string FlyoutNavBackgroundImage = "Images/Background-Paper.jpg";
 
 			public static class iPhone
 			{
@@ -43,6 +43,24 @@ namespace OasisMobile.iOS
 			{
 				public const string LoginBackgroundImage_Potrait="Images/OasisBG.png";
 				public const string LoginBackgroundImage_Landscape="Images/OasisBG.png";
+			}
+		}
+
+		public static class FlyoutNavTheme{
+			public const string BackgroundImagePath = "Images/Background-Paper.jpg";
+			public const string ExamIconPath = "Images/Icon-Book.png";
+			public const string SettingIconPath = "Images/Icon-Gear.png";
+			public const string SupportIconPath = "Images/Icon-Lifebuoy.png";
+			public const string AboutIconPath = "Images/Icon-Beaker.png";
+			public static UIColor TextColor{
+				get{
+					return UIColor.DarkGray;
+				}
+			}
+			public static UIColor SeparatorColor{
+				get{
+					return UIColor.DarkGray;
+				}
 			}
 		}
 
