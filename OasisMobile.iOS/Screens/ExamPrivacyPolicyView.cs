@@ -20,7 +20,8 @@ namespace OasisMobile.iOS
 		{
 			// Releases the view if it doesn't have a superview.
 			base.DidReceiveMemoryWarning ();
-			
+
+			Console.WriteLine ("Memory warning triggered");
 			// Release any cached data, images, etc that aren't in use.
 		}
 

@@ -213,6 +213,8 @@
     <InterfaceDefinition Include="Screens\ExamPrivacyPolicyView_iPad.xib" />
     <InterfaceDefinition Include="Screens\ExamDisclosureView_iPad.xib" />
     <InterfaceDefinition Include="Screens\ExamDisclosureView_iPhone.xib" />
+    <InterfaceDefinition Include="Screens\ViewImage_iPad.xib" />
+    <InterfaceDefinition Include="Screens\ViewImage_iPhone.xib" />
   </ItemGroup>
   <ItemGroup>
     <BundleResource Include="Images\Background-Party.png" />

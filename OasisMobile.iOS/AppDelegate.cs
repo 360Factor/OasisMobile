@@ -5,6 +5,7 @@ using System.IO;
 using MonoTouch.Foundation;
 using MonoTouch.UIKit;
 using System.Threading.Tasks;
+using System.Threading;
 using BigTed;
 using System.Net;
 
@@ -22,7 +23,7 @@ namespace OasisMobile.iOS
 		//public static UIViewController m_loginViewController;
 		public static OasisFlyoutController m_flyoutMenuController;
 		public static NSTimer m_syncTimer;
-		public static Task m_syncBackgroundTask;
+		public static Thread m_syncBackgroundThread;
 		//
 		// This method is invoked when the application has loaded and is ready to run. In this 
 		// method you should instantiate the window, load the UI into it and then make the window
@@ -40,12 +41,11 @@ namespace OasisMobile.iOS
 			BusinessModel.Repository.Instance.InitializeDb ();
 
 
-
 			if (AppSettings.PersistentLogin && AppSettings.LoggedInLoginName != null && AppSettings.LoggedInLoginName != "") {
 				BusinessModel.User _loggedInUser = BusinessModel.User.GetUserByLoginName (AppSettings.LoggedInLoginName);
 				AppSession.LoggedInUser = _loggedInUser;
 				m_flyoutMenuController = new OasisFlyoutController ();
-				window.RootViewController =  m_flyoutMenuController;
+				window.RootViewController = m_flyoutMenuController;
 				window.MakeKeyAndVisible ();
 				BTProgressHUD.Show ("Synching Account");
 				bool _dataUpdateSuccessful = false;
@@ -94,20 +94,22 @@ namespace OasisMobile.iOS
 						Console.WriteLine (ex.ToString ());
 					}
 
-
 				}).ContinueWith (task1 => {
 					BTProgressHUD.Dismiss ();
+
 					if(_dataUpdateSuccessful){
 						UIViewController _currentDisplayedController = m_flyoutMenuController.ExamTab.VisibleViewController;
 						if(_currentDisplayedController.GetType () == typeof(ExamListView)){
 							((ExamListView)_currentDisplayedController).LoadExamList();
 						}
 					}
+
 					StartSyncThread ();
+
 				}, TaskScheduler.FromCurrentSynchronizationContext ());
 			} else {
 				m_flyoutMenuController = new OasisFlyoutController ();
-				window.RootViewController =  m_flyoutMenuController;
+				window.RootViewController = m_flyoutMenuController;
 				window.MakeKeyAndVisible ();
 				LoginView _loginViewController = new LoginView ();
 				_loginViewController.ModalInPopover = false;
@@ -116,7 +118,15 @@ namespace OasisMobile.iOS
 				StartSyncThread ();
 			}
 
-
+//			m_flyoutMenuController = new OasisFlyoutController ();
+//			window.RootViewController =  m_flyoutMenuController;
+//			window.MakeKeyAndVisible ();
+//			LoginView _loginViewController = new LoginView ();
+//			_loginViewController.ModalInPopover = false;
+//			_loginViewController.ModalTransitionStyle = UIModalTransitionStyle.FlipHorizontal;
+//			m_flyoutMenuController.PresentViewController (_loginViewController, false, null);
+//			StartSyncThread ();
+//
 			return true;
 		}
 
@@ -130,14 +140,19 @@ namespace OasisMobile.iOS
 
 		private void StartSyncThread ()
 		{
-			m_syncBackgroundTask = Task.Factory.StartNew (()=>{
-					SyncManager.PushAllDoSyncData ();
-					if(AppSession.LoggedInUser != null){
-						SyncManager.SyncUserQuestionAndAnswerFromServer (AppSession.LoggedInUser, false);
-					}
+			Console.WriteLine ("Starting to create sync thread");
+			m_syncBackgroundThread = new Thread (SyncDataInBackground);
+			m_syncBackgroundThread.Start ();
+		}
 
-					ScheduleNextRun ();
-				});
+		private void SyncDataInBackground ()
+		{
+			Console.WriteLine ("Sync thread created, running task");
+			SyncManager.PushAllDoSyncData ();
+			if (AppSession.LoggedInUser != null) {
+				SyncManager.SyncUserQuestionAndAnswerFromServer (AppSession.LoggedInUser, false);
+			}
+			ScheduleNextRun ();
 		}
 
 		private void ScheduleNextRun ()
