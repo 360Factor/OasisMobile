@@ -54,7 +54,7 @@ namespace OasisMobile.iOS
 			public const string AboutIconPath = "Images/Icon-Beaker.png";
 			public static UIColor TextColor{
 				get{
-					return UIColor.FromRGB (210,210,210);
+					return UIColor.FromRGB (235,235,235);
 				}
 			}
 			public static UIColor SeparatorColor{

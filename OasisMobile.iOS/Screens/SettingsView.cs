@@ -202,15 +202,17 @@ namespace OasisMobile.iOS
 
 			private void btnLogout_Clicked (object sender, EventArgs e)
 			{
-				AppSession.ClearSession ();
 				AppSettings.LoggedInLoginName = "";
-				m_currentViewController.NavigationController.PopToRootViewController (false);
+
 				AppDelegate.m_flyoutMenuController.SelectedIndex = 0;
+				AppDelegate.m_flyoutMenuController.ExamTab.PopToRootViewController (false);
 				LoginView _loginViewController = new LoginView ();
 				_loginViewController.ModalInPopover = false;
 				_loginViewController.ModalTransitionStyle = UIModalTransitionStyle.FlipHorizontal;
 
 				AppDelegate.m_flyoutMenuController.PresentViewController (_loginViewController,true, null);
+				//TODO: clear session here without crashing the views
+			
 			}
 		}
 	}

@@ -303,10 +303,6 @@
     <BundleResource Include="Images\Background-Party.png" />
     <BundleResource Include="Images\ClothBG-iPad%402x.jpg" />
     <BundleResource Include="Images\ClothBG-iPhone 5.jpg" />
-    <BundleResource Include="Images\Icon-Beaker.png" />
-    <BundleResource Include="Images\Icon-Book.png" />
-    <BundleResource Include="Images\Icon-Gear.png" />
-    <BundleResource Include="Images\Icon-Lifebuoy.png" />
     <BundleResource Include="Images\Icon-No.png" />
     <BundleResource Include="Images\Icon-QuestionMark.png" />
     <BundleResource Include="Images\Icon-User.png" />
@@ -328,6 +324,10 @@
     <BundleResource Include="Images\AOSSM_BG-iPhone.png" />
     <BundleResource Include="Images\AOSSM_BG-iPhone568h.png" />
     <BundleResource Include="Images\Background-Blue.jpg" />
+    <BundleResource Include="Images\Icon-Beaker.png" />
+    <BundleResource Include="Images\Icon-Book.png" />
+    <BundleResource Include="Images\Icon-Gear.png" />
+    <BundleResource Include="Images\Icon-Lifebuoy.png" />
   </ItemGroup>
   <ItemGroup>
     <ITunesArtwork Include="iTunesArtwork%402x" />

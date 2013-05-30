@@ -219,6 +219,8 @@ namespace OasisMobile.iOS
 		{
 			if (txtUserName.Text != null && txtPassword.Text != null &&
 				txtUserName.Text != "" && txtPassword.Text != "") {
+				//Clear the session just in case there is leftover session
+				AppSession.ClearSession ();
 				if (Reachability.InternetConnectionStatus () == NetworkStatus.NotReachable) {
 					//Not reachable, tell user to try again later
 					UIAlertView _alert = new UIAlertView ("No Connection", "Please connect to the internet to login", null, "Ok", null);
