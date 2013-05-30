@@ -242,11 +242,11 @@ namespace OasisMobile.iOS
 					if (_isDownloadSuccessful) {
 						if(!AppSession.SelectedUserExam.HasReadDisclosure){
 							//Show Disclosure
-							ExamDisclosureView _disclosureView = new ExamDisclosureView();
+							ExamDisclosureView _disclosureView = new ExamDisclosureView(true);
 							m_currentViewController.NavigationController.PushViewController (_disclosureView,true);
 						}else if(!AppSession.SelectedUserExam.HasReadPrivacyPolicy){
 							//Show Privacy Policy
-							ExamPrivacyPolicyView _privacyPolicyView = new ExamPrivacyPolicyView();
+							ExamPrivacyPolicyView _privacyPolicyView = new ExamPrivacyPolicyView(true);
 							m_currentViewController.NavigationController.PushViewController (_privacyPolicyView,true);
 						}else{
 							//Navigate straight to the exam
@@ -297,11 +297,11 @@ namespace OasisMobile.iOS
 					if (_isDownloadSuccessful) {
 						if(!AppSession.SelectedUserExam.HasReadDisclosure){
 							//Show Disclosure
-							ExamDisclosureView _disclosureView = new ExamDisclosureView();
+							ExamDisclosureView _disclosureView = new ExamDisclosureView(true);
 							m_currentViewController.NavigationController.PushViewController (_disclosureView,true);
 						}else if(!AppSession.SelectedUserExam.HasReadPrivacyPolicy){
 							//Show Privacy Policy
-							ExamPrivacyPolicyView _privacyPolicyView = new ExamPrivacyPolicyView();
+							ExamPrivacyPolicyView _privacyPolicyView = new ExamPrivacyPolicyView(true);
 							m_currentViewController.NavigationController.PushViewController (_privacyPolicyView,true);
 						}else{
 							//Navigate straight to the exam

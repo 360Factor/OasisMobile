@@ -194,6 +194,7 @@
       <DependentUpon>ExamPrivacyPolicyView.cs</DependentUpon>
     </Compile>
     <Compile Include="Utilities\AppSettings.cs" />
+    <Compile Include="CustomCells\CustomTileButtonCell.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
   <ItemGroup>

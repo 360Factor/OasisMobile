@@ -95,6 +95,7 @@
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Resources\" />
+    <Folder Include="Images\ButtonImages\" />
   </ItemGroup>
   <ItemGroup>
     <None Include="Info.plist" />
@@ -296,6 +297,9 @@
       <Link>Utilities\AppSettings.cs</Link>
     </Compile>
     <Compile Include="CustomCells\CustomNarrowCell.cs" />
+    <Compile Include="..\OasisMobile.iOS\CustomCells\CustomTileButtonCell.cs">
+      <Link>CustomCells\CustomTileButtonCell.cs</Link>
+    </Compile>
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
   <ItemGroup>
@@ -328,6 +332,10 @@
     <BundleResource Include="Images\Icon-Book.png" />
     <BundleResource Include="Images\Icon-Gear.png" />
     <BundleResource Include="Images\Icon-Lifebuoy.png" />
+    <BundleResource Include="Images\ButtonImages\Icon-Download.png" />
+    <BundleResource Include="Images\ButtonImages\Icon-Continue.png" />
+    <BundleResource Include="Images\ButtonImages\Icon-Disclosure.png" />
+    <BundleResource Include="Images\ButtonImages\Icon-PrivacyPolicy.png" />
   </ItemGroup>
   <ItemGroup>
     <ITunesArtwork Include="iTunesArtwork%402x" />

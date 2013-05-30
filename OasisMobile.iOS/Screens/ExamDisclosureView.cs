@@ -7,13 +7,15 @@ namespace OasisMobile.iOS
 {
 	public partial class ExamDisclosureView : UIViewController
 	{
+		private bool m_showAcceptButton;
 		static bool UserInterfaceIdiomIsPhone {
 			get { return UIDevice.CurrentDevice.UserInterfaceIdiom == UIUserInterfaceIdiom.Phone; }
 		}
 
-		public ExamDisclosureView ()
+		public ExamDisclosureView (bool aShowAcceptButton)
 			: base (UserInterfaceIdiomIsPhone ? "ExamDisclosureView_iPhone" : "ExamDisclosureView_iPad", null)
 		{
+			m_showAcceptButton = aShowAcceptButton;
 		}
 
 		public override void DidReceiveMemoryWarning ()
@@ -31,7 +33,7 @@ namespace OasisMobile.iOS
 			this.Title = "Disclosure";
 
 
-			tblvExamDisclosure.Source = new ExamDisclosureTableSource (this);
+			tblvExamDisclosure.Source = new ExamDisclosureTableSource (this, m_showAcceptButton);
 			// Perform any additional setup after loading the view, typically from a nib.
 		}
 
@@ -39,17 +41,28 @@ namespace OasisMobile.iOS
 		{
 			private UIViewController m_currentViewController = null;
 			private UIButton btnAcceptAndContinue;
+			private bool m_showAcceptButton;
 
-			public ExamDisclosureTableSource (UIViewController ParentViewController)
+			public ExamDisclosureTableSource (UIViewController ParentViewController, bool aShowAcceptButton)
 			{
 				m_currentViewController = ParentViewController;
+				m_showAcceptButton = aShowAcceptButton;
 
 			}
 			#region implemented abstract members of UITableViewSource
 
 			public override int RowsInSection (UITableView tableview, int section)
 			{
-				return 1;
+				if (section == 0) {
+					return 1; //Section 0 contains the Disclosure
+				} else {
+					// Section 1 the Accept Button
+					if (m_showAcceptButton) {
+						return 1; 
+					} else {
+						return 0;
+					}
+				}
 			}
 
 			public override UITableViewCell GetCell (UITableView tableView, NSIndexPath indexPath)
@@ -137,7 +150,7 @@ namespace OasisMobile.iOS
 						_questionSplitView.PresentAsRootViewWithAnimation ();
 					}
 				} else {
-					var _privacyPolicyView = new ExamPrivacyPolicyView ();
+					var _privacyPolicyView = new ExamPrivacyPolicyView (true);
 					m_currentViewController.NavigationController.PushViewController (_privacyPolicyView, true);
 				}
 			}

@@ -64,6 +64,8 @@ namespace OasisMobile.iOS
 			private string m_examInfoText;
 			private string m_examCreditInfoText;
 			private UIButton btnStartContinueExam;
+			private UIButton btnDisclosure;
+			private UIButton btnPrivacyPolicy;
 
 			public enum ExamDetailSection
 			{
@@ -107,24 +109,63 @@ namespace OasisMobile.iOS
 				if (indexPath.Section == (int)ExamDetailSection.ExamActionButtons) {
 					cell = tableView.DequeueReusableCell ("buttonRowCell");
 					if (cell == null) {
-						cell = new UITableViewCell (UITableViewCellStyle.Default, "buttonRowCell");
-					}
-
-					string _buttonTitle;
-					if (AppSession.SelectedUserExam != null && AppSession.SelectedUserExam.IsDownloaded) {
-						_buttonTitle = "Continue Exam";
-					} else {
-						_buttonTitle = "Download Exam";
+						cell = new CustomTileButtonCell ("buttonRowCell");
 					}
 					btnStartContinueExam = new UIButton (UIButtonType.RoundedRect);
-					btnStartContinueExam.AutoresizingMask = UIViewAutoresizing.FlexibleWidth;
-					btnStartContinueExam.Frame = new System.Drawing.RectangleF (0, 0, cell.ContentView.Frame.Width, 36);
-					btnStartContinueExam.SetTitle (_buttonTitle, UIControlState.Normal);
-					btnStartContinueExam.TouchUpInside += btnStartContinueExam_Clicked;
-					foreach (UIView _subview in cell.ContentView.Subviews) {
-						_subview.RemoveFromSuperview ();
+					//						btnStartContinueExam.Layer.BorderWidth = 1;
+					//						btnStartContinueExam.Layer.BorderColor = UIColor.LightGray.CGColor;
+					btnStartContinueExam.Layer.ShadowOffset = new SizeF (0, 1);
+					btnStartContinueExam.Layer.ShadowRadius = 1;
+					btnStartContinueExam.Layer.ShadowOpacity = 0.75f;
+					btnStartContinueExam.Layer.ShadowColor = UIColor.DarkGray.CGColor;
+
+					if (AppSession.SelectedUserExam != null && AppSession.SelectedUserExam.IsDownloaded) {
+						btnStartContinueExam.SetBackgroundImage (UIImage.FromBundle ("Images/ButtonImages/Icon-Continue.png"), UIControlState.Normal);
+					}else{
+						btnStartContinueExam.SetBackgroundImage (UIImage.FromBundle ("Images/ButtonImages/Icon-Download.png"), UIControlState.Normal);
 					}
-					cell.ContentView.AddSubview (btnStartContinueExam);
+
+					btnStartContinueExam.TouchUpInside += btnStartContinueExam_Clicked;
+
+					btnDisclosure = new UIButton (UIButtonType.RoundedRect);
+					//						btnDisclosure.Layer.BorderWidth = 1;
+					//						btnDisclosure.Layer.BorderColor = UIColor.LightGray.CGColor;
+					btnDisclosure.Layer.ShadowOffset = new SizeF (0, 1);
+					btnDisclosure.Layer.ShadowRadius = 1;
+					btnDisclosure.Layer.ShadowOpacity = 0.75f;
+					btnDisclosure.Layer.ShadowColor = UIColor.DarkGray.CGColor;
+
+					btnDisclosure.SetBackgroundImage (UIImage.FromBundle ("Images/ButtonImages/Icon-Disclosure.png"),UIControlState.Normal);
+					btnDisclosure.TouchUpInside += btnDisclosure_Clicked;
+
+
+					btnPrivacyPolicy = new UIButton (UIButtonType.RoundedRect);
+					//						btnPrivacyPolicy.Layer.BorderWidth = 1;
+					//						btnPrivacyPolicy.Layer.BorderColor = UIColor.LightGray.CGColor;
+					btnPrivacyPolicy.Layer.ShadowOffset = new SizeF (0, 1);
+					btnPrivacyPolicy.Layer.ShadowRadius = 1;
+					btnPrivacyPolicy.Layer.ShadowOpacity = 0.75f;
+					btnPrivacyPolicy.Layer.ShadowColor = UIColor.DarkGray.CGColor;
+
+					btnPrivacyPolicy.SetBackgroundImage (UIImage.FromBundle ("Images/ButtonImages/Icon-PrivacyPolicy.png"),UIControlState.Normal);
+					btnPrivacyPolicy.TouchUpInside += btnPrivacyPolicy_Clicked;
+
+					((CustomTileButtonCell)cell).CellButtons  = new UIButton[]{btnStartContinueExam,btnDisclosure,btnPrivacyPolicy};
+
+
+//					string _buttonTitle;
+//					if (AppSession.SelectedUserExam != null && AppSession.SelectedUserExam.IsDownloaded) {
+//						_buttonTitle = "Continue Exam";
+//					} else {
+//						_buttonTitle = "Download Exam";
+//					}
+//					btnStartContinueExam = new UIButton (UIButtonType.Custom);
+					//					btnStartContinueExam.SetImage(new UIImage(UIImage.FromBundle ("Images/ButtonImages/Button-Download.png").CGImage,2,UIImageOrientation.Up),UIControlState.Normal);
+//					btnStartContinueExam.TouchUpInside += btnStartContinueExam_Clicked;
+//					foreach (UIView _subview in cell.ContentView.Subviews) {
+//						_subview.RemoveFromSuperview ();
+//					}
+//					cell.ContentView.AddSubview (btnStartContinueExam);
 				} else {
 					cell = tableView.DequeueReusableCell ("cell");
 					if (cell == null) {
@@ -228,6 +269,8 @@ namespace OasisMobile.iOS
 				if (indexPath.Section == (int)ExamDetailSection.ExamInfo) {
 					SizeF _bounds = new SizeF (tableView.Bounds.Width - 40, float.MaxValue);
 					return tableView.StringSize (m_examInfoText, UIFont.SystemFontOfSize (13), _bounds, UILineBreakMode.WordWrap).Height + 20; // add 20 px as padding
+				} else if (indexPath.Section == (int)ExamDetailSection.ExamActionButtons) {
+					return 100;
 				} else {
 					return 44;
 				}
@@ -307,13 +350,13 @@ namespace OasisMobile.iOS
 			private void btnStartContinueExam_Clicked (object sender, EventArgs e)
 			{
 				if (AppSession.SelectedUserExam != null && AppSession.SelectedUserExam.IsDownloaded) {
-					if(!AppSession.SelectedUserExam.HasReadDisclosure){
-						ExamDisclosureView _disclosureView = new ExamDisclosureView();
-						m_currentViewController.NavigationController.PushViewController (_disclosureView,true);
-					}else if(!AppSession.SelectedUserExam.HasReadPrivacyPolicy){
-						ExamPrivacyPolicyView _privacyPolicyView = new ExamPrivacyPolicyView();
-						m_currentViewController.NavigationController.PushViewController (_privacyPolicyView,true);
-					}else{
+					if (!AppSession.SelectedUserExam.HasReadDisclosure) {
+						ExamDisclosureView _disclosureView = new ExamDisclosureView (true);
+						m_currentViewController.NavigationController.PushViewController (_disclosureView, true);
+					} else if (!AppSession.SelectedUserExam.HasReadPrivacyPolicy) {
+						ExamPrivacyPolicyView _privacyPolicyView = new ExamPrivacyPolicyView (true);
+						m_currentViewController.NavigationController.PushViewController (_privacyPolicyView, true);
+					} else {
 						//Navigate straight to the exam
 						if (UserInterfaceIdiomIsPhone) {
 							m_currentViewController.NavigationController.PushViewController (new ExamQuestionList_iPhone (), true);
@@ -360,10 +403,10 @@ namespace OasisMobile.iOS
 						UIApplication.SharedApplication.IdleTimerDisabled = false;
 						if (_isDownloadSuccessful) {
 							if(!AppSession.SelectedUserExam.HasReadDisclosure){
-								ExamDisclosureView _disclosureView = new ExamDisclosureView();
+								ExamDisclosureView _disclosureView = new ExamDisclosureView(true);
 								m_currentViewController.NavigationController.PushViewController (_disclosureView,true);
 							}else if(!AppSession.SelectedUserExam.HasReadPrivacyPolicy){
-								ExamPrivacyPolicyView _privacyPolicyView = new ExamPrivacyPolicyView();
+								ExamPrivacyPolicyView _privacyPolicyView = new ExamPrivacyPolicyView(true);
 								m_currentViewController.NavigationController.PushViewController (_privacyPolicyView,true);
 							}else{
 								if(UserInterfaceIdiomIsPhone){
@@ -381,6 +424,14 @@ namespace OasisMobile.iOS
 					}, TaskScheduler.FromCurrentSynchronizationContext ());
 				}
 
+			}
+
+			private void btnDisclosure_Clicked(object sender, EventArgs e){
+				m_currentViewController.NavigationController.PushViewController (new ExamDisclosureView(false),true);
+			}
+
+			private void btnPrivacyPolicy_Clicked(object sender, EventArgs e){
+				m_currentViewController.NavigationController.PushViewController (new ExamPrivacyPolicyView(false),true);
 			}
 
 			public void DownloadExamImageProgressUpdated (float aDownloadProgressPct)
