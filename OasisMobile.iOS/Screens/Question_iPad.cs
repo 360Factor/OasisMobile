@@ -423,7 +423,12 @@ namespace OasisMobile.iOS
 						case (int)UnsubmittedQuestionViewSections.QuestionAnswerOptions:
 						return m_questionAnswerOptions.Count;
 						case (int)UnsubmittedQuestionViewSections.SubmitAnswerButton:
-						return 1;
+						if((AppSettings.AutoAdvanceQuestion && !AppSession.SelectedUserExam.IsLearningMode) ||
+						   (AppSettings.AutoSubmitResponse && AppSession.SelectedUserExam.IsLearningMode)){
+							return 0; //Dont display the submit answer button if they submit the answer by tapping answer option
+						}else {
+							return 1;
+						}
 						default:
 						return 0;
 					}
