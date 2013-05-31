@@ -385,7 +385,7 @@ namespace OasisMobile.iOS
 						UIAlertView _alert = new UIAlertView ("Wifi Connection Required", 
 						                                      "Exam material, along with question related images, takes about 5 to 15 minutes to download. " +
 						                                      "Please budget sufficient time for the exam download ",null, "Cancel", "Download");
-						_alert.Clicked += downloadExamAlertView_Clicked;
+						_alert.Dismissed += downloadExamAlertView_Dismissed;
 						_alert.Show ();
 					}
 				
@@ -394,7 +394,7 @@ namespace OasisMobile.iOS
 
 			}
 
-			private void downloadExamAlertView_Clicked(object sender, UIButtonEventArgs e){
+			private void downloadExamAlertView_Dismissed(object sender, UIButtonEventArgs e){
 				if (e.ButtonIndex == ((UIAlertView) sender).CancelButtonIndex ) {
 					//If cancel button is clicked then we return as we dont need to do anything
 					return;
