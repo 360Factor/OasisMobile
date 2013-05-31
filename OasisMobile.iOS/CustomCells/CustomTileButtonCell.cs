@@ -28,9 +28,7 @@ namespace OasisMobile.iOS
 				x.RemoveFromSuperview ();
 			}
 
-			foreach (var _button in m_CellButtons) {
-				ContentView.AddSubview (_button);
-			}
+			ContentView.AddSubviews (m_CellButtons);
 		}
 
 		public override void LayoutSubviews ()

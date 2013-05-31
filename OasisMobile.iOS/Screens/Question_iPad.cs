@@ -1,4 +1,3 @@
-
 using System;
 using System.Drawing;
 using MonoTouch.Foundation;
@@ -10,10 +9,14 @@ namespace OasisMobile.iOS
 {
 	public partial class Question_iPad : UIViewController
 	{
-		public class ViewedQuestionChangedEventArgs : EventArgs{
-			public BusinessModel.UserQuestion CurrentUserQuestion{ get; set;}
-			public int CurrentUserQuestionIndex{ get; set;}
-			public ViewedQuestionChangedEventArgs(BusinessModel.UserQuestion aCurrentlyViewedUserQuestion, int aCurrentUserQuestionIndex) : base(){
+		public class ViewedQuestionChangedEventArgs : EventArgs
+		{
+			public BusinessModel.UserQuestion CurrentUserQuestion{ get; set; }
+
+			public int CurrentUserQuestionIndex{ get; set; }
+
+			public ViewedQuestionChangedEventArgs (BusinessModel.UserQuestion aCurrentlyViewedUserQuestion, int aCurrentUserQuestionIndex) : base()
+			{
 				CurrentUserQuestion = aCurrentlyViewedUserQuestion;
 				CurrentUserQuestionIndex = aCurrentUserQuestionIndex;
 			}
@@ -28,28 +31,29 @@ namespace OasisMobile.iOS
 		private UITableView tblvNextQuestion = null;
 		private UINavigationBar navBar = null;
 		private UIBarButtonItem navBackButton = null;
-		public UIPopoverController Popover{ get; set;}
+
+		public UIPopoverController Popover{ get; set; }
+
 		public event EventHandler<EventArgs> QuestionUpdated;
 		public event EventHandler<ViewedQuestionChangedEventArgs> ViewedQuestionChanged;
 
-		public int CurrentQuestionToDisplayIndex{
-			get{
+		public int CurrentQuestionToDisplayIndex {
+			get {
 				return m_currentQuestionToDisplayIndex;
 			}
 		}
 
-		public int TotalQuestionInExam{
-			get{
+		public int TotalQuestionInExam {
+			get {
 				return m_totalQuestionInExam;
 			}
 		}
 
-		public BusinessModel.UserQuestion CurrentQuestionToDisplay{
-			get{
+		public BusinessModel.UserQuestion CurrentQuestionToDisplay {
+			get {
 				return m_currentQuestionToDisplay;
 			}
 		}
-
 
 		public Question_iPad (BusinessModel.UserQuestion aUserQuestion) : base ()
 		{
@@ -62,7 +66,8 @@ namespace OasisMobile.iOS
 		
 		}
 
-		public void DisplayUserQuestion(BusinessModel.UserQuestion aUserQuestion){
+		public void DisplayUserQuestion (BusinessModel.UserQuestion aUserQuestion)
+		{
 			m_currentQuestionToDisplay = 
 				(from x in AppSession.SelectedExamUserQuestionList 
 				 where x.UserQuestionID == aUserQuestion.UserQuestionID select x).FirstOrDefault ();
@@ -76,7 +81,6 @@ namespace OasisMobile.iOS
 			}
 		}
 
-
 		public override void DidReceiveMemoryWarning ()
 		{
 			// Releases the view if it doesn't have a superview.
@@ -85,19 +89,20 @@ namespace OasisMobile.iOS
 			// Release any cached data, images, etc that aren't in use.
 		}
 
-		private void navBackButton_Clicked(object sender, EventArgs e){
-		UIViewAnimationOptions _transitionStyle = UIViewAnimationOptions.TransitionFlipFromRight;
+		private void navBackButton_Clicked (object sender, EventArgs e)
+		{
+			UIViewAnimationOptions _transitionStyle = UIViewAnimationOptions.TransitionFlipFromRight;
 			switch (AppDelegate.window.RootViewController.InterfaceOrientation) {
-				case UIInterfaceOrientation.LandscapeLeft:
+			case UIInterfaceOrientation.LandscapeLeft:
 				_transitionStyle = UIViewAnimationOptions.TransitionFlipFromBottom;
 				break;
-				case UIInterfaceOrientation.LandscapeRight:
+			case UIInterfaceOrientation.LandscapeRight:
 				_transitionStyle = UIViewAnimationOptions.TransitionFlipFromTop;
 				break;
-				case UIInterfaceOrientation.Portrait:
+			case UIInterfaceOrientation.Portrait:
 				_transitionStyle = UIViewAnimationOptions.TransitionFlipFromRight;
 				break;
-				case UIInterfaceOrientation.PortraitUpsideDown:
+			case UIInterfaceOrientation.PortraitUpsideDown:
 				_transitionStyle = UIViewAnimationOptions.TransitionFlipFromLeft;
 				break;
 			}
@@ -107,7 +112,7 @@ namespace OasisMobile.iOS
 			                   () => {
 				AppDelegate.window.RootViewController = AppDelegate.m_flyoutMenuController;
 				AppDelegate.m_flyoutMenuController.WillAnimateRotation (this.InterfaceOrientation, 0);
-			},null);
+			}, null);
 		}
 
 		public override void ViewDidLoad ()
@@ -124,8 +129,8 @@ namespace OasisMobile.iOS
 			var navItem = new UINavigationItem (this.Title);
 			navBackButton = new UIBarButtonItem (UIBarButtonSystemItem.Rewind);
 			navBackButton.Clicked += navBackButton_Clicked;
-			navItem.LeftBarButtonItems = new UIBarButtonItem[] {navBackButton};
-			navBar.SetItems (new UINavigationItem[]{navItem},false);
+			navItem.LeftBarButtonItems = new UIBarButtonItem[] { navBackButton };
+			navBar.SetItems (new UINavigationItem[]{navItem}, false);
 			RectangleF _scrollViewFrame = new RectangleF (0, navBar.Frame.Height, this.View.Bounds.Width, this.View.Bounds.Height - navBar.Frame.Height);
 			svQuestionPager = new UIScrollView (_scrollViewFrame);
 
@@ -147,18 +152,18 @@ namespace OasisMobile.iOS
 			UINavigationController _examNavController = AppDelegate.m_flyoutMenuController.ExamTab;
 		
 			UIViewController[] _originalNavigationStack = _examNavController.ViewControllers;
-			List<UIViewController> _updatedNavigationStack = new List<UIViewController>();
+			List<UIViewController> _updatedNavigationStack = new List<UIViewController> ();
 
-			foreach(UIViewController _viewController in _originalNavigationStack){
+			foreach (UIViewController _viewController in _originalNavigationStack) {
 				//Eliminate the generate new exam, exam disclosure, and exam privacy policy from the view
 				Type _viewType = _viewController.GetType ();
-				if(_viewType != typeof(GenerateNewExamView) && 
-				   _viewType != typeof(ExamDisclosureView) && 
-				   _viewType != typeof(ExamPrivacyPolicyView)){
+				if (_viewType != typeof(GenerateNewExamView) && 
+					_viewType != typeof(ExamDisclosureView) && 
+					_viewType != typeof(ExamPrivacyPolicyView)) {
 					_updatedNavigationStack.Add (_viewController);
 				}
 			}
-			_examNavController.ViewControllers = _updatedNavigationStack.ToArray();
+			_examNavController.ViewControllers = _updatedNavigationStack.ToArray ();
 
 		}
 
@@ -171,10 +176,11 @@ namespace OasisMobile.iOS
 			RectangleF _scrollViewContentFrame = svQuestionPager.Frame;
 			_scrollViewContentFrame.Width = _scrollViewContentFrame.Width * m_totalQuestionInExam;
 			svQuestionPager.ContentSize = _scrollViewContentFrame.Size;
-			svQuestionPager.SetContentOffset (new PointF(svQuestionPager.Frame.Width * m_currentQuestionToDisplayIndex,0),false);
+			svQuestionPager.SetContentOffset (new PointF(svQuestionPager.Frame.Width * m_currentQuestionToDisplayIndex,0), false);
 		}
 
-		private void DisplayCurrentQuestionInScrollView(){
+		private void DisplayCurrentQuestionInScrollView ()
+		{
 			foreach (UIView _subView in svQuestionPager.Subviews) {
 				//Clear all previous subviews
 				_subView.RemoveFromSuperview ();
@@ -189,7 +195,7 @@ namespace OasisMobile.iOS
 
 			tblvCurrentQuestion = new UITableView (_currentQuestionFrame, UITableViewStyle.Grouped);
 			tblvCurrentQuestion.AutoresizingMask = UIViewAutoresizing.All;
-			tblvCurrentQuestion.Source =  new Question_iPadTableSource (m_currentQuestionToDisplay, this);
+			tblvCurrentQuestion.Source = new Question_iPadTableSource (m_currentQuestionToDisplay, this);
 			svQuestionPager.AddSubview (tblvCurrentQuestion);
 
 			if (m_currentQuestionToDisplayIndex > 0) {
@@ -199,40 +205,38 @@ namespace OasisMobile.iOS
 				//----------------------------------------
 				RectangleF _previousQuestionFrame = svQuestionPager.Frame;
 				PointF _previousQuestionLocation = new PointF ();
-				_previousQuestionLocation.X = svQuestionPager.Frame.Width * (m_currentQuestionToDisplayIndex-1);
+				_previousQuestionLocation.X = svQuestionPager.Frame.Width * (m_currentQuestionToDisplayIndex - 1);
 				_previousQuestionFrame.Location = _previousQuestionLocation;
 
 				tblvPreviousQuestion = new UITableView (_previousQuestionFrame, UITableViewStyle.Grouped);
 				tblvPreviousQuestion.AutoresizingMask = UIViewAutoresizing.All;
-				tblvPreviousQuestion.Source =  new Question_iPadTableSource (AppSession.SelectedExamUserQuestionList[m_currentQuestionToDisplayIndex-1], this);
+				tblvPreviousQuestion.Source = new Question_iPadTableSource (AppSession.SelectedExamUserQuestionList[m_currentQuestionToDisplayIndex-1], this);
 				svQuestionPager.AddSubview (tblvPreviousQuestion);
-			}else{
+			} else {
 				tblvPreviousQuestion = null;
 			}
-			if(m_currentQuestionToDisplayIndex < m_totalQuestionInExam - 1){
+			if (m_currentQuestionToDisplayIndex < m_totalQuestionInExam - 1) {
 				//We should have next question here
 
 				// Create TableView for next question
 				//----------------------------------------
 				RectangleF _nextQuestionFrame = svQuestionPager.Frame;
 				PointF _nextQuestionLocation = new PointF ();
-				_nextQuestionLocation.X = svQuestionPager.Frame.Width * (m_currentQuestionToDisplayIndex+1);
+				_nextQuestionLocation.X = svQuestionPager.Frame.Width * (m_currentQuestionToDisplayIndex + 1);
 				_nextQuestionFrame.Location = _nextQuestionLocation;
 
 				tblvNextQuestion = new UITableView (_nextQuestionFrame, UITableViewStyle.Grouped);
 				tblvNextQuestion.AutoresizingMask = UIViewAutoresizing.All;
-				tblvNextQuestion.Source =  new Question_iPadTableSource (AppSession.SelectedExamUserQuestionList[m_currentQuestionToDisplayIndex+1], this);
+				tblvNextQuestion.Source = new Question_iPadTableSource (AppSession.SelectedExamUserQuestionList[m_currentQuestionToDisplayIndex+1], this);
 				svQuestionPager.AddSubview (tblvNextQuestion);
-			}
-			else{
+			} else {
 				tblvNextQuestion = null;
 			}
 
 			//Set the current scroll position
-			svQuestionPager.SetContentOffset (_currentQuestionLocation,false);
+			svQuestionPager.SetContentOffset (_currentQuestionLocation, false);
 			Console.WriteLine ("Offset Content Set");
 		}
-
 		/// <summary>
 		/// Shows the button that allows access to the master view popover
 		/// </summary>
@@ -241,7 +245,6 @@ namespace OasisMobile.iOS
 			button.Title = "Questions";
 			navBar.TopItem.LeftBarButtonItems = new UIBarButtonItem[] { navBackButton, button };
 		}
-
 		/// <summary>
 		/// Hides the button that allows access to the master view popover
 		/// </summary>
@@ -250,8 +253,9 @@ namespace OasisMobile.iOS
 			navBar.TopItem.LeftBarButtonItems = new UIBarButtonItem[] { navBackButton };
 		}
 
-		private void svQuestionPager_Scrolled(object sender, EventArgs e){
-			int _scrollViewDisplayIndex = (int) Math.Floor ((svQuestionPager.ContentOffset.X +svQuestionPager.Frame.Width/2) /svQuestionPager.Frame.Width);
+		private void svQuestionPager_Scrolled (object sender, EventArgs e)
+		{
+			int _scrollViewDisplayIndex = (int)Math.Floor ((svQuestionPager.ContentOffset.X +svQuestionPager.Frame.Width/2) /svQuestionPager.Frame.Width);
 			if (_scrollViewDisplayIndex == m_currentQuestionToDisplayIndex) {
 				return;
 			}
@@ -261,7 +265,7 @@ namespace OasisMobile.iOS
 				//-----------------------------------------------------
 
 				//Remove the previous question tableview from scrollview to save memory
-				if(tblvPreviousQuestion!=null){
+				if (tblvPreviousQuestion != null) {
 					tblvPreviousQuestion.RemoveFromSuperview ();
 				}
 
@@ -275,25 +279,25 @@ namespace OasisMobile.iOS
 					//Load the question to populate to the next question tableview
 					RectangleF _nextQuestionFrame = svQuestionPager.Frame;
 					PointF _nextQuestionLocation = new PointF ();
-					_nextQuestionLocation.X = svQuestionPager.Frame.Width * (m_currentQuestionToDisplayIndex+1);
+					_nextQuestionLocation.X = svQuestionPager.Frame.Width * (m_currentQuestionToDisplayIndex + 1);
 					_nextQuestionFrame.Location = _nextQuestionLocation;
 					tblvNextQuestion = new UITableView (_nextQuestionFrame, UITableViewStyle.Grouped);
 					tblvNextQuestion.AutoresizingMask = UIViewAutoresizing.All;
-					tblvNextQuestion.Source =  new Question_iPadTableSource (AppSession.SelectedExamUserQuestionList[m_currentQuestionToDisplayIndex+1], this);
+					tblvNextQuestion.Source = new Question_iPadTableSource (AppSession.SelectedExamUserQuestionList[m_currentQuestionToDisplayIndex+1], this);
 					svQuestionPager.AddSubview (tblvNextQuestion);
-				}else{
+				} else {
 					//We are at the last question in exam, there are no next question available
 					tblvNextQuestion = null;
 				}
 				//Invoke the event to notify that viewed question has changed
-				ViewedQuestionChanged (sender, new ViewedQuestionChangedEventArgs (m_currentQuestionToDisplay,m_currentQuestionToDisplayIndex));
+				ViewedQuestionChanged (sender, new ViewedQuestionChangedEventArgs (m_currentQuestionToDisplay, m_currentQuestionToDisplayIndex));
 
 			} else if (_scrollViewDisplayIndex == m_currentQuestionToDisplayIndex - 1) {
 				//Set the previous question as current one and load the previous one
 				//-----------------------------------------------------
 
 				//Remove the next question tableview from scrollview to save memory
-				if(tblvNextQuestion!=null){
+				if (tblvNextQuestion != null) {
 					tblvNextQuestion.RemoveFromSuperview ();
 				}
 
@@ -307,18 +311,18 @@ namespace OasisMobile.iOS
 					//Load the question to populate to the previous question tableview
 					RectangleF _previousQuestionFrame = svQuestionPager.Frame;
 					PointF _previousQuestionLocation = new PointF ();
-					_previousQuestionLocation.X = svQuestionPager.Frame.Width * (m_currentQuestionToDisplayIndex-1);
+					_previousQuestionLocation.X = svQuestionPager.Frame.Width * (m_currentQuestionToDisplayIndex - 1);
 					_previousQuestionFrame.Location = _previousQuestionLocation;
 					tblvPreviousQuestion = new UITableView (_previousQuestionFrame, UITableViewStyle.Grouped);
 					tblvPreviousQuestion.AutoresizingMask = UIViewAutoresizing.All;
-					tblvPreviousQuestion.Source =  new Question_iPadTableSource (AppSession.SelectedExamUserQuestionList[m_currentQuestionToDisplayIndex-1], this);
+					tblvPreviousQuestion.Source = new Question_iPadTableSource (AppSession.SelectedExamUserQuestionList[m_currentQuestionToDisplayIndex-1], this);
 					svQuestionPager.AddSubview (tblvPreviousQuestion);
-				}else{
+				} else {
 					//We are at the first question in exam, there are no previous question available
 					tblvPreviousQuestion = null;
 				}
 				//Invoke the event to notify that viewed question has changed
-				ViewedQuestionChanged (sender, new ViewedQuestionChangedEventArgs (m_currentQuestionToDisplay,m_currentQuestionToDisplayIndex));
+				ViewedQuestionChanged (sender, new ViewedQuestionChangedEventArgs (m_currentQuestionToDisplay, m_currentQuestionToDisplayIndex));
 			} else {
 				throw new Exception ("Scroll view index should only return the question before or after the current question");
 			}
@@ -329,25 +333,25 @@ namespace OasisMobile.iOS
 
 		}
 
-		private void GoToNextQuestion(){
+		private void GoToNextQuestion ()
+		{
 			PointF _targetLocation = new PointF (svQuestionPager.Frame.Width * (m_currentQuestionToDisplayIndex + 1), 0);
-			svQuestionPager.SetContentOffset (_targetLocation,true);
+			svQuestionPager.SetContentOffset (_targetLocation, true);
 
 		}
 
-		private void GoToPreviousQuestion(){
+		private void GoToPreviousQuestion ()
+		{
 			PointF _targetLocation = new PointF (svQuestionPager.Frame.Width * (m_currentQuestionToDisplayIndex - 1), 0);
-			svQuestionPager.SetContentOffset (_targetLocation,true);
+			svQuestionPager.SetContentOffset (_targetLocation, true);
 		}
 
-
-		public void ReloadCurrentQuestion(){
+		public void ReloadCurrentQuestion ()
+		{
 			m_currentQuestionToDisplay = AppSession.SelectedExamUserQuestionList [m_currentQuestionToDisplayIndex];
 			tblvCurrentQuestion.Source = new Question_iPadTableSource (AppSession.SelectedExamUserQuestionList[m_currentQuestionToDisplayIndex], this);
 			tblvCurrentQuestion.ReloadData ();
 		}
-
-
 
 		public class Question_iPadTableSource : UITableViewSource
 		{
@@ -405,31 +409,31 @@ namespace OasisMobile.iOS
 			{
 				if (m_showQuestionAnswer) {
 					switch (section) {
-						case (int)SubmittedQuestionViewSections.QuestionStemAndImages:
+					case (int)SubmittedQuestionViewSections.QuestionStemAndImages:
 						return m_questionImages.Count + 2;
-						case (int)SubmittedQuestionViewSections.QuestionAnswerOptions:
+					case (int)SubmittedQuestionViewSections.QuestionAnswerOptions:
 						return m_questionAnswerOptions.Count;
-						case (int)SubmittedQuestionViewSections.QuestionCommentary:
+					case (int)SubmittedQuestionViewSections.QuestionCommentary:
 						return 1;
-						case (int)SubmittedQuestionViewSections.QuestionReferences:
+					case (int)SubmittedQuestionViewSections.QuestionReferences:
 						return 1;
-						default:
+					default:
 						return 0;
 					}
 				} else {
 					switch (section) {
-						case (int)UnsubmittedQuestionViewSections .QuestionStemAndImages:
+					case (int)UnsubmittedQuestionViewSections .QuestionStemAndImages:
 						return m_questionImages.Count + 2; //Question images + Question Stem + Question Leadin
-						case (int)UnsubmittedQuestionViewSections.QuestionAnswerOptions:
+					case (int)UnsubmittedQuestionViewSections.QuestionAnswerOptions:
 						return m_questionAnswerOptions.Count;
-						case (int)UnsubmittedQuestionViewSections.SubmitAnswerButton:
-						if((AppSettings.AutoAdvanceQuestion && !AppSession.SelectedUserExam.IsLearningMode) ||
-						   (AppSettings.AutoSubmitResponse && AppSession.SelectedUserExam.IsLearningMode)){
+					case (int)UnsubmittedQuestionViewSections.SubmitAnswerButton:
+						if ((AppSettings.AutoAdvanceQuestion && !AppSession.SelectedUserExam.IsLearningMode) ||
+							(AppSettings.AutoSubmitResponse && AppSession.SelectedUserExam.IsLearningMode)) {
 							return 0; //Dont display the submit answer button if they submit the answer by tapping answer option
-						}else {
+						} else {
 							return 1;
 						}
-						default:
+					default:
 						return 0;
 					}
 				}
@@ -443,7 +447,7 @@ namespace OasisMobile.iOS
 
 				if (m_showQuestionAnswer) {
 					switch (indexPath.Section) {
-						case (int)SubmittedQuestionViewSections.QuestionStemAndImages:
+					case (int)SubmittedQuestionViewSections.QuestionStemAndImages:
 						//cell.BackgroundView = new UIView (RectangleF.Empty); // The question stem/images will not have separators
 						//cell.Layer.BorderWidth=0;
 						if (indexPath.Row == 0) {
@@ -472,14 +476,17 @@ namespace OasisMobile.iOS
 							}
 							UIImage _imageAtRow = UIImage.FromFile (m_questionImages [indexPath.Row - 1].FilePath);
 							cell.ImageView.Image = _imageAtRow;
-
 							cell.ImageView.GestureRecognizers = new UIGestureRecognizer[] { };
-							cell.ImageView.UserInteractionEnabled = true;
-							UITapGestureRecognizer _tapGesture = new UITapGestureRecognizer ();
-							_tapGesture.AddTarget (() =>{
-								HandleImageTapGesture(_tapGesture, m_questionImages [indexPath.Row - 1].ImageID);
-							});
-							cell.ImageView.AddGestureRecognizer (_tapGesture);
+
+							if (_imageAtRow != null){
+								cell.ImageView.UserInteractionEnabled = true;
+								UITapGestureRecognizer _tapGesture = new UITapGestureRecognizer ();
+								_tapGesture.AddTarget (() =>{
+									HandleImageTapGesture(_tapGesture, m_questionImages [indexPath.Row - 1].ImageID);
+								});
+								cell.ImageView.AddGestureRecognizer (_tapGesture);
+							}
+						
 						}
 						break;
 						case (int)SubmittedQuestionViewSections.QuestionAnswerOptions:
@@ -559,14 +566,17 @@ namespace OasisMobile.iOS
 							}
 							UIImage _imageAtRow = UIImage.FromFile (m_questionImages [indexPath.Row - 1].FilePath);
 							cell.ImageView.Image = _imageAtRow;
-
 							cell.ImageView.GestureRecognizers = new UIGestureRecognizer[] { };
-							cell.ImageView.UserInteractionEnabled = true;
-							UITapGestureRecognizer _tapGesture = new UITapGestureRecognizer ();
-							_tapGesture.AddTarget (() =>{
-								HandleImageTapGesture(_tapGesture, m_questionImages [indexPath.Row - 1].ImageID);
-							});
-							cell.ImageView.AddGestureRecognizer (_tapGesture);
+
+							if (_imageAtRow != null) {
+								cell.ImageView.UserInteractionEnabled = true;
+								UITapGestureRecognizer _tapGesture = new UITapGestureRecognizer ();
+								_tapGesture.AddTarget (() =>{
+									HandleImageTapGesture(_tapGesture, m_questionImages [indexPath.Row - 1].ImageID);
+								});
+								cell.ImageView.AddGestureRecognizer (_tapGesture);
+							}
+
 						}
 						break;
 						case (int)UnsubmittedQuestionViewSections.QuestionAnswerOptions:
@@ -695,13 +705,18 @@ namespace OasisMobile.iOS
 							return tableView.StringSize (m_question.LeadIn, UIFont.SystemFontOfSize (14), _bounds, UILineBreakMode.WordWrap).Height + 20; // add 20 px as padding
 						} else {
 							UIImage _imageAtRow = UIImage.FromFile (m_questionImages [indexPath.Row - 1].FilePath);
-							float _widthToHeightRatio = _imageAtRow.Size.Width / _imageAtRow.Size.Height;
-							float _maxDimension = _bounds.Width;
-							if (_widthToHeightRatio >= 1) {
-								return _maxDimension / _widthToHeightRatio + 20;
-							} else {
-								return _maxDimension + 20;
-							} 
+							if(_imageAtRow != null){
+								float _widthToHeightRatio = _imageAtRow.Size.Width / _imageAtRow.Size.Height;
+								float _maxDimension = _bounds.Width;
+								if (_widthToHeightRatio >= 1) {
+									return _maxDimension / _widthToHeightRatio + 20;
+								} else {
+									return _maxDimension + 20;
+								} 
+							}else{
+								return 0; //Collapse the cell if the image is null
+							}
+
 						}
 						case (int) SubmittedQuestionViewSections.QuestionAnswerOptions:
 						return tableView.StringSize (m_questionAnswerOptions [indexPath.Row].AnswerOptionText, UIFont.SystemFontOfSize (14), _bounds, UILineBreakMode.WordWrap).Height + 20; // add 20 px as padding
@@ -719,13 +734,18 @@ namespace OasisMobile.iOS
 							return tableView.StringSize (m_question.LeadIn, UIFont.SystemFontOfSize (14), _bounds, UILineBreakMode.WordWrap).Height + 20; // add 20 px as padding
 						} else {
 							UIImage _imageAtRow = UIImage.FromFile (m_questionImages [indexPath.Row - 1].FilePath);
-							float _widthToHeightRatio = _imageAtRow.Size.Width / _imageAtRow.Size.Height;
-							float _maxDimension = _bounds.Width;
-							if (_widthToHeightRatio >= 1) {
-								return _maxDimension / _widthToHeightRatio + 20;
-							} else {
-								return _maxDimension + 20;
-							} 
+							if(_imageAtRow != null){
+								float _widthToHeightRatio = _imageAtRow.Size.Width / _imageAtRow.Size.Height;
+								float _maxDimension = _bounds.Width;
+								if (_widthToHeightRatio >= 1) {
+									return _maxDimension / _widthToHeightRatio + 20;
+								} else {
+									return _maxDimension + 20;
+								} 
+							}else{
+								return 0; //Collapse the cell if the image is null
+							}
+
 
 						}
 						case (int) UnsubmittedQuestionViewSections.QuestionAnswerOptions:

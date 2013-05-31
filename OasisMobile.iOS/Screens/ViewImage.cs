@@ -28,6 +28,16 @@ namespace OasisMobile.iOS
 								    "SELECT tblImageToReturn.* FROM tblImage AS tblImageToReturn INNER JOIN tblImage AS tblOriginalImage " +
 								    "ON tblImageToReturn.fkQuestionID = tblOriginalImage.fkQuestionID " +
 									"WHERE tblOriginalImage.pkImageID={0} ORDER BY Title",aImageToDisplayID));
+
+			//Remove any image record that does not have a valid file from the list
+			List<BusinessModel.Image> _tempImageList = new List<BusinessModel.Image> ();
+			foreach(var _imageRecord in m_questionImagesList){
+				if (UIImage.FromFile (_imageRecord.FilePath) != null) {
+					_tempImageList.Add (_imageRecord);
+				}
+				m_questionImagesList = _tempImageList;
+			}
+
 			m_currentImageDisplayIndex = m_questionImagesList.FindIndex (x => x.ImageID==aImageToDisplayID);
 		}
 

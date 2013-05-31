@@ -21,17 +21,21 @@ namespace OasisMobile.iOS
 		private UITextField txtUserName;
 		private UITextField txtPassword;
 		private UIButton btnLogin;
+		private UIButton btnForgotPassword;
+		private UIButton btnRegister;
 		#region implemented abstract members of UITableViewSource
 		
 		public override int RowsInSection (UITableView tableview, int section)
 		{
 
 			switch (section) {
-			case 0:
+			case 0: //Spacer
 				return 1;
-			case 1:
+			case 1: //UserName & password
 				return 2;
-			case 2:
+			case 2: //LoginButton
+				return 1;
+			case 3: //ForgotPassword & Register Links
 				return 1;
 			default:
 				return 0;
@@ -148,7 +152,54 @@ namespace OasisMobile.iOS
 				btnLogin.Frame = new System.Drawing.RectangleF (0, 0, cell.ContentView.Frame.Width, 36);
 				btnLogin.SetTitle ("Login", UIControlState.Normal);
 				btnLogin.TouchUpInside += btnLogin_Clicked;
+
+				foreach (UIButton _button in cell.ContentView.Subviews) {
+					_button.RemoveFromSuperview ();
+				}
 				cell.ContentView.AddSubview (btnLogin);
+				break;
+			case 3:
+				cell = tableView.DequeueReusableCell ("linksCell");
+				if (cell == null) {
+					cell = new UITableViewCell (UITableViewCellStyle.Default, "linksCell");
+				}
+
+				foreach (UIButton _button in cell.ContentView.Subviews) {
+					_button.RemoveFromSuperview ();
+				}
+
+				btnForgotPassword = new UIButton (UIButtonType.Custom);
+				btnForgotPassword.SetTitle ("Forgot Password", UIControlState.Normal);
+				btnForgotPassword.TitleLabel.AdjustsFontSizeToFitWidth = true;
+				btnForgotPassword.Frame = new System.Drawing.RectangleF (new PointF(0,0), 
+				                                                          tableView.StringSize (btnForgotPassword.Title (UIControlState.Normal), UIFont.SystemFontOfSize (14)));
+				btnForgotPassword.TouchUpInside += (object sender, EventArgs e) => {
+					UIApplication.SharedApplication.OpenUrl (NSUrl.FromString ( "http://selfassessment.sportsmed.org/Public/PasswordRecovery.aspx"));
+				};
+
+				cell.ContentView.AddSubview (btnForgotPassword);
+
+
+				btnRegister = new UIButton (UIButtonType.Custom);
+				btnRegister.SetTitle ("Register", UIControlState.Normal);
+				btnRegister.TitleLabel.AdjustsFontSizeToFitWidth = true;
+				if (UIDevice.CurrentDevice.UserInterfaceIdiom == UIUserInterfaceIdiom.Pad) {
+					btnRegister.Frame = new System.Drawing.RectangleF (new PointF(btnForgotPassword.Frame.Width + 30,0), 
+					                                                   tableView.StringSize (btnRegister.Title (UIControlState.Normal),UIFont.SystemFontOfSize (14)));
+				}else{
+					btnRegister.Frame = new System.Drawing.RectangleF (new PointF(0,btnForgotPassword.Frame.Height), 
+					                                                   tableView.StringSize (btnRegister.Title (UIControlState.Normal),UIFont.SystemFontOfSize (14)));
+				}
+
+					btnRegister.TouchUpInside += (object sender, EventArgs e) => {
+						UIApplication.SharedApplication.OpenUrl (NSUrl.FromString ("http://www.sportsmed.org"));
+					};
+
+		
+					cell.ContentView.AddSubview (btnRegister);
+		
+
+
 				break;
 			default:
 				cell = tableView.DequeueReusableCell ("cell");
@@ -166,7 +217,7 @@ namespace OasisMobile.iOS
 		
 		public override int NumberOfSections (UITableView tableView)
 		{
-			return 3; //3 sections for login page. 1 for logo view, 1 for credential, 1 for button
+			return 4; //4 sections for login page. 1 for logo view, 1 for credential, 1 for button, and one for the links
 			// TODO: Implement - see: http://go-mono.com/docs/index.aspx?link=T%3aMonoTouch.Foundation.ModelAttribute
 		}
 
@@ -175,6 +226,9 @@ namespace OasisMobile.iOS
 			// NOTE: Don't call the base implementation on a Model class
 			// see http://docs.xamarin.com/ios/tutorials/Events%2c_Protocols_and_Delegates 
 			if ((indexPath.Section == 0 || indexPath.Section == 2) && indexPath.Row == 0) {
+				cell.BackgroundView = null;
+				cell.SelectionStyle = UITableViewCellSelectionStyle.None;
+			}else if(indexPath.Section ==3){
 				cell.BackgroundView = null;
 				cell.SelectionStyle = UITableViewCellSelectionStyle.None;
 			}
@@ -186,7 +240,7 @@ namespace OasisMobile.iOS
 		{
 			// NOTE: Don't call the base implementation on a Model class
 			// see http://docs.xamarin.com/ios/tutorials/Events%2c_Protocols_and_Delegates 
-			if (indexPath.Section == 0 || indexPath.Section == 1) {
+			if (indexPath.Section == 0 || indexPath.Section == 1 || indexPath.Section==3) {
 				tableView.DeselectRow (indexPath, false);
 			}
 
@@ -198,12 +252,18 @@ namespace OasisMobile.iOS
 			// see http://docs.xamarin.com/ios/tutorials/Events%2c_Protocols_and_Delegates 
 			if (indexPath.Section == 0) {
 //				return 100;
-				if(UIDevice.CurrentDevice.UserInterfaceIdiom == UIUserInterfaceIdiom.Pad){
+				if (UIDevice.CurrentDevice.UserInterfaceIdiom == UIUserInterfaceIdiom.Pad) {
 					return 200;
-				}
-				else{
+				} else {
 					return 75;
 				}
+			} else if (indexPath.Section == 3) {
+				if (UIDevice.CurrentDevice.UserInterfaceIdiom == UIUserInterfaceIdiom.Pad) {
+					return tableView.StringSize ("Test",UIFont.SystemFontOfSize (14)).Height;
+				} else {
+					return 2 * tableView.StringSize ("Test",UIFont.SystemFontOfSize (14)).Height + 20;
+				}
+			
 			} else {
 				return 44;
 			}
@@ -212,6 +272,9 @@ namespace OasisMobile.iOS
 
 		private void btnLogin_Clicked (object sender, EventArgs e)
 		{
+			txtUserName.ResignFirstResponder ();
+			txtPassword.ResignFirstResponder ();
+			btnLogin.ResignFirstResponder ();
 			ProcessLogin ();
 		}
 
@@ -266,10 +329,33 @@ namespace OasisMobile.iOS
 							int _examCount = BusinessModel.SQL.ExecuteScalar<int> ("SELECT COUNT(*) FROM tblExam", new object[]{});
 							if(_examCount==0){
 								//Only sync if there is not exam for now
-								SyncManager.SyncExamDataFromServer();
+								try{
+									SyncManager.SyncExamDataFromServer();
+								}catch(Exception ex){
+									Console.WriteLine ("Exception on synching exam data from server");
+									Console.WriteLine (ex.ToString());
+									throw ex;
+								}
+
+
 							}
-							SyncManager.SyncUserExamDataFromServer (AppSession.LoggedInUser);
-							SyncManager.SyncUserExamAccess (AppSession.LoggedInUser);
+
+							try{
+								SyncManager.SyncUserExamDataFromServer (AppSession.LoggedInUser);
+							}catch(Exception ex){
+								Console.WriteLine ("Exception on synching user exam data from server");
+								Console.WriteLine (ex.ToString());
+								throw ex;
+							}
+
+							try{
+								SyncManager.SyncUserExamAccess (AppSession.LoggedInUser);
+							}catch(Exception ex){
+								Console.WriteLine ("Exception on synching user exam access data from server");
+								Console.WriteLine (ex.ToString());
+								throw ex;
+							}
+
 							
 						} else {
 							_loginSuccessful = false;

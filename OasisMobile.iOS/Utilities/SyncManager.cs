@@ -5,6 +5,7 @@ using System.Json;
 using System.Linq;
 using System.IO;
 using System.Text.RegularExpressions;
+
 namespace OasisMobile.iOS
 {
 	public static class SyncManager
@@ -51,8 +52,6 @@ namespace OasisMobile.iOS
 					_examToSave.Disclosure = System.Web.HttpUtility.HtmlDecode (_examToSave.Disclosure);
 
 					//Replace 2 or more line break to 2 line breaks
-					_examToSave.PrivacyPolicy = Regex.Replace (_examToSave.PrivacyPolicy, "(<br\\s*\\/*>\\s*){2,}", "<br /><br />");
-					_examToSave.Disclosure = Regex.Replace (_examToSave.Disclosure, "(<br\\s*\\/*>\\s*){2,}", "<br /><br />");
 
 					_examToSave.PrivacyPolicy = Regex.Replace (_examToSave.PrivacyPolicy, "<br\\s*\\/*>", "\n");
 					_examToSave.Disclosure = Regex.Replace (_examToSave.Disclosure, "<br\\s*\\/*>", "\n");
@@ -60,11 +59,14 @@ namespace OasisMobile.iOS
 					_examToSave.PrivacyPolicy = Regex.Replace (_examToSave.PrivacyPolicy, "<div[^>]*>(.+)</\\s*div>", "$1\n");
 					_examToSave.Disclosure = Regex.Replace (_examToSave.Disclosure, "<div[^>]*>(.+)</\\s*div>", "$1\n");
 
-					_examToSave.PrivacyPolicy = Regex.Replace (_examToSave.PrivacyPolicy, "<[^>]+>([^<]+)<\\/[^>]+>","$1");
-					_examToSave.Disclosure = Regex.Replace (_examToSave.Disclosure, "<[^>]+>([^<]+)<\\/[^>]+>","$1");
+					_examToSave.PrivacyPolicy = Regex.Replace (_examToSave.PrivacyPolicy, "[\r\n]{2,}", "\n\n");
+					_examToSave.Disclosure = Regex.Replace (_examToSave.Disclosure,  "[\r\n]{2,}", "\n\n");
 
-					_examToSave.PrivacyPolicy = Regex.Replace (_examToSave.PrivacyPolicy, "<[^>]+(\\/)?>","");
-					_examToSave.Disclosure = Regex.Replace (_examToSave.Disclosure, "<[^>]+(\\/)?>","");
+					_examToSave.PrivacyPolicy = Regex.Replace (_examToSave.PrivacyPolicy, "<[^>]+>([^<]+)<\\/[^>]+>", "$1");
+					_examToSave.Disclosure = Regex.Replace (_examToSave.Disclosure, "<[^>]+>([^<]+)<\\/[^>]+>", "$1");
+
+					_examToSave.PrivacyPolicy = Regex.Replace (_examToSave.PrivacyPolicy, "<[^>]+(\\/)?>", "");
+					_examToSave.Disclosure = Regex.Replace (_examToSave.Disclosure, "<[^>]+(\\/)?>", "");
 
 				}
 			}
@@ -109,8 +111,8 @@ namespace OasisMobile.iOS
 					_examToSave.PrivacyPolicy = Regex.Replace (_examToSave.PrivacyPolicy, "<div[^>]*>(.+)</\\s*div>", "$1\n");
 					_examToSave.Disclosure = Regex.Replace (_examToSave.Disclosure, "<div[^>]*>(.+)</\\s*div>", "$1\n");
 
-					_examToSave.PrivacyPolicy = Regex.Replace (_examToSave.PrivacyPolicy, "<[^>]+(\\/)?>","");
-					_examToSave.Disclosure = Regex.Replace (_examToSave.Disclosure, "<[^>]+(\\/)?>","");
+					_examToSave.PrivacyPolicy = Regex.Replace (_examToSave.PrivacyPolicy, "<[^>]+(\\/)?>", "");
+					_examToSave.Disclosure = Regex.Replace (_examToSave.Disclosure, "<[^>]+(\\/)?>", "");
 				}
 			}
 
@@ -154,7 +156,7 @@ namespace OasisMobile.iOS
 							_userExamToSave.IsCompleted = false;
 							_localUserExamList.Add (_userExamToSave);
 						}
-						if(!_userExamToSave.DoSync){
+						if (!_userExamToSave.DoSync) {
 							
 							_userExamToSave.ExamID = _mainSystemExamIDToLocalExamIDMap [_remoteUserExam ["ExamID"]];
 							_userExamToSave.UserID = aUser.UserID;
@@ -274,7 +276,16 @@ namespace OasisMobile.iOS
 			
 			try {
 				_service.Headers.Add (HttpRequestHeader.Accept, "application/json");
-				_responseString = _service.DownloadString (_serviceTargetURL);
+				_responseString = System.Text.Encoding.UTF8.GetString (_service.DownloadData (_serviceTargetURL));
+
+//				string _testResponsePath = Environment.GetFolderPath (Environment.SpecialFolder.Personal) + "/TestResponse.txt";
+//				if(File.Exists (_testResponsePath)){
+//					File.Delete (_testResponsePath);
+//				}
+//				StreamWriter _textWriter = File.CreateText (_testResponsePath);
+//				_textWriter.Write (_responseString);
+//				//_textWriter.Flush ();
+//				_textWriter.Close ();
 
 			} catch (Exception ex) {
 				Console.WriteLine (ex.ToString ());
@@ -282,16 +293,29 @@ namespace OasisMobile.iOS
 			}
 			
 			if (_responseString != null && _responseString != "") {
+
+//				Newtonsoft.Json.Linq.JObject _jsonObj = Newtonsoft.Json.Linq.JObject.Parse (_responseString);
+//
+//				// Sync Exam Base Question
+//				//---------------------------
+//				List<BusinessModel.Question> _localQuestionList = BusinessModel.Question.GetQuestionsByExamID (aExam.ExamID);
+//
+//				if (_localQuestionList == null) {
+//					_localQuestionList = new List<BusinessModel.Question> ();
+//				}
+//
+//				Newtonsoft.Json.Linq.JArray _remoteQuestionList = (Newtonsoft.Json.Linq.JArray)_jsonObj ["QuestionList"];
+//				foreach (Newtonsoft.Json.Linq.JObject _remoteQuestion in _remoteQuestionList) {
 				JsonValue _jsonObj = JsonValue.Parse (_responseString);
-				
+
 				// Sync Exam Base Question
 				//---------------------------
 				List<BusinessModel.Question> _localQuestionList = BusinessModel.Question.GetQuestionsByExamID (aExam.ExamID);
-				
+
 				if (_localQuestionList == null) {
 					_localQuestionList = new List<BusinessModel.Question> ();
 				}
-				
+
 				JsonArray _remoteQuestionList = (JsonArray)_jsonObj ["QuestionList"];
 				foreach (JsonValue _remoteQuestion in _remoteQuestionList) {
 					BusinessModel.Question _matchinglocalQuestion = 
@@ -318,8 +342,8 @@ namespace OasisMobile.iOS
 
 					//Trim the line break at the end
 					_matchinglocalQuestion.Stem = Regex.Replace (_matchinglocalQuestion.Stem, "(<br\\s*\\/*>)+\\Z", "");
-					_matchinglocalQuestion.LeadIn = Regex.Replace (_matchinglocalQuestion.LeadIn,"(<br\\s*\\/*>)+\\Z", "");
-					_matchinglocalQuestion.Commentary = Regex.Replace (_matchinglocalQuestion.Commentary,"(<br\\s*\\/*>)+\\Z", "");
+					_matchinglocalQuestion.LeadIn = Regex.Replace (_matchinglocalQuestion.LeadIn, "(<br\\s*\\/*>)+\\Z", "");
+					_matchinglocalQuestion.Commentary = Regex.Replace (_matchinglocalQuestion.Commentary, "(<br\\s*\\/*>)+\\Z", "");
 					_matchinglocalQuestion.Reference = Regex.Replace (_matchinglocalQuestion.Reference, "(<br\\s*\\/*>)+\\Z", "");
 
 					_matchinglocalQuestion.Stem = Regex.Replace (_matchinglocalQuestion.Stem, "<br\\s*\\/*>", "\n");
@@ -327,10 +351,10 @@ namespace OasisMobile.iOS
 					_matchinglocalQuestion.Commentary = Regex.Replace (_matchinglocalQuestion.Commentary, "<br\\s*\\/*>", "\n");
 					_matchinglocalQuestion.Reference = Regex.Replace (_matchinglocalQuestion.Reference, "<br\\s*\\/*>", "\n");
 
-					_matchinglocalQuestion.Stem = Regex.Replace (_matchinglocalQuestion.Stem, "<[^>]+>([^<]+)<\\/[^>]+>","$1");
-					_matchinglocalQuestion.LeadIn = Regex.Replace (_matchinglocalQuestion.LeadIn, "<[^>]+>([^<]+)<\\/[^>]+>","$1");
-					_matchinglocalQuestion.Commentary = Regex.Replace (_matchinglocalQuestion.Commentary, "<[^>]+>([^<]+)<\\/[^>]+>","$1");
-					_matchinglocalQuestion.Reference = Regex.Replace (_matchinglocalQuestion.Reference, "<[^>]+>([^<]+)<\\/[^>]+>","$1");
+					_matchinglocalQuestion.Stem = Regex.Replace (_matchinglocalQuestion.Stem, "<[^>]+>([^<]+)<\\/[^>]+>", "$1");
+					_matchinglocalQuestion.LeadIn = Regex.Replace (_matchinglocalQuestion.LeadIn, "<[^>]+>([^<]+)<\\/[^>]+>", "$1");
+					_matchinglocalQuestion.Commentary = Regex.Replace (_matchinglocalQuestion.Commentary, "<[^>]+>([^<]+)<\\/[^>]+>", "$1");
+					_matchinglocalQuestion.Reference = Regex.Replace (_matchinglocalQuestion.Reference, "<[^>]+>([^<]+)<\\/[^>]+>", "$1");
 
 
 					_matchinglocalQuestion.ExamID = aExam.ExamID;
@@ -381,7 +405,7 @@ namespace OasisMobile.iOS
 					}
 					_matchingLocalAnswerOption.QuestionID = _mainSystemIDToQuestionIDMap [_remoteAnswerOption ["QuestionID"]];
 					_matchingLocalAnswerOption.AnswerText = _remoteAnswerOption ["Text"];
-					_matchingLocalAnswerOption.AnswerText = Regex.Replace (_matchingLocalAnswerOption.AnswerText, "<[^>]+(\\/)?>","");
+					_matchingLocalAnswerOption.AnswerText = Regex.Replace (_matchingLocalAnswerOption.AnswerText, "<[^>]+(\\/)?>", "");
 					_matchingLocalAnswerOption.AnswerText = _matchingLocalAnswerOption.AnswerText.Trim ();
 					_matchingLocalAnswerOption.IsCorrect = _remoteAnswerOption ["IsCorrect"];
 				}
@@ -480,18 +504,28 @@ namespace OasisMobile.iOS
 						//local save path in form of library/ExamImages/{RelativeSavePathOnServer with "/" replaced by "_"}
 						string _localSavePath = Path.Combine (libraryPath, "ExamImages", Regex.Replace (_remoteRelativeFilePath, "[/\\\\]+", "_"));
 						string _localSaveDirectory = Path.GetDirectoryName (_localSavePath);
-						if (!File.Exists (_localSavePath)) {
-							
-							//Only download if the file has not existed
+						if (!File.Exists (_localSavePath) || MonoTouch.UIKit.UIImage.FromFile (_localSavePath) == null) {
+							//Only download if the file has not existed or the file is corrupted (not a valid image)
 							try {
 								if (!Directory.Exists (_localSaveDirectory)) {
 									Directory.CreateDirectory (_localSaveDirectory);
+								}
+
+								if (File.Exists (_localSavePath)) {
+									//If the file exist, that means the file is there but the is not a valid image, we delete the file before reattempting download
+									File.Delete (_localSavePath);
 								}
 								_service.DownloadFile (_downloadURL, _localSavePath);
 							} catch (Exception ex) {
 								Console.WriteLine ("Error on downloading image id " + _localImage.ImageID);
 								Console.WriteLine (ex.ToString ());
 								return false;
+							}
+
+							//After downloading the file, we check if the file is really an image, if not we fail the download as the file is 
+							if (MonoTouch.UIKit.UIImage.FromFile (_localSavePath) == null) {
+								Console.WriteLine ("Image ID " + _localImage.ImageID + " is not a valid image file");
+								return false;	
 							}
 						}
 						_localImage.DownloadURL = _downloadURL;
@@ -562,7 +596,7 @@ namespace OasisMobile.iOS
 				//-------------------------
 				List<BusinessModel.UserQuestion> _localUserQuestionList = 
 					BusinessModel.UserQuestion.GetUserQuestionsBySQL (
-						"SELECT * FROM tblUserQuestion WHERE fkUserExamID=" + _localUserExam.UserExamID);
+					"SELECT * FROM tblUserQuestion WHERE fkUserExamID=" + _localUserExam.UserExamID);
 				if (_localUserQuestionList == null) {
 					_localUserQuestionList = new List<BusinessModel.UserQuestion> ();
 				}
@@ -735,7 +769,7 @@ namespace OasisMobile.iOS
 			_postData.UserExamList = new List<WebserviceHelper.SyncUserExamPostData.UserExamSyncData> ();
 			string _query = "";
 			_query = "SELECT tblUserExam.MainSystemID, tblUserExam.HasReadDisclosure, tblUserExam.HasReadPrivacyPolicy FROM tblUserExam " +
-					"WHERE DoSync=1";
+				"WHERE DoSync=1";
 			_postData.UserExamList = BusinessModel.Repository.Instance.Query<WebserviceHelper.SyncUserExamPostData.UserExamSyncData> (_query);
 			if (_postData.UserExamList == null) {
 				_postData.UserExamList = new List<WebserviceHelper.SyncUserExamPostData.UserExamSyncData> ();
@@ -754,7 +788,7 @@ namespace OasisMobile.iOS
 				_postData.UserQuestionAnswerPairList = new List<WebserviceHelper.SyncUserExamPostData.UserQuestionAnswerSyncData> ();
 			}
 			List<int> _userQuestionToUpdateIDList = (from x in _postData.UserQuestionAnswerPairList select x.UserQuestionMainSystemID).ToList ();
-			if(_postData.UserExamList.Count>0 || _postData.UserQuestionAnswerPairList.Count>0){
+			if (_postData.UserExamList.Count > 0 || _postData.UserQuestionAnswerPairList.Count > 0) {
 				try {
 					WebserviceHelper.SyncUserExamData (_postData);
 					BusinessModel.SQL.ExecuteNonQuery (string.Format ("UPDATE tblUserQuestion SET DoSync=0 WHERE MainSystemID IN ({0})",
@@ -773,7 +807,7 @@ namespace OasisMobile.iOS
 
 		public static bool SyncUserQuestionAndAnswerFromServer (BusinessModel.User aUser, bool aDoSyncSubmittedExam)
 		{
-			Console.WriteLine ("Pulling data from server for user: " + aUser.LoginName );
+			Console.WriteLine ("Pulling data from server for user: " + aUser.LoginName);
 			string _query = "";
 			if (aDoSyncSubmittedExam) {
 				_query = string.Format ("SELECT * FROM tblUserExam WHERE IsDownloaded=1 AND fkUserID={0}", aUser.UserID);
@@ -813,14 +847,14 @@ namespace OasisMobile.iOS
 									JsonArray _remoteAnswerOptionList = (JsonArray)JsonValue.Parse (_answerOptionResponse);
 									int _selectedAnswerOptionMainSystemID = -1;
 									foreach (JsonValue _remoteAnswerOption in _remoteAnswerOptionList) {
-										if(_remoteAnswerOption["IsUserSelection"]){
-											_selectedAnswerOptionMainSystemID = _remoteAnswerOption["UserAnswerOptionID"];
+										if (_remoteAnswerOption ["IsUserSelection"]) {
+											_selectedAnswerOptionMainSystemID = _remoteAnswerOption ["UserAnswerOptionID"];
 										}
 									}
-									if(_selectedAnswerOptionMainSystemID>0){
+									if (_selectedAnswerOptionMainSystemID > 0) {
 										_answerOptionUpdateQueryList.Add ("UPDATE tblUserAnswerOption SET IsSelected=0 WHERE fkUserQuestionID=" + _matchingLocalUserQuestion.UserQuestionID); 
 										_answerOptionUpdateQueryList.Add ("UPDATE tblUserAnswerOption SET IsSelected=1 WHERE MainSystemID=" + _selectedAnswerOptionMainSystemID); 
-									}else{
+									} else {
 										Console.WriteLine ("Error on updating remote question id: " +_matchingLocalUserQuestion.MainSystemID + ". AnswerDateTime exist but no answer is selected");
 									}
 

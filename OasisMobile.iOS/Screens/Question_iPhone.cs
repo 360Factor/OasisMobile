@@ -335,14 +335,17 @@ namespace OasisMobile.iOS
 							}
 							UIImage _imageAtRow = UIImage.FromFile (m_questionImages [indexPath.Row - 1].FilePath);
 							cell.ImageView.Image = _imageAtRow;
-
 							cell.ImageView.GestureRecognizers = new UIGestureRecognizer[] { };
-							cell.ImageView.UserInteractionEnabled = true;
-							UITapGestureRecognizer _tapGesture = new UITapGestureRecognizer ();
-							_tapGesture.AddTarget (() =>{
-								HandleImageTapGesture(_tapGesture, m_questionImages [indexPath.Row - 1].ImageID);
-							});
-							cell.ImageView.AddGestureRecognizer (_tapGesture);
+
+							if (_imageAtRow != null) {
+								cell.ImageView.UserInteractionEnabled = true;
+								UITapGestureRecognizer _tapGesture = new UITapGestureRecognizer ();
+								_tapGesture.AddTarget (() =>{
+									HandleImageTapGesture(_tapGesture, m_questionImages [indexPath.Row - 1].ImageID);
+								});
+								cell.ImageView.AddGestureRecognizer (_tapGesture);
+							}
+
 						}
 						break;
 					case (int)SubmittedQuestionViewSections.QuestionAnswerOptions:
@@ -422,14 +425,17 @@ namespace OasisMobile.iOS
 							}
 							UIImage _imageAtRow = UIImage.FromFile (m_questionImages [indexPath.Row - 1].FilePath);
 							cell.ImageView.Image = _imageAtRow;
-
 							cell.ImageView.GestureRecognizers = new UIGestureRecognizer[] { };
-							cell.ImageView.UserInteractionEnabled = true;
-							UITapGestureRecognizer _tapGesture = new UITapGestureRecognizer ();
-							_tapGesture.AddTarget (() =>{
-								HandleImageTapGesture(_tapGesture, m_questionImages [indexPath.Row - 1].ImageID);
-							});
-							cell.ImageView.AddGestureRecognizer (_tapGesture);
+					
+							if (_imageAtRow != null) {
+								cell.ImageView.UserInteractionEnabled = true;
+								UITapGestureRecognizer _tapGesture = new UITapGestureRecognizer ();
+								_tapGesture.AddTarget (() =>{
+									HandleImageTapGesture(_tapGesture, m_questionImages [indexPath.Row - 1].ImageID);
+								});
+								cell.ImageView.AddGestureRecognizer (_tapGesture);
+							}
+
 						}
 						break;
 					case (int)UnsubmittedQuestionViewSections.QuestionAnswerOptions:
@@ -557,13 +563,18 @@ namespace OasisMobile.iOS
 							return tableView.StringSize (m_question.LeadIn, UIFont.SystemFontOfSize (14), _bounds, UILineBreakMode.WordWrap).Height + 20; // add 20 px as padding
 						} else {
 							UIImage _imageAtRow = UIImage.FromFile (m_questionImages [indexPath.Row - 1].FilePath);
-							float _widthToHeightRatio = _imageAtRow.Size.Width / _imageAtRow.Size.Height;
-							float _maxDimension = _bounds.Width;
-							if (_widthToHeightRatio >= 1) {
-								return _maxDimension / _widthToHeightRatio + 20;
+							if (_imageAtRow != null) {
+								float _widthToHeightRatio = _imageAtRow.Size.Width / _imageAtRow.Size.Height;
+								float _maxDimension = _bounds.Width;
+								if (_widthToHeightRatio >= 1) {
+									return _maxDimension / _widthToHeightRatio + 20;
+								} else {
+									return _maxDimension + 20;
+								} 
 							} else {
-								return _maxDimension + 20;
-							} 
+								return 0; //Collapse the cell if the image is null
+							}
+
 						}
 					case (int) SubmittedQuestionViewSections.QuestionAnswerOptions:
 						return tableView.StringSize ((Char)(Convert.ToInt32 ('A') + indexPath.Row) + ". " +
@@ -583,13 +594,18 @@ namespace OasisMobile.iOS
 							return tableView.StringSize (m_question.LeadIn, UIFont.SystemFontOfSize (14), _bounds, UILineBreakMode.WordWrap).Height + 20; // add 20 px as padding
 						} else {
 							UIImage _imageAtRow = UIImage.FromFile (m_questionImages [indexPath.Row - 1].FilePath);
-							float _widthToHeightRatio = _imageAtRow.Size.Width / _imageAtRow.Size.Height;
-							float _maxDimension = _bounds.Width;
-							if (_widthToHeightRatio >= 1) {
-								return _maxDimension / _widthToHeightRatio + 20;
+							if (_imageAtRow != null) {
+								float _widthToHeightRatio = _imageAtRow.Size.Width / _imageAtRow.Size.Height;
+								float _maxDimension = _bounds.Width;
+								if (_widthToHeightRatio >= 1) {
+									return _maxDimension / _widthToHeightRatio + 20;
+								} else {
+									return _maxDimension + 20;
+								} 
 							} else {
-								return _maxDimension + 20;
-							} 
+								return 0; //Collapse the cell if the image is null
+							}
+
 
 						}
 					case (int) UnsubmittedQuestionViewSections.QuestionAnswerOptions:

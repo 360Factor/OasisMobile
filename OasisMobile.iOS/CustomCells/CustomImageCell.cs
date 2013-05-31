@@ -33,19 +33,27 @@ namespace OasisMobile.iOS
 			}
 
 			UIImage _imageToDisplay = ImageView.Image;
-			SizeF _imageFileDimension = _imageToDisplay.Size;
-
-			float _imageWidthToHeightRatio = _imageFileDimension.Width / _imageFileDimension.Height;
-
+			SizeF _imageFileDimension;
+			float _imageWidthToHeightRatio;
 			SizeF _imageViewDimension;
 			PointF _imageViewPosition;
 
-			if (_imageWidthToHeightRatio >= 1) {
-				_imageViewDimension = new SizeF (m_imageMaxDimension, m_imageMaxDimension / _imageWidthToHeightRatio);
+			if (_imageToDisplay != null) {
+				_imageFileDimension = _imageToDisplay.Size;
+				_imageWidthToHeightRatio = _imageFileDimension.Width / _imageFileDimension.Height;
+				if (_imageWidthToHeightRatio >= 1) {
+					_imageViewDimension = new SizeF (m_imageMaxDimension, m_imageMaxDimension / _imageWidthToHeightRatio);
+				} else {
+					_imageViewDimension = new SizeF (_imageWidthToHeightRatio * m_imageMaxDimension, m_imageMaxDimension);
+				}
+				_imageViewPosition = new PointF (ContentView.Frame.Width/2 - _imageViewDimension.Width/2, 10);
 			} else {
-				_imageViewDimension = new SizeF (_imageWidthToHeightRatio * m_imageMaxDimension, m_imageMaxDimension);
+				_imageFileDimension = new SizeF (0, 0);
+				_imageWidthToHeightRatio = 1;
+				_imageViewDimension = new SizeF (0, 0);
+				_imageViewPosition = new PointF (0, 0);
 			}
-			_imageViewPosition = new PointF (ContentView.Frame.Width/2 - _imageViewDimension.Width/2, 10);
+
 
 			ImageView.Frame = new RectangleF (_imageViewPosition, _imageViewDimension);
 

@@ -42,18 +42,20 @@ namespace OasisMobile.iOS
 			// Perform any additional setup after loading the view, typically from a nib.
 
 			this.Title = "Exam Info";
+			tblvExamDetail.Source = new ExamDetailTableSource (this, m_examID);
 		}
 
 		public override void ViewWillAppear (bool animated)
 		{
 			base.ViewWillAppear (animated);
-			if (tblvExamDetail.Source != null) {
-				tblvExamDetail.Source = new ExamDetailTableSource (this, m_examID);
-				tblvExamDetail.ReloadData ();
-			} else {
-				tblvExamDetail.Source = new ExamDetailTableSource (this, m_examID);
+			if (AppSession.SelectedExam != null) {
+				if (tblvExamDetail.Source != null) {
+					tblvExamDetail.Source = new ExamDetailTableSource (this, m_examID);
+					tblvExamDetail.ReloadData ();
+				}
 			}
-	
+
+
 		
 			AppSession.SelectedExamUserQuestionList = null;
 		}
@@ -368,62 +370,89 @@ namespace OasisMobile.iOS
 
 				
 				} else {
-					bool _isDownloadSuccessful = false;
-					if (AppSession.SelectedUserExam == null) {
-						//Direct the user to a specific page to select their exam types
-						m_currentViewController.NavigationController.PushViewController (new GenerateNewExamView(), true);
-						return;
+					NetworkStatus _internetStatus = Reachability.InternetConnectionStatus ();
+					if(_internetStatus == NetworkStatus.NotReachable){
+						UIAlertView _alert = new UIAlertView ("No Connection", "Please connect to the internet to download the exam", null, "Ok", null);
+						_alert.Show ();
+					}else if(_internetStatus ==  NetworkStatus.ReachableViaCarrierDataNetwork){
+						UIAlertView _alert = new UIAlertView ("Wifi Connection Required", 
+						                                      "Exam material, along with question related images, are too large to download via 2G/3G cellular connection. " +
+																"Please find a Wifi connection and re-attempt exam download",
+						                                      null, "Ok", null);
+						_alert.Show ();
+					}else{
+
+						UIAlertView _alert = new UIAlertView ("Wifi Connection Required", 
+						                                      "Exam material, along with question related images, takes about 5 to 15 minutes to download. " +
+						                                      "Please budget sufficient time for the exam download ",null, "Cancel", "Download");
+						_alert.Clicked += downloadExamAlertView_Clicked;
+						_alert.Show ();
 					}
+				
 
-					BTProgressHUD.Show ("Downloading Exam", 0);
-					UIApplication.SharedApplication.IdleTimerDisabled = true;
-					Task.Factory.StartNew (() => {
-						try{
-							if (SyncManager.DownloadExamBaseData (AppSession.SelectedExam) && 
-							    SyncManager.DownloadExamImageFiles (AppSession.SelectedExam, DownloadExamImageProgressUpdated) && 
-							    SyncManager.DownloadUserExamCompleteData (AppSession.LoggedInUser, AppSession.SelectedExam)) {
-								//Update the user exam to session just in case the user exam gets updated in download
-								AppSession.SelectedUserExam = BusinessModel.UserExam.GetFirstUserExamByUserIDAndExamID (
-									AppSession.LoggedInUser.UserID,
-									AppSession.SelectedExam.ExamID);
-
-								AppSession.SelectedUserExam.IsDownloaded = true;
-								AppSession.SelectedUserExam.Save ();
-								_isDownloadSuccessful = true;
-							} else {
-								_isDownloadSuccessful = false;
-							}
-						}
-						catch(Exception ex){
-							Console.WriteLine (ex.ToString());
-						}
-
-					}).ContinueWith (task1 => {
-						BTProgressHUD.Dismiss ();
-						UIApplication.SharedApplication.IdleTimerDisabled = false;
-						if (_isDownloadSuccessful) {
-							if(!AppSession.SelectedUserExam.HasReadDisclosure){
-								ExamDisclosureView _disclosureView = new ExamDisclosureView(true);
-								m_currentViewController.NavigationController.PushViewController (_disclosureView,true);
-							}else if(!AppSession.SelectedUserExam.HasReadPrivacyPolicy){
-								ExamPrivacyPolicyView _privacyPolicyView = new ExamPrivacyPolicyView(true);
-								m_currentViewController.NavigationController.PushViewController (_privacyPolicyView,true);
-							}else{
-								if(UserInterfaceIdiomIsPhone){
-									m_currentViewController.NavigationController.PushViewController (new ExamQuestionList_iPhone (), true);
-								}else{
-									QuestionSplitView _questionSplitView = new QuestionSplitView();
-									_questionSplitView.PresentAsRootViewWithAnimation ();
-								}
-							}
-
-						} else {
-							UIAlertView _alert = new UIAlertView ("Download Failed", "We could not download your exam right now. Please try again later", null, "Ok", null);
-							_alert.Show ();
-						}
-					}, TaskScheduler.FromCurrentSynchronizationContext ());
 				}
 
+			}
+
+			private void downloadExamAlertView_Clicked(object sender, UIButtonEventArgs e){
+				if (e.ButtonIndex == ((UIAlertView) sender).CancelButtonIndex ) {
+					//If cancel button is clicked then we return as we dont need to do anything
+					return;
+				}
+				bool _isDownloadSuccessful = false;
+				if (AppSession.SelectedUserExam == null) {
+					//Direct the user to a specific page to select their exam types
+					m_currentViewController.NavigationController.PushViewController (new GenerateNewExamView(), true);
+					return;
+				}
+
+				BTProgressHUD.Show ("Downloading Exam", 0);
+				UIApplication.SharedApplication.IdleTimerDisabled = true;
+				Task.Factory.StartNew (() => {
+					try{
+						if (SyncManager.DownloadExamBaseData (AppSession.SelectedExam) && 
+						    SyncManager.DownloadExamImageFiles (AppSession.SelectedExam, DownloadExamImageProgressUpdated) && 
+						    SyncManager.DownloadUserExamCompleteData (AppSession.LoggedInUser, AppSession.SelectedExam)) {
+							//Update the user exam to session just in case the user exam gets updated in download
+							AppSession.SelectedUserExam = BusinessModel.UserExam.GetFirstUserExamByUserIDAndExamID (
+								AppSession.LoggedInUser.UserID,
+								AppSession.SelectedExam.ExamID);
+
+							AppSession.SelectedUserExam.IsDownloaded = true;
+							AppSession.SelectedUserExam.Save ();
+							_isDownloadSuccessful = true;
+						} else {
+							_isDownloadSuccessful = false;
+						}
+					}
+					catch(Exception ex){
+						Console.WriteLine (ex.ToString());
+					}
+
+				}).ContinueWith (task1 => {
+					BTProgressHUD.Dismiss ();
+					UIApplication.SharedApplication.IdleTimerDisabled = false;
+					if (_isDownloadSuccessful) {
+						if(!AppSession.SelectedUserExam.HasReadDisclosure){
+							ExamDisclosureView _disclosureView = new ExamDisclosureView(true);
+							m_currentViewController.NavigationController.PushViewController (_disclosureView,true);
+						}else if(!AppSession.SelectedUserExam.HasReadPrivacyPolicy){
+							ExamPrivacyPolicyView _privacyPolicyView = new ExamPrivacyPolicyView(true);
+							m_currentViewController.NavigationController.PushViewController (_privacyPolicyView,true);
+						}else{
+							if(UserInterfaceIdiomIsPhone){
+								m_currentViewController.NavigationController.PushViewController (new ExamQuestionList_iPhone (), true);
+							}else{
+								QuestionSplitView _questionSplitView = new QuestionSplitView();
+								_questionSplitView.PresentAsRootViewWithAnimation ();
+							}
+						}
+
+					} else {
+						UIAlertView _alert = new UIAlertView ("Download Failed", "We could not download your exam right now. Please try again later", null, "Ok", null);
+						_alert.Show ();
+					}
+				}, TaskScheduler.FromCurrentSynchronizationContext ());
 			}
 
 			private void btnDisclosure_Clicked(object sender, EventArgs e){

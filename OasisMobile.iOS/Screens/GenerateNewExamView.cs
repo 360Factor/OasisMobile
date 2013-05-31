@@ -271,7 +271,7 @@ namespace OasisMobile.iOS
 				bool _isDownloadSuccessful = false;
 				Task.Factory.StartNew (() => {
 					try {
-						WebserviceHelper.GenerateUserExam (false, AppSession.SelectedExam.MainSystemID, AppSession.LoggedInUser .MainSystemID);
+						WebserviceHelper.GenerateUserExam (true, AppSession.SelectedExam.MainSystemID, AppSession.LoggedInUser .MainSystemID);
 						//Use && statement in if so that code gets evaluated only if the previous statement returns true (e.g. if DownloadExamBaseData, we dont need to execute DownloadExamImageFiles)
 						if (SyncManager.DownloadExamBaseData (AppSession.SelectedExam) && 
 						    SyncManager.DownloadExamImageFiles (AppSession.SelectedExam,DownloadExamImageProgressUpdated) && 
