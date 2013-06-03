@@ -376,7 +376,7 @@ namespace OasisMobile.iOS
 						_alert.Show ();
 					}else if(_internetStatus ==  NetworkStatus.ReachableViaCarrierDataNetwork){
 						UIAlertView _alert = new UIAlertView ("Wifi Connection Required", 
-						                                      "Exam material, along with question related images, are too large to download via 2G/3G cellular connection. " +
+						                                      "Exam material, along with question related images, are too large to download via cellular connection. " +
 																"Please find a Wifi connection and re-attempt exam download",
 						                                      null, "Ok", null);
 						_alert.Show ();

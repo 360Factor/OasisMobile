@@ -336,9 +336,17 @@
     <BundleResource Include="Images\ButtonImages\Icon-Continue.png" />
     <BundleResource Include="Images\ButtonImages\Icon-Disclosure.png" />
     <BundleResource Include="Images\ButtonImages\Icon-PrivacyPolicy.png" />
+    <BundleResource Include="Resources\Icon.png" />
+    <BundleResource Include="Resources\Icon-72.png" />
+    <BundleResource Include="Resources\Icon-Small.png" />
+    <BundleResource Include="Resources\Icon-Small-50.png" />
+    <BundleResource Include="Resources\Default.png" />
+    <BundleResource Include="Resources\Default-Portrait.png" />
+    <BundleResource Include="Resources\Default-Landscape.png" />
   </ItemGroup>
   <ItemGroup>
     <ITunesArtwork Include="iTunesArtwork%402x" />
+    <ITunesArtwork Include="iTunesArtwork" />
   </ItemGroup>
   <ItemGroup>
     <InterfaceDefinition Include="..\OasisMobile.iOS\Screens\AboutView_iPad.xib">
