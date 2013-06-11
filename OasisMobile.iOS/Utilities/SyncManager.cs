@@ -510,10 +510,10 @@ namespace OasisMobile.iOS
 								if (!Directory.Exists (_localSaveDirectory)) {
 									Directory.CreateDirectory (_localSaveDirectory);
 									//Set the directory as non backed up directory
-//									MonoTouch.Foundation.NSError _errorObj = MonoTouch.Foundation.NSFileManager.SetSkipBackupAttribute (_localSaveDirectory,true);
-//									if(_errorObj != null){
-//										Console.WriteLine (_errorObj.ToString());
-//									}
+									MonoTouch.Foundation.NSError _errorObj = MonoTouch.Foundation.NSFileManager.SetSkipBackupAttribute (_localSaveDirectory,true);
+									if(_errorObj != null){
+										Console.WriteLine (_errorObj.ToString());
+									}
 								}
 
 								if (File.Exists (_localSavePath)) {
