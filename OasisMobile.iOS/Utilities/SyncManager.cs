@@ -501,14 +501,19 @@ namespace OasisMobile.iOS
 						                                     _remoteRelativeFilePath);
 						string documentsPath = Environment.GetFolderPath (Environment.SpecialFolder.Personal); // Documents folder
 						string libraryPath = Path.Combine (documentsPath, "..", "Library"); // Library folder instead
-						//local save path in form of library/ExamImages/{RelativeSavePathOnServer with "/" replaced by "_"}
-						string _localSavePath = Path.Combine (libraryPath, "ExamImages", Regex.Replace (_remoteRelativeFilePath, "[/\\\\]+", "_"));
+						//local save path in form of library/Application Support/ExamImages/{RelativeSavePathOnServer with "/" replaced by "_"}
+						string _localSavePath = Path.Combine (libraryPath,"Application Support", "ExamImages", Regex.Replace (_remoteRelativeFilePath, "[/\\\\]+", "_"));
 						string _localSaveDirectory = Path.GetDirectoryName (_localSavePath);
 						if (!File.Exists (_localSavePath) || MonoTouch.UIKit.UIImage.FromFile (_localSavePath) == null) {
 							//Only download if the file has not existed or the file is corrupted (not a valid image)
 							try {
 								if (!Directory.Exists (_localSaveDirectory)) {
 									Directory.CreateDirectory (_localSaveDirectory);
+									//Set the directory as non backed up directory
+//									MonoTouch.Foundation.NSError _errorObj = MonoTouch.Foundation.NSFileManager.SetSkipBackupAttribute (_localSaveDirectory,true);
+//									if(_errorObj != null){
+//										Console.WriteLine (_errorObj.ToString());
+//									}
 								}
 
 								if (File.Exists (_localSavePath)) {
